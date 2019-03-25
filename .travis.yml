@@ -5,6 +5,7 @@ install:
   - pip3 install codecov
 
 script:
+  - pip3 install .
   - coverage run setup.py test
 
 after_success:
