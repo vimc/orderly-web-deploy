@@ -1,3 +1,3 @@
-## OrderlyWeb Deploy
+## OrderlyWeb (Deploy)
 
-Deploy scripts for orderly web
+This is the deploy scripts for OrderlyWeb.  They are the only part of the system that runs directly on metal.
