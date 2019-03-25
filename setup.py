@@ -14,6 +14,7 @@ setuptools.setup(
     url="https://github.com/vimc/orderly-web-deploy",
     packages=setuptools.find_packages(),
     requires=[
+        "docker",
         "yaml"
     ],
     test_suite="nose.collector",

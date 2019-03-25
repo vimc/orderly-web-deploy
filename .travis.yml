@@ -1,6 +1,9 @@
 language: python
 python: 3.5
 
+before_install:
+  docker pull vimc/orderly.server:master
+
 install:
   - pip3 install codecov
 
@@ -10,3 +13,6 @@ script:
 
 after_success:
   - codecov
+
+services:
+  - docker
