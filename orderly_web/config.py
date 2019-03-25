@@ -8,6 +8,7 @@ class OrderlyWebConfig:
             "orderly": config_string(dat, ["volumes", "orderly"])
         }
         self.orderly_image = config_string(dat, ["orderly", "image"])
+        self.orderly_name = config_string(dat, ["orderly", "name"])
     @staticmethod
     def from_file(path):
         path_yml = "{}/orderly-web.yml".format(path)
