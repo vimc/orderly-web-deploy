@@ -26,6 +26,7 @@ def config_string(data, path):
             data = data[p]
         except KeyError as e:
             e.args = (":".join(path[:(i + 1)]), )
+            raise e
     if type(data) is not str:
         raise ValueError("Expected string for {}".format(path))
     return data
