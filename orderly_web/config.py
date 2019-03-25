@@ -19,15 +19,33 @@ class OrderlyWebConfig:
 
 # Utility function for centralising control over pulling information
 # out of the configuration.
-def config_string(data, path):
+def config_value(data, path, data_type, is_optional):
     if type(path) is str:
         path = [path]
     for i, p in enumerate(path):
         try:
             data = data[p]
         except KeyError as e:
+            if is_optional:
+                return None
             e.args = (":".join(path[:(i + 1)]), )
             raise e
-    if type(data) is not str:
-        raise ValueError("Expected string for {}".format(path))
+
+    expected = {"string": str,
+                "integer": int,
+                "boolean": bool}
+    if type(data) is not expected[data_type]:
+        raise ValueError("Expected {} for {}".format(data_type, path))
     return data
+
+
+def config_string(data, path, is_optional=False):
+    return config_value(data, path, "string", is_optional)
+
+
+def config_integer(data, path, is_optional=False):
+    return config_value(data, path, "integer", is_optional)
+
+
+def config_boolean(data, path, is_optional=False):
+    return config_value(data, path, "boolean", is_optional)
