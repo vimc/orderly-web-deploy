@@ -1,0 +1,11 @@
+language: python
+python: 3.5
+
+install:
+  - pip3 install codecov
+
+script:
+  - coverage run setup.py test
+
+after_success:
+  - codecov
