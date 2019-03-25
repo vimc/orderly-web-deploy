@@ -12,7 +12,7 @@ class OrderlyWebConfig:
     def from_file(path):
         path_yml = "{}/orderly-web.yml".format(path)
         with open(path_yml, "r") as f:
-            dat = yaml.load(f)
+            dat = yaml.load(f, Loader=yaml.SafeLoader)
         return OrderlyWebConfig(dat);
 
 
