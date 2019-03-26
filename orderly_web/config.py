@@ -1,3 +1,4 @@
+import docker
 import yaml
 
 
@@ -38,6 +39,10 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "github_org"], True)
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
+
+    def get_container(self, name):
+        cl = docker.client.from_env()
+        return cl.containers.get(self.containers[name])
 
 
 # Utility function for centralising control over pulling information
