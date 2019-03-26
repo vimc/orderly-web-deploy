@@ -28,3 +28,19 @@ Options:
 ```
 
 Here `<path>` is the path to a directory that contains a configuration file `orderly-web.yml` (more options will follow in future versions).
+
+## Testing
+
+Run
+
+```
+python3 setup.py test
+```
+
+This will take a while.  There will be lots of warnings like:
+
+```
+ResourceWarning: unclosed <socket.socket fd=8,
+```
+
+which are out of our control (see the helper `docker_client` in `docker_helpers.py` for details).
