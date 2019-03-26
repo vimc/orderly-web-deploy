@@ -1,6 +1,4 @@
-"""orderly_web
-
-Usage:
+"""Usage:
   orderly_web deploy <path>
   orderly_web status <path>
   orderly_web stop <path> [--volumes] [--network]
