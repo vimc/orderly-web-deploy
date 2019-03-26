@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from orderly_web.config import config_string, config_integer, config_boolean
+from orderly_web.config import config_string, config_integer, config_boolean, \
+    read_config
 
 
 class TestConfigHelpers(TestCase):
@@ -31,3 +32,21 @@ class TestConfigHelpers(TestCase):
 
     def test_config_boolean(self):
         self.assertEqual(config_boolean(self.sample_data, "d"), True)
+
+
+class TestExampleConfig(TestCase):
+    def test_example_config(self):
+        cfg = read_config("example")
+        self.assertEqual(cfg.network, "orderly_web_network")
+        self.assertEqual(cfg.volumes["orderly"], "orderly_web_volume")
+        self.assertEqual(cfg.containers["orderly"], "orderly_web_orderly")
+        self.assertEqual(cfg.containers["web"], "orderly_web_web")
+        self.assertEqual(cfg.orderly_image, "vimc/orderly.server:master")
+        self.assertEqual(cfg.web_dev_mode, True)
+        self.assertEqual(cfg.web_port, 80)
+        self.assertEqual(cfg.web_name, "OrderlyWeb")
+        self.assertEqual(cfg.web_email, "admin@example.com")
+        self.assertEqual(cfg.web_auth_montagu, False)
+        self.assertEqual(cfg.web_auth_fine_grained, True)
+        self.assertEqual(cfg.web_auth_github_org, "vimc")
+        self.assertEqual(cfg.web_auth_github_team, "")

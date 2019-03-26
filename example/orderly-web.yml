@@ -1,0 +1,21 @@
+## Prefix for container names; we'll use {container_prefix}_(orderly,web)
+container_prefix: orderly_web
+
+network: orderly_web_network
+
+volumes:
+  orderly: orderly_web_volume
+
+orderly:
+  image: vimc/orderly.server:master
+
+web:
+  dev_mode: true
+  port: 80
+  name: OrderlyWeb
+  email: admin@example.com
+  auth:
+    github_org: vimc
+    github_team: ""
+    fine_grained: true
+    montagu: false
