@@ -14,8 +14,8 @@ import docopt
 import orderly_web
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv)
     path = args["<path>"]
 
     cfg = orderly_web.read_config(path)
