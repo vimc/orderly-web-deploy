@@ -57,6 +57,7 @@ def orderly_start(container):
 def web_init(cfg, docker_client):
     container = web_container(cfg, docker_client)
     web_container_config(cfg, container)
+    web_migrate(cfg, docker_client)
     web_start(container)
     return container
 
@@ -88,6 +89,13 @@ def web_container_config(cfg, container):
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     string_into_container(container, txt, "/etc/orderly/web/config.properties")
+
+
+def web_migrate(cfg, docker_client):
+    print("Migrating the web tables")
+    image = "docker.montagu.dide.ic.ac.uk:5000/orderlyweb-migrate:master"
+    mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    docker_client.containers.run(image, mounts=mounts, auto_remove=True)
 
 
 def web_start(container):
