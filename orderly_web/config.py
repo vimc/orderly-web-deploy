@@ -1,20 +1,40 @@
 import yaml
 
+
 class OrderlyWebConfig:
+
     def __init__(self, dat):
         self.data = dat
         self.network = config_string(dat, ["network"])
         self.volumes = {
             "orderly": config_string(dat, ["volumes", "orderly"])
         }
+
+        self.container_prefix = config_string(dat, ["container_prefix"])
+        self.container_name_orderly = "{}_orderly".format(self.container_prefix)
+        self.container_name_web = "{}_web".format(self.container_prefix)
+
         self.orderly_image = config_string(dat, ["orderly", "image"])
-        self.orderly_name = config_string(dat, ["orderly", "name"])
+
+        self.web_port = config_integer(dat, ["web", "port"])
+        self.web_name = config_string(dat, ["web", "name"])
+        self.web_email = config_string(dat, ["web", "email"])
+
+        self.web_auth_montagu = config_boolean(
+            dat, ["web", "auth", "montagu"])
+        self.web_auth_fine_grained = config_boolean(
+            dat, ["web", "auth", "fine_grained"])
+        self.web_auth_github_org = config_string(
+            dat, ["web", "auth", "github_org"], True)
+        self.web_auth_github_team = config_string(
+            dat, ["web", "auth", "github_team"], True)
+
     @staticmethod
     def from_file(path):
         path_yml = "{}/orderly-web.yml".format(path)
         with open(path_yml, "r") as f:
             dat = yaml.load(f, Loader=yaml.SafeLoader)
-        return OrderlyWebConfig(dat);
+        return OrderlyWebConfig(dat)
 
 
 # Utility function for centralising control over pulling information

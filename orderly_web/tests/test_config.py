@@ -2,8 +2,10 @@ from unittest import TestCase
 
 from orderly_web.config import config_string, config_integer, config_boolean
 
+
 class TestConfigHelpers(TestCase):
     sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True}
+
     def test_config_string_reads_simple_values(self):
         self.assertEqual(config_string(self.sample_data, "a"), "value1")
         self.assertEqual(config_string(self.sample_data, ["a"]), "value1")
