@@ -3,7 +3,7 @@ import docker
 from orderly_web.docker_helpers import *
 
 
-def teardown(cfg, network=False, volumes=False):
+def stop(cfg, network=False, volumes=False):
     client = docker.client.from_env()
     kill_and_remove_container(client, cfg.containers["web"])
     kill_and_remove_container(client, cfg.containers["orderly"])
