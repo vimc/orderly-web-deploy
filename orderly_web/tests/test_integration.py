@@ -25,6 +25,8 @@ class TestExample(TestCase):
             print(st)
         out = f.getvalue()
         self.assertEqual(str(st).strip(), out.strip())
+        # __repr__ is called when the object is printed
+        self.assertEqual(st.__repr__(), str(st))
 
     def test_deploy_and_stop(self):
         cfg = orderly_web.read_config("example")

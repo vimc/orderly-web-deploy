@@ -26,9 +26,10 @@ def exec_safely(container, args):
     if ans[0] != 0:
         print(ans[1].decode("UTF-8"))
         raise Exception("Error running demo command (see above for log)")
+    return ans
 
 
-def stop_and_remove_container(client, name, kill):
+def stop_and_remove_container(client, name, kill, timeout=10):
     try:
         container = client.containers.get(name)
     except docker.errors.NotFound:
@@ -39,7 +40,7 @@ def stop_and_remove_container(client, name, kill):
             container.kill()
         else:
             print("Stopping '{}'".format(name))
-            container.stop()
+            container.stop(timeout=timeout)
     print("Removing '{}'".format(name))
     container.remove()
 
@@ -62,11 +63,17 @@ def remove_volume(client, name):
     v.remove(name)
 
 
+def container_exists(client, name):
+    try:
+        client.containers.get(name)
+        return True
+    except docker.errors.NotFound:
+        return False
+
+
 def simple_tar(path, name):
     f = tempfile.NamedTemporaryFile()
     t = tarfile.open(mode="w", fileobj=f)
-    if not name:
-        name = os.path.basename(path)
     abs_path = os.path.abspath(path)
     t.add(abs_path, arcname=name, recursive=False)
     t.close()
@@ -90,13 +97,8 @@ def simple_tar_string(text, name):
 # see
 # https://github.com/richfitz/stevedore/blob/845587/R/docker_client_support.R#L943-L1020
 #
-# So these functions assume that the destination directory exists and
-# can copy either a file or the contents of a string into a container.
-def cp_into_container(container, src, dest):
-    with simple_tar(src, os.path.basename(dest)) as tar:
-        container.put_archive(os.path.dirname(dest), tar)
-
-
+# So this function assumes that the destination directory exists and
+# dumps out text into a file in the container
 def string_into_container(container, txt, dest):
     with simple_tar_string(txt, os.path.basename(dest)) as tar:
         container.put_archive(os.path.dirname(dest), tar)
