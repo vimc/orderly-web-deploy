@@ -16,6 +16,7 @@ class OrderlyWebConfig:
 
         self.orderly_image = config_string(dat, ["orderly", "image"])
 
+        self.web_dev_mode = config_boolean(dat, ["web", "dev_mode"], True)
         self.web_port = config_integer(dat, ["web", "port"])
         self.web_name = config_string(dat, ["web", "name"])
         self.web_email = config_string(dat, ["web", "email"])
@@ -55,7 +56,8 @@ def config_value(data, path, data_type, is_optional):
                 "integer": int,
                 "boolean": bool}
     if type(data) is not expected[data_type]:
-        raise ValueError("Expected {} for {}".format(data_type, path))
+        raise ValueError("Expected {} for {}".format(
+            data_type, ":".join(path)))
     return data
 
 

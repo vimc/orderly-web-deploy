@@ -5,6 +5,9 @@ from orderly_web.docker_helpers import exec_safely, string_into_container
 
 def deploy(cfg):
     docker_client = docker.client.from_env()
+    ensure_network(docker_client, cfg.network)
+    for v in cfg.volumes.values():
+        ensure_volume(docker_client, v)
     orderly = orderly_init(cfg, docker_client)
     web = web_init(cfg, docker_client)
     return {"orderly": orderly, "web": web}
@@ -61,8 +64,13 @@ def web_container(cfg, docker_client):
     print("Creating web container")
     image = "docker.montagu.dide.ic.ac.uk:5000/orderly-web:master"
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    if cfg.web_dev_mode:
+        port = cfg.web_port
+        ports = {"{}/tcp".format(port): ("127.0.0.1", port)}
+    else:
+        ports = None
     container = docker_client.containers.run(
-        image, mounts=mounts, network=cfg.network,
+        image, mounts=mounts, network=cfg.network, ports=ports,
         name=cfg.container_name_web, detach=True)
     return container
 
