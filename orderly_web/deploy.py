@@ -1,6 +1,7 @@
 import docker
 
-from orderly_web.docker_helpers import exec_safely, string_into_container
+from orderly_web.docker_helpers import ensure_network, ensure_volume, \
+    exec_safely, string_into_container
 
 
 def deploy(cfg):

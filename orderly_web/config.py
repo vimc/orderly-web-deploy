@@ -1,6 +1,13 @@
 import yaml
 
 
+def read_config(path):
+    path_yml = "{}/orderly-web.yml".format(path)
+    with open(path_yml, "r") as f:
+        dat = yaml.load(f, Loader=yaml.SafeLoader)
+    return OrderlyWebConfig(dat)
+
+
 class OrderlyWebConfig:
 
     def __init__(self, dat):
@@ -11,7 +18,8 @@ class OrderlyWebConfig:
         }
 
         self.container_prefix = config_string(dat, ["container_prefix"])
-        self.container_name_orderly = "{}_orderly".format(self.container_prefix)
+        self.container_name_orderly = "{}_orderly".format(
+            self.container_prefix)
         self.container_name_web = "{}_web".format(self.container_prefix)
 
         self.orderly_image = config_string(dat, ["orderly", "image"])
@@ -29,13 +37,6 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "github_org"], True)
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
-
-    @staticmethod
-    def from_file(path):
-        path_yml = "{}/orderly-web.yml".format(path)
-        with open(path_yml, "r") as f:
-            dat = yaml.load(f, Loader=yaml.SafeLoader)
-        return OrderlyWebConfig(dat)
 
 
 # Utility function for centralising control over pulling information
