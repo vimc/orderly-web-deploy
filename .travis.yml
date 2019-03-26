@@ -5,9 +5,6 @@ before_install:
   - docker pull vimc/orderly.server:master
   - docker pull vimc/orderly-web:master
   - docker pull vimc/orderlyweb-migrate:master
-  # workaround for now
-  - docker tag vimc/orderly-web:master docker.montagu.dide.ic.ac.uk:5000/orderly-web:master
-  - docker tag vimc/orderlyweb-migrate:master docker.montagu.dide.ic.ac.uk:5000/orderlyweb-migrate:master
 
 install:
   - pip3 install codecov

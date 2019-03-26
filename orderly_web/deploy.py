@@ -64,7 +64,7 @@ def web_init(cfg, docker_client):
 
 def web_container(cfg, docker_client):
     print("Creating web container")
-    image = "docker.montagu.dide.ic.ac.uk:5000/orderly-web:master"
+    image = "vimc/orderly-web:master"
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.web_dev_mode:
         port = cfg.web_port
@@ -93,7 +93,7 @@ def web_container_config(cfg, container):
 
 def web_migrate(cfg, docker_client):
     print("Migrating the web tables")
-    image = "docker.montagu.dide.ic.ac.uk:5000/orderlyweb-migrate:master"
+    image = "vimc/orderlyweb-migrate:master"
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     docker_client.containers.run(image, mounts=mounts, auto_remove=True)
 
