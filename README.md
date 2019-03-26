@@ -1,5 +1,8 @@
 ## OrderlyWeb (Deploy)
 
+[![Build Status](https://travis-ci.org/vimc/orderly-web-deploy.svg?branch=master)](https://travis-ci.org/vimc/orderly-web-deploy)
+[![codecov.io](https://codecov.io/github/vimc/orderly-web-deploy/coverage.svg?branch=master)](https://codecov.io/github/vimc/orderly-web-deploy?branch=master)
+
 This is the deploy scripts for OrderlyWeb.  They are the only part of the system that runs directly on metal.
 I am not good at python packaging so some documentation for help me.  These might not be the best ways to do things but they seem to work:
 
