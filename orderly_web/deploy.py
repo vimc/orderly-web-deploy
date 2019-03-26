@@ -29,7 +29,7 @@ def orderly_container(cfg, docker_client):
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     container = docker_client.containers.run(
         cfg.orderly_image, args, mounts=mounts, network=cfg.network,
-        name=cfg.container_name_orderly, working_dir="/orderly", detach=True)
+        name=cfg.containers["orderly"], working_dir="/orderly", detach=True)
     return container
 
 
@@ -73,7 +73,7 @@ def web_container(cfg, docker_client):
         ports = None
     container = docker_client.containers.run(
         image, mounts=mounts, network=cfg.network, ports=ports,
-        name=cfg.container_name_web, detach=True)
+        name=cfg.containers["web"], detach=True)
     return container
 
 
@@ -85,7 +85,7 @@ def web_container_config(cfg, container):
             "app.github_org": cfg.web_auth_github_org,
             "app.github_team": cfg.web_auth_github_team,
             "app.auth": str(cfg.web_auth_fine_grained).lower(),
-            "orderly.server": "{}:8321".format(cfg.container_name_orderly)}
+            "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     string_into_container(container, txt, "/etc/orderly/web/config.properties")

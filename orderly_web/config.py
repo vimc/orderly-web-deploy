@@ -18,9 +18,10 @@ class OrderlyWebConfig:
         }
 
         self.container_prefix = config_string(dat, ["container_prefix"])
-        self.container_name_orderly = "{}_orderly".format(
-            self.container_prefix)
-        self.container_name_web = "{}_web".format(self.container_prefix)
+        self.containers = {
+            "orderly": "{}_orderly".format(self.container_prefix),
+            "web": "{}_web".format(self.container_prefix)
+        }
 
         self.orderly_image = config_string(dat, ["orderly", "image"])
 
