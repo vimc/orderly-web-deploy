@@ -7,6 +7,7 @@ import json
 
 import orderly_web
 
+
 class TestExample(TestCase):
 
     def test_status_when_not_running(self):

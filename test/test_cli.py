@@ -5,6 +5,7 @@ from contextlib import redirect_stdout
 import orderly_web
 import orderly_web.cli
 
+
 class TestCli(TestCase):
     def test_cli_basic_usage(self):
         path = "example"
@@ -19,6 +20,7 @@ class TestCli(TestCase):
         out = f.getvalue()
         self.assertEqual(str(st).strip(), out.strip())
 
-        orderly_web.cli.main(["stop", path, "--kill", "--volumes", "--network"])
+        stop_args = ["stop", path, "--kill", "--volumes", "--network"]
+        orderly_web.cli.main(stop_args)
         st = orderly_web.status(cfg)
         self.assertEqual(st.containers["web"]["status"], "missing")

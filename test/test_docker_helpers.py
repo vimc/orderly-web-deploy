@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from orderly_web.docker_helpers import *
 
+
 class TestDockerHelpers(TestCase):
 
     def test_exec_safely_throws_on_failure(self):
