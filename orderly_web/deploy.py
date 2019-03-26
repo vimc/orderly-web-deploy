@@ -1,16 +1,17 @@
 import docker
 
-from orderly_web.docker_helpers import ensure_network, ensure_volume, \
+from orderly_web.docker_helpers import docker_client, \
+    ensure_network, ensure_volume, \
     exec_safely, string_into_container
 
 
 def deploy(cfg):
-    docker_client = docker.client.from_env()
-    ensure_network(docker_client, cfg.network)
-    for v in cfg.volumes.values():
-        ensure_volume(docker_client, v)
-    orderly = orderly_init(cfg, docker_client)
-    web = web_init(cfg, docker_client)
+    with docker_client() as cl:
+        ensure_network(cl, cfg.network)
+        for v in cfg.volumes.values():
+            ensure_volume(cl, v)
+        orderly = orderly_init(cfg, cl)
+        web = web_init(cfg, cl)
 
 
 def orderly_init(cfg, docker_client):

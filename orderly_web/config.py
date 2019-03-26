@@ -1,6 +1,8 @@
 import docker
 import yaml
 
+from orderly_web.docker_helpers import docker_client
+
 
 def read_config(path):
     path_yml = "{}/orderly-web.yml".format(path)
@@ -41,8 +43,8 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "github_team"], True)
 
     def get_container(self, name):
-        cl = docker.client.from_env()
-        return cl.containers.get(self.containers[name])
+        with docker_client() as cl:
+            return cl.containers.get(self.containers[name])
 
 
 # Utility function for centralising control over pulling information

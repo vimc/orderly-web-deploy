@@ -1,5 +1,7 @@
 import docker
 
+from orderly_web.docker_helpers import docker_client
+
 
 def status(cfg):
     return OrderlyWebStatus(cfg)
@@ -28,12 +30,12 @@ class OrderlyWebStatus:
         return self.__str__()
 
     def reload(self):
-        client = docker.client.from_env()
-        self.containers = {k: container_status(client, v)
-                           for k, v in self.cfg.containers.items()}
-        self.volumes = {k: volume_status(client, v)
-                        for k, v in self.cfg.volumes.items()}
-        self.network = network_status(client, self.cfg.network)
+        with docker_client() as client:
+            self.containers = {k: container_status(client, v)
+                               for k, v in self.cfg.containers.items()}
+            self.volumes = {k: volume_status(client, v)
+                            for k, v in self.cfg.volumes.items()}
+            self.network = network_status(client, self.cfg.network)
 
 
 def container_status(client, name):
