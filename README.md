@@ -18,7 +18,7 @@ This installs the package `orderly_web` for programmatic use, and a cli tool `or
 ```
 $ orderly-web --help
 Usage:
-  orderly_web deploy <path>
+  orderly_web start <path>
   orderly_web status <path>
   orderly_web stop <path> [--volumes] [--network]
 

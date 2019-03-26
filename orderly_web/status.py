@@ -40,7 +40,7 @@ def container_status(client, name):
     try:
         status = client.containers.get(name).status
     except docker.errors.NotFound:
-        status = None
+        status = "missing"
     return {"name": name, "status": status}
 
 

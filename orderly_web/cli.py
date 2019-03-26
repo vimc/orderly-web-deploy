@@ -1,11 +1,12 @@
 """Usage:
-  orderly_web deploy <path>
+  orderly_web start <path>
   orderly_web status <path>
-  orderly_web stop <path> [--volumes] [--network]
+  orderly_web stop <path> [--volumes] [--network] [--kill]
 
 Options:
   --volumes   Remove volumes (WARNING: irrevrsible data loss)
   --network   Remove network
+  --kill      Kill the containers (faster, but possible db corruption)
 """
 
 import docopt
@@ -18,11 +19,12 @@ def main():
     path = args["<path>"]
 
     cfg = orderly_web.read_config(path)
-    if args["deploy"]:
+    if args["start"]:
         orderly_web.deploy(cfg)
     elif args["status"]:
         print(orderly_web.status(cfg))
     elif args["stop"]:
         network = args["--network"]
         volumes = args["--volumes"]
-        orderly_web.stop(cfg, network=network, volumes=volumes)
+        kill = args["--kill"]
+        orderly_web.stop(cfg, network=network, volumes=volumes, kill=kill)

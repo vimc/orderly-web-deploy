@@ -28,14 +28,18 @@ def exec_safely(container, args):
         raise Exception("Error running demo command (see above for log)")
 
 
-def kill_and_remove_container(client, name):
+def stop_and_remove_container(client, name, kill):
     try:
         container = client.containers.get(name)
     except docker.errors.NotFound:
         return
     if container.status == "running":
-        print("Killing '{}'".format(name))
-        container.kill()
+        if kill:
+            print("Killing '{}'".format(name))
+            container.kill()
+        else:
+            print("Stopping '{}'".format(name))
+            container.stop()
     print("Removing '{}'".format(name))
     container.remove()
 
