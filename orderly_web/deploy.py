@@ -11,7 +11,6 @@ def deploy(cfg):
         ensure_volume(docker_client, v)
     orderly = orderly_init(cfg, docker_client)
     web = web_init(cfg, docker_client)
-    return {"orderly": orderly, "web": web}
 
 
 def orderly_init(cfg, docker_client):

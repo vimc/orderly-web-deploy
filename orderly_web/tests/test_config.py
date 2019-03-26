@@ -43,7 +43,7 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.containers["web"], "orderly_web_web")
         self.assertEqual(cfg.orderly_image, "vimc/orderly.server:master")
         self.assertEqual(cfg.web_dev_mode, True)
-        self.assertEqual(cfg.web_port, 80)
+        self.assertEqual(cfg.web_port, 8888)
         self.assertEqual(cfg.web_name, "OrderlyWeb")
         self.assertEqual(cfg.web_email, "admin@example.com")
         self.assertEqual(cfg.web_auth_montagu, False)
