@@ -14,6 +14,8 @@ From local sources
 python3 setup.py install --user
 ```
 
+(you may need `--upgrade` to upgrade older versions of python packages).
+
 This installs the package `orderly_web` for programmatic use, and a cli tool `orderly-web` for interacting with the package:
 
 ## Usage
@@ -21,12 +23,12 @@ This installs the package `orderly_web` for programmatic use, and a cli tool `or
 ```
 $ orderly-web --help
 Usage:
-  orderly_web start <path>
-  orderly_web status <path>
-  orderly_web stop <path> [--volumes] [--network]
+  orderly-web start <path>
+  orderly-web status <path>
+  orderly-web stop <path> [--volumes] [--network]
 
 Options:
-  --volumes   Remove volumes (WARNING: irrevrsible data loss)
+  --volumes   Remove volumes (WARNING: irreversible data loss)
   --network   Remove network
 ```
 
@@ -47,3 +49,7 @@ ResourceWarning: unclosed <socket.socket fd=8,
 ```
 
 which are out of our control (see the helper `docker_client` in `docker_helpers.py` for details).
+
+## Configuration
+
+Configuration is a work in progress and will change as the tool progresses.  See [`example/orderly-web.yml`] for an annotated configuration.

@@ -25,7 +25,7 @@ def exec_safely(container, args):
     ans = container.exec_run(args)
     if ans[0] != 0:
         print(ans[1].decode("UTF-8"))
-        raise Exception("Error running demo command (see above for log)")
+        raise Exception("Error running command (see above for log)")
     return ans
 
 

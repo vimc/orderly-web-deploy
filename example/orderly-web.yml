@@ -1,21 +1,48 @@
 ## Prefix for container names; we'll use {container_prefix}_(orderly,web)
 container_prefix: orderly_web
 
+## The name of the docker network that containers will be attached to.
+## If you want to proxy OrderlyWeb to the host, you will need to
+## arrange a proxy on this network, or use dev_mode in the web section
+## below.
 network: orderly_web_network
 
+## Names of the docker volumes to use:
+##
+## orderly: stores the orderly archive
+##
+## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
 
+## Orderly configuration
 orderly:
+  ## Image to use for orderly.  This should build off of
+  ## vimc/orderly.server but can be extended to use whatever packages
+  ## you need.
   image: vimc/orderly.server:master
 
+## Api and Website configuration
 web:
+  ## If dev_mode is true then the port is exposed to the host (as
+  ## plain http).  Do not use in production.  The port is attached
+  ## only to the localhost and will not be available from other
+  ## machines
   dev_mode: true
+  ## Port to use for the web service
   port: 8888
+  ## Name of the web service (affects the UI)
   name: OrderlyWeb
+  ## Email address of the web service
   email: admin@example.com
+  ## Authentication configuration
   auth:
+    ## Name of the github organisation if using github auth
     github_org: vimc
+    ## Name of the team within this github organisation if using
+    ## github auth (cuurrently must be "" - VIMC
     github_team: ""
+    ## Enable or disable fine grained permissions
     fine_grained: true
+    ## Enable montagu authentication provider
     montagu: false

@@ -14,10 +14,8 @@ class OrderlyWebStatus:
         self.reload()
 
     def __str__(self):
-        st_c = dict_map(self.containers, lambda k, v: "  {}: {} ({})".format(
-            k, v["status"], v["name"]))
-        st_v = dict_map(self.volumes, lambda k, v: "  {}: {} ({})".format(
-            k, v["status"], v["name"]))
+        st_c = dict_map(self.containers, format_status)
+        st_v = dict_map(self.volumes, format_status)
         st_n = "Network: {} ({})".format(
             self.network["status"], self.network["name"])
         ret = ["OrderlyWeb: {}".format(self.cfg.web_name)]
@@ -36,6 +34,10 @@ class OrderlyWebStatus:
             self.volumes = {k: volume_status(client, v)
                             for k, v in self.cfg.volumes.items()}
             self.network = network_status(client, self.cfg.network)
+
+
+def format_status(name, status):
+    return "  {}: {} ({})".format(name, status["status"], status["name"])
 
 
 def container_status(client, name):

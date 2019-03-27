@@ -1,10 +1,10 @@
 """Usage:
-  orderly_web start <path>
-  orderly_web status <path>
-  orderly_web stop <path> [--volumes] [--network] [--kill]
+  orderly-web start <path>
+  orderly-web status <path>
+  orderly-web stop <path> [--volumes] [--network] [--kill]
 
 Options:
-  --volumes   Remove volumes (WARNING: irrevrsible data loss)
+  --volumes   Remove volumes (WARNING: irreversible data loss)
   --network   Remove network
   --kill      Kill the containers (faster, but possible db corruption)
 """
