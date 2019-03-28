@@ -46,6 +46,11 @@ class TestExample(TestCase):
             dat = json.loads(http_get("http://localhost:8888"))
             self.assertEqual(dat["status"], "success")
             orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+            st = orderly_web.status(cfg)
+            self.assertEqual(st.containers["orderly"]["status"], "missing")
+            self.assertEqual(st.containers["web"]["status"], "missing")
+            self.assertEqual(st.volumes["orderly"]["status"], "missing")
+            self.assertEqual(st.network["status"], "down")
         finally:
             orderly_web.stop(cfg, kill=True, volumes=True, network=True)
 
