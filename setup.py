@@ -1,0 +1,35 @@
+from setuptools import setup, find_packages
+
+with open("README.md", "r") as f:
+    long_description = f.read()
+
+setup(name="orderly_web",
+      version="0.0.1",
+      description="Deploy scripts for OrderlyWeb",
+      long_description=long_description,
+      classifiers=[
+          "Programming Language :: Python :: 3",
+          "License :: OSI Approved :: MIT License",
+          "Operating System :: OS Independent",
+      ],
+      # keywords
+      url="https://github.com/vimc/orderly-web-deploy",
+      author="Rich FitzJohn",
+      author_email="r.fitzjohn@imperial.ac.uk",
+      license='MIT',
+      packages=find_packages(),
+      # install_requires
+      test_suite="nose.collector",
+      tests_require=["nose"],
+      entry_points={
+          'console_scripts': ['orderly-web=orderly_web.cli:main'],
+      },
+      include_package_data=True,
+      zip_safe=False,
+      # Extra:
+      long_description_content_type="text/markdown",
+      requires=[
+          "docker",
+          "docopt",
+          "yaml"
+      ])
