@@ -19,11 +19,27 @@ volumes:
 orderly:
   ## Image to use for orderly.  This should build off of
   ## vimc/orderly.server but can be extended to use whatever packages
-  ## you need.
-  image: vimc/orderly.server:master
+  ## you need.  The components repo, image and tag will be assembled as
+  ## <repo>/<name>:<tag> for the full docker image reference.
+  image:
+    repo: vimc
+    name: orderly.server
+    tag: master
 
 ## Api and Website configuration
 web:
+  ## Image to use for the web components.  As for the orderly
+  ## configuration these will be assembled as <repo>/<name>:<tag>.  In
+  ## addition, a second image with the database migration support will
+  ## be used as <repo>/<migrate>:<tag>.  It is not expected (unlike
+  ## the orderly image) that the 'name' and 'migrate' will need to be
+  ## changed often, and it is expected that a web image will go
+  ## together with a corresponding migration image.
+  image:
+    repo: vimc
+    name: orderly-web
+    tag: master
+    migrate: orderlyweb-migrate
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached
   ## only to the localhost and will not be available from other

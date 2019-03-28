@@ -26,9 +26,10 @@ def orderly_init(cfg, docker_client):
 def orderly_container(cfg, docker_client):
     print("Creating orderly container")
     args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
+    image = str(cfg.images["orderly"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     container = docker_client.containers.run(
-        cfg.orderly_image, args, mounts=mounts, network=cfg.network,
+        image, args, mounts=mounts, network=cfg.network,
         name=cfg.containers["orderly"], working_dir="/orderly", detach=True)
     return container
 
@@ -64,7 +65,7 @@ def web_init(cfg, docker_client):
 
 def web_container(cfg, docker_client):
     print("Creating web container")
-    image = "vimc/orderly-web:master"
+    image = str(cfg.images["web"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.web_dev_mode:
         port = cfg.web_port
@@ -93,7 +94,7 @@ def web_container_config(cfg, container):
 
 def web_migrate(cfg, docker_client):
     print("Migrating the web tables")
-    image = "vimc/orderlyweb-migrate:master"
+    image = str(cfg.images["migrate"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     docker_client.containers.run(image, mounts=mounts, auto_remove=True)
 

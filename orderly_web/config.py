@@ -26,7 +26,11 @@ class OrderlyWebConfig:
             "web": "{}_web".format(self.container_prefix)
         }
 
-        self.orderly_image = config_string(dat, ["orderly", "image"])
+        self.images = {
+            "orderly": config_image_reference(dat, ["orderly", "image"]),
+            "web": config_image_reference(dat, ["web", "image"]),
+            "migrate": config_image_reference(dat, ["web", "image"], "migrate")
+        }
 
         self.web_dev_mode = config_boolean(dat, ["web", "dev_mode"], True)
         self.web_port = config_integer(dat, ["web", "port"])
@@ -45,6 +49,17 @@ class OrderlyWebConfig:
     def get_container(self, name):
         with docker_client() as cl:
             return cl.containers.get(self.containers[name])
+
+
+class DockerImageReference:
+
+    def __init__(self, repo, name, tag):
+        self.repo = repo
+        self.name = name
+        self.tag = tag
+
+    def __str__(self):
+        return "{}/{}:{}".format(self.repo, self.name, self.tag)
 
 
 # Utility function for centralising control over pulling information
@@ -80,3 +95,12 @@ def config_integer(data, path, is_optional=False):
 
 def config_boolean(data, path, is_optional=False):
     return config_value(data, path, "boolean", is_optional)
+
+
+def config_image_reference(dat, path, name="name"):
+    if type(path) is str:
+        path = [path]
+    repo = config_string(dat, path + ["repo"])
+    name = config_string(dat, path + [name])
+    tag = config_string(dat, path + ["tag"])
+    return DockerImageReference(repo, name, tag)

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
-    read_config
+    config_image_reference, read_config
 
 
 class TestConfigHelpers(TestCase):
@@ -41,7 +41,12 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.volumes["orderly"], "orderly_web_volume")
         self.assertEqual(cfg.containers["orderly"], "orderly_web_orderly")
         self.assertEqual(cfg.containers["web"], "orderly_web_web")
-        self.assertEqual(cfg.orderly_image, "vimc/orderly.server:master")
+
+        self.assertEqual(cfg.images["orderly"].repo, "vimc")
+        self.assertEqual(cfg.images["orderly"].name, "orderly.server")
+        self.assertEqual(cfg.images["orderly"].tag, "master")
+        self.assertEqual(str(cfg.images["orderly"].tag),
+                         "vimc/orderly.server:master")
         self.assertEqual(cfg.web_dev_mode, True)
         self.assertEqual(cfg.web_port, 8888)
         self.assertEqual(cfg.web_name, "OrderlyWeb")
@@ -50,3 +55,21 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.web_auth_fine_grained, True)
         self.assertEqual(cfg.web_auth_github_org, "vimc")
         self.assertEqual(cfg.web_auth_github_team, "")
+
+
+class TestDockerImageReference(TestCase):
+    def test_string_representation(self):
+        img = DockerImageReference("a", "b", "c")
+        self.assertEqual(str(img), "a/b:c")
+
+    def test_config_image_reference(self):
+        data = {"foo": {
+            "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1}}
+        self.assertEqual(str(config_image_reference(data, "foo")),
+                         "a/b:c")
+        self.assertEqual(str(config_image_reference(data, ["foo"], "other")),
+                         "a/d:c")
+        with self.assertRaises(KeyError):
+            config_image_reference(data, ["foo"], "missing")
+        with self.assertRaises(ValueError):
+            config_image_reference(data, ["foo"], "num")
