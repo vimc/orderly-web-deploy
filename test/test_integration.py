@@ -32,12 +32,20 @@ class TestExample(TestCase):
     def test_start_and_stop(self):
         cfg = orderly_web.read_config("example")
         try:
-            orderly_web.start(cfg)
+            res = orderly_web.start(cfg)
+            self.assertTrue(res)
             st = orderly_web.status(cfg)
             self.assertEqual(st.containers["orderly"]["status"], "running")
             self.assertEqual(st.containers["web"]["status"], "running")
             self.assertEqual(st.volumes["orderly"]["status"], "created")
             self.assertEqual(st.network["status"], "up")
+
+            f = io.StringIO()
+            with redirect_stdout(f):
+                res = orderly_web.start(cfg)
+                msg = f.getvalue().strip()
+            self.assertFalse(res)
+            self.assertTrue(msg.endswith("please run orderly-web stop"))
 
             web = cfg.get_container("web")
             ports = web.attrs["HostConfig"]["PortBindings"]

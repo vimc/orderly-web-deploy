@@ -1,18 +1,26 @@
 import docker
 
+from orderly_web.status import status
 from orderly_web.docker_helpers import docker_client, \
     ensure_network, ensure_volume, \
     exec_safely, string_into_container
 
 
 def start(cfg):
+    st = status(cfg)
+    for name, data in st.containers.items():
+        if data["status"] is not "missing":
+            msg = "Container '{}' is {}; please run orderly-web stop".format(
+                name, data["status"])
+            print(msg)
+            return False
     with docker_client() as cl:
         ensure_network(cl, cfg.network)
         for v in cfg.volumes.values():
             ensure_volume(cl, v)
         orderly = orderly_init(cfg, cl)
         web = web_init(cfg, cl)
-
+        return True
 
 def orderly_init(cfg, docker_client):
     container = orderly_container(cfg, docker_client)
