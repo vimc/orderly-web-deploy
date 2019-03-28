@@ -29,10 +29,10 @@ class TestExample(TestCase):
         # __repr__ is called when the object is printed
         self.assertEqual(st.__repr__(), str(st))
 
-    def test_deploy_and_stop(self):
+    def test_start_and_stop(self):
         cfg = orderly_web.read_config("example")
         try:
-            orderly_web.deploy(cfg)
+            orderly_web.start(cfg)
             st = orderly_web.status(cfg)
             self.assertEqual(st.containers["orderly"]["status"], "running")
             self.assertEqual(st.containers["web"]["status"], "running")
@@ -53,7 +53,7 @@ class TestExample(TestCase):
         cfg = orderly_web.read_config("example")
         cfg.web_dev_mode = False
         try:
-            orderly_web.deploy(cfg)
+            orderly_web.start(cfg)
             web = cfg.get_container("web")
             self.assertIsNone(web.attrs["HostConfig"]["PortBindings"])
         finally:

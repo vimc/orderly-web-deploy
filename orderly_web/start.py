@@ -5,7 +5,7 @@ from orderly_web.docker_helpers import docker_client, \
     exec_safely, string_into_container
 
 
-def deploy(cfg):
+def start(cfg):
     with docker_client() as cl:
         ensure_network(cl, cfg.network)
         for v in cfg.volumes.values():

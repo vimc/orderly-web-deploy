@@ -20,7 +20,7 @@ def main(argv=None):
 
     cfg = orderly_web.read_config(path)
     if args["start"]:
-        orderly_web.deploy(cfg)
+        orderly_web.start(cfg)
     elif args["status"]:
         print(orderly_web.status(cfg))
     elif args["stop"]:
