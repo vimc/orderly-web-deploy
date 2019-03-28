@@ -22,6 +22,7 @@ def start(cfg):
         web = web_init(cfg, cl)
         return True
 
+
 def orderly_init(cfg, docker_client):
     container = orderly_container(cfg, docker_client)
     if not orderly_is_initialised(container):
