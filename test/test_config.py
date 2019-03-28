@@ -45,7 +45,7 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.images["orderly"].repo, "vimc")
         self.assertEqual(cfg.images["orderly"].name, "orderly.server")
         self.assertEqual(cfg.images["orderly"].tag, "master")
-        self.assertEqual(str(cfg.images["orderly"].tag),
+        self.assertEqual(str(cfg.images["orderly"]),
                          "vimc/orderly.server:master")
         self.assertEqual(cfg.web_dev_mode, True)
         self.assertEqual(cfg.web_port, 8888)
