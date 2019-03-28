@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
-    config_image_reference, read_config
+    config_image_reference, read_config, DockerImageReference
 
 
 class TestConfigHelpers(TestCase):
