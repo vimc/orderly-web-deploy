@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+HERE=$(dirname $0)
+. $HERE/common
+
+docker build \
+       --tag $APP_DOCKER_COMMIT_TAG \
+       --tag $APP_DOCKER_BRANCH_TAG \
+       --tag $APP_PUBLIC_COMMIT_TAG \
+       --tag $APP_PUBLIC_BRANCH_TAG \
+       $HERE
