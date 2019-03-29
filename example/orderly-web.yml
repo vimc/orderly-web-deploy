@@ -62,3 +62,14 @@ web:
     fine_grained: true
     ## Enable montagu authentication provider
     montagu: false
+
+## If running a proxy directly, fill this section in.  Otherwise you
+## are responsible for proxying the application out of the docker
+## network
+proxy:
+  enabled: true
+  self_signed: true
+  image:
+    repo: vimc
+    name: orderly-web-proxy
+    tag: master

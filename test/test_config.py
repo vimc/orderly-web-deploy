@@ -56,6 +56,11 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.web_auth_github_org, "vimc")
         self.assertEqual(cfg.web_auth_github_team, "")
 
+        self.assertEqual(cfg.proxy_enabled, True)
+        self.assertEqual(cfg.proxy_self_signed, True)
+        self.assertEqual(str(cfg.images["proxy"]),
+                         "vimc/orderly-web-proxy:master")
+
 
 class TestDockerImageReference(TestCase):
     def test_string_representation(self):

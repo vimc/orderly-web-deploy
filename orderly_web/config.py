@@ -46,6 +46,16 @@ class OrderlyWebConfig:
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
 
+        if "proxy" in dat:
+            self.proxy_enabled = config_boolean(
+                dat, ["proxy", "enabled"])
+            self.proxy_self_signed = config_boolean(
+                dat, ["proxy", "self_signed"])
+            self.images["proxy"] = config_image_reference(
+                dat, ["proxy", "image"])
+        else:
+            self.proxy_enabled = False
+
     def get_container(self, name):
         with docker_client() as cl:
             return cl.containers.get(self.containers[name])
