@@ -2,7 +2,12 @@
 set -e
 
 GIT_ID=$(git rev-parse --short=7 HEAD)
-GIT_BRANCH=$(git symbolic-ref --short HEAD)
+if [ -z "$TRAVIS_BRANCH" ]; then
+    GIT_BRANCH=$(git symbolic-ref --short HEAD)
+else
+    GIT_BRANCH="$TRAVIS_BRANCH"
+fi
+
 REGISTRY=docker.montagu.dide.ic.ac.uk:5000
 NAME=orderly-web-proxy
 PUBLIC_REGISTRY=vimc

@@ -2,9 +2,6 @@ language: python
 python: 3.5
 
 before_install:
-  - env
-  - pwd
-  - git fetch --unshallow
   - ./proxy/build
   - docker pull vimc/orderly.server:master
   - docker pull vimc/orderly-web:master
