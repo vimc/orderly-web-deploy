@@ -46,7 +46,7 @@ class OrderlyWebConfig:
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
 
-        if "proxy" in dat:
+        if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(
                 dat, ["proxy", "enabled"])
             self.proxy_self_signed = config_boolean(

@@ -34,7 +34,7 @@ def test_config_boolean():
 
 
 def test_example_config():
-    cfg = read_config("example")
+    cfg = read_config("config/complete")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.containers["orderly"] == "orderly_web_orderly"
@@ -62,6 +62,7 @@ def test_string_representation():
     img = DockerImageReference("a", "b", "c")
     assert str(img) == "a/b:c"
 
+
 def test_config_image_reference():
     data = {"foo": {
         "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1}}
@@ -71,3 +72,7 @@ def test_config_image_reference():
         config_image_reference(data, ["foo"], "missing")
     with pytest.raises(ValueError):
         config_image_reference(data, ["foo"], "num")
+
+def test_config_no_proxy():
+    cfg = read_config("config/noproxy")
+    assert not cfg.proxy_enabled

@@ -145,8 +145,6 @@ def proxy_container(cfg, docker_client):
 
 
 def proxy_certificates(cfg, container):
-    if cfg.proxy_self_signed:
-        exec_safely(container, ["self-signed-certificate", "/run/proxy"])
-    else:
-        # This practically means using the vault, but we'll see
-        raise Exception("real certificates not handled")
+    # Need to support non-self-signed certificates here but that
+    # requires more work and probably the vault
+    exec_safely(container, ["self-signed-certificate", "/run/proxy"])

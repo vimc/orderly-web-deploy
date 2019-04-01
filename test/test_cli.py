@@ -6,7 +6,7 @@ import orderly_web.cli
 
 
 def test_cli_basic_usage():
-    path = "example"
+    path = "config/noproxy"
     cfg = orderly_web.read_config(path)
     orderly_web.cli.main(["start", path])
     st = orderly_web.status(cfg)

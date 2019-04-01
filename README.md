@@ -52,4 +52,4 @@ which are out of our control (see the helper `docker_client` in `docker_helpers.
 
 ## Configuration
 
-Configuration is a work in progress and will change as the tool progresses.  See [`example/orderly-web.yml`] for an annotated configuration.
+Configuration is a work in progress and will change as the tool progresses.  See [`config/complete/orderly-web.yml`] for an annotated configuration.
