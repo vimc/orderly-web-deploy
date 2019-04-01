@@ -4,7 +4,8 @@ python: 3.5
 before_install:
   - env
   - pwd
-  - cd proxy && ./proxy/build
+  - git fetch --unshallow
+  - ./proxy/build
   - docker pull vimc/orderly.server:master
   - docker pull vimc/orderly-web:master
   - docker pull vimc/orderlyweb-migrate:master
