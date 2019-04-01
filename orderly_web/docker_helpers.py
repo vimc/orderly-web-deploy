@@ -1,6 +1,8 @@
+import math
 import os
 import tarfile
 import tempfile
+import time
 
 import docker
 
@@ -69,6 +71,24 @@ def container_exists(client, name):
         return True
     except docker.errors.NotFound:
         return False
+
+
+## https://medium.com/@nagarwal/lifecycle-of-docker-container-d2da9f85959
+def container_wait_running(container, poll=0.1, timeout=1):
+    for i in range(math.ceil(timeout / poll)):
+        if container.status != "created":
+            break
+        time.sleep(poll)
+        container.reload()
+    if container.status != "running":
+        raise Exception("container '{}' ({}) is not running ({})".format(
+            container.name, container.id[:8], container.status))
+    time.sleep(poll)
+    container.reload()
+    if container.status != "running":
+        raise Exception("container '{}' ({}) is no longer running ({})".format(
+            container.name, container.id[:8], container.status))
+    return container
 
 
 def simple_tar(path, name):

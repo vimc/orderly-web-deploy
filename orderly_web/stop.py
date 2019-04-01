@@ -5,6 +5,7 @@ from orderly_web.docker_helpers import *
 
 def stop(cfg, kill=False, network=False, volumes=False):
     with docker_client() as client:
+        stop_and_remove_container(client, cfg.containers["proxy"], kill)
         stop_and_remove_container(client, cfg.containers["web"], kill)
         stop_and_remove_container(client, cfg.containers["orderly"], kill)
         if network:

@@ -10,10 +10,12 @@ network: orderly_web_network
 ## Names of the docker volumes to use:
 ##
 ## orderly: stores the orderly archive
+## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
+  proxy_logs: orderly_web_proxy_logs
 
 ## Orderly configuration
 orderly:
@@ -69,7 +71,10 @@ web:
 proxy:
   enabled: true
   self_signed: true
+  hostname: localhost
+  port_http: 80
+  port_https: 443
   image:
     repo: vimc
     name: orderly-web-proxy
-    tag: master
+    tag: mrc-206

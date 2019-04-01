@@ -51,8 +51,17 @@ class OrderlyWebConfig:
                 dat, ["proxy", "enabled"])
             self.proxy_self_signed = config_boolean(
                 dat, ["proxy", "self_signed"])
+            self.proxy_hostname = config_string(
+                dat, ["proxy", "hostname"])
+            self.proxy_port_http = config_integer(
+                dat, ["proxy", "port_http"])
+            self.proxy_port_https = config_integer(
+                dat, ["proxy", "port_https"])
             self.images["proxy"] = config_image_reference(
                 dat, ["proxy", "image"])
+            self.volumes["proxy_logs"] = config_string(
+                dat, ["volumes", "proxy_logs"])
+            self.containers["proxy"] = "{}_proxy".format(self.container_prefix)
         else:
             self.proxy_enabled = False
 
