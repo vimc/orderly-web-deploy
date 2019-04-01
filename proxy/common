@@ -2,10 +2,12 @@
 set -e
 
 GIT_ID=$(git rev-parse --short=7 HEAD)
-if [ -z "$TRAVIS_BRANCH" ]; then
-    GIT_BRANCH=$(git symbolic-ref --short HEAD)
-else
+if [ ! -z "$TRAVIS_PULL_REQUEST_BRANCH" ]; then
+    GIT_BRANCH="$TRAVIS_PULL_REQUEST_BRANCH"
+elif [ ! -z "$TRAVIS_BRANCH" ]; then
     GIT_BRANCH="$TRAVIS_BRANCH"
+else
+    GIT_BRANCH=$(git symbolic-ref --short HEAD)
 fi
 
 REGISTRY=docker.montagu.dide.ic.ac.uk:5000
