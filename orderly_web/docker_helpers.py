@@ -83,7 +83,7 @@ def container_wait_running(container, poll=0.1, timeout=1):
     if container.status != "running":
         raise Exception("container '{}' ({}) is not running ({})".format(
             container.name, container.id[:8], container.status))
-    time.sleep(poll)
+    time.sleep(timeout)
     container.reload()
     if container.status != "running":
         raise Exception("container '{}' ({}) is no longer running ({})".format(
