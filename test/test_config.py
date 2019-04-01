@@ -10,8 +10,10 @@ def test_config_string_reads_simple_values():
     assert config_string(sample_data, "a") == "value1"
     assert config_string(sample_data, ["a"]) == "value1"
 
+
 def test_config_string_reads_nested_values():
     assert config_string(sample_data, ["b", "x"]) == "value2"
+
 
 def test_config_string_throws_on_missing_keys():
     with pytest.raises(KeyError):
@@ -19,15 +21,19 @@ def test_config_string_throws_on_missing_keys():
     with pytest.raises(KeyError):
         config_string(sample_data, ["b", "y"])
 
+
 def test_config_string_validates_types():
     with pytest.raises(ValueError):
         config_string(sample_data, "c")
 
+
 def test_config_string_default():
     assert config_string(sample_data, "x", True) is None
 
+
 def test_config_integer():
     assert config_integer(sample_data, "c") == 1
+
 
 def test_config_boolean():
     assert config_boolean(sample_data, "d")
@@ -72,6 +78,7 @@ def test_config_image_reference():
         config_image_reference(data, ["foo"], "missing")
     with pytest.raises(ValueError):
         config_image_reference(data, ["foo"], "num")
+
 
 def test_config_no_proxy():
     cfg = read_config("config/noproxy")

@@ -73,7 +73,7 @@ def container_exists(client, name):
         return False
 
 
-## https://medium.com/@nagarwal/lifecycle-of-docker-container-d2da9f85959
+# https://medium.com/@nagarwal/lifecycle-of-docker-container-d2da9f85959
 def container_wait_running(container, poll=0.1, timeout=1):
     for i in range(math.ceil(timeout / poll)):
         if container.status != "created":

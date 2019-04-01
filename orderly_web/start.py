@@ -79,9 +79,9 @@ def web_container(cfg, docker_client):
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.web_dev_mode:
         port = cfg.web_port
-        ## NOTE: different format to proxy below because we only
-        ## expose this to the localhost, and not to any external
-        ## interface
+        # NOTE: different format to proxy below because we only
+        # expose this to the localhost, and not to any external
+        # interface
         ports = {"{}/tcp".format(cfg.web_port): ("127.0.0.1", cfg.web_port)}
     else:
         ports = None

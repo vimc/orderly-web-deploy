@@ -7,6 +7,7 @@ import ssl
 
 import orderly_web
 
+
 def test_status_when_not_running():
     cfg = orderly_web.read_config("config/complete")
     st = orderly_web.status(cfg)
@@ -14,6 +15,7 @@ def test_status_when_not_running():
     assert st.containers["web"]["status"] == "missing"
     assert st.volumes["orderly"]["status"] == "missing"
     assert st.network["status"] == "down"
+
 
 def test_status_representation_is_str():
     cfg = orderly_web.read_config("config/complete")
@@ -25,6 +27,7 @@ def test_status_representation_is_str():
     assert str(st).strip() == out.strip()
     # __repr__ is called when the object is printed
     assert st.__repr__() == str(st)
+
 
 def test_start_and_stop():
     cfg = orderly_web.read_config("config/complete")
@@ -50,7 +53,7 @@ def test_start_and_stop():
         dat = json.loads(http_get("http://localhost:8888"))
         assert dat["status"] == "success"
 
-        ## Trivial check that the proxy container works too:
+        # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
         ports = proxy.attrs["HostConfig"]["PortBindings"]
         assert set(ports.keys()) == set(["443/tcp", "80/tcp"])
@@ -59,7 +62,7 @@ def test_start_and_stop():
         dat = json.loads(http_get("https://localhost"))
         assert dat["status"] == "success"
 
-        ## Bring the whole lot down:
+        # Bring the whole lot down:
         orderly_web.stop(cfg, kill=True, volumes=True, network=True)
         st = orderly_web.status(cfg)
         assert st.containers["orderly"]["status"] == "missing"

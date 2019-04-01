@@ -11,6 +11,7 @@ def test_exec_safely_throws_on_failure():
             exec_safely(container, "missing_command")
         container.kill()
 
+
 def test_stop_and_remove_container_works():
     with docker_client() as cl:
         container = cl.containers.run("alpine", ["sleep", "10"],
@@ -19,6 +20,7 @@ def test_stop_and_remove_container_works():
         assert container_exists(cl, name)
         stop_and_remove_container(cl, name, False, 1)
         assert not container_exists(cl, name)
+
 
 def test_string_into_container():
     with docker_client() as cl:
