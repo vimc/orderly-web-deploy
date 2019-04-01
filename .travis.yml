@@ -2,6 +2,10 @@ language: python
 python: 3.5
 
 before_install:
+  - env
+  - git fetch --unshallow origin/${TRAVIS_BRANCH}
+  - ./proxy/build
+  - ./proxy/build
   - docker pull vimc/orderly.server:master
   - docker pull vimc/orderly-web:master
   - docker pull vimc/orderlyweb-migrate:master
@@ -10,7 +14,6 @@ install:
   - pip3 install codecov
 
 script:
-  - ./proxy/build
   - pip3 install -r requirements.txt
   - coverage run --source=orderly_web setup.py test
 
