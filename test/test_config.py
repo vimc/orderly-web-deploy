@@ -59,7 +59,7 @@ class TestExampleConfig(TestCase):
         self.assertEqual(cfg.proxy_enabled, True)
         self.assertEqual(cfg.proxy_self_signed, True)
         self.assertEqual(str(cfg.images["proxy"]),
-                         "vimc/orderly-web-proxy:master")
+                         "vimc/orderly-web-proxy:mrc-206")
 
 
 class TestDockerImageReference(TestCase):
