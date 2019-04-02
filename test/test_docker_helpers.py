@@ -48,4 +48,4 @@ def test_container_wait_running_detects_slow_failure():
             container = cl.containers.run("alpine", ["sleep", "1"],
                                           detach=True)
             container_wait_running(container, 0.1, 1.2)
-        assert "is no longer running (exited)" in str(e)
+        assert "was running but is now exited" in str(e)
