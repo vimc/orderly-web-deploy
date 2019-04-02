@@ -1,12 +1,13 @@
 import docker
 
 from orderly_web.status import status
+from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
     ensure_network, ensure_volume, container_wait_running, \
     exec_safely, string_into_container
 
 
-def start(cfg):
+def start(cfg, pull_images=False):
     st = status(cfg)
     for name, data in st.containers.items():
         if data["status"] is not "missing":
@@ -14,6 +15,8 @@ def start(cfg):
                 name, data["status"])
             print(msg)
             return False
+    if pull_images:
+        pull(cfg)
     with docker_client() as cl:
         ensure_network(cl, cfg.network)
         for v in cfg.volumes.values():

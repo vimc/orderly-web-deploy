@@ -6,7 +6,7 @@ import json
 import ssl
 
 import orderly_web
-
+from orderly_web.docker_helpers import docker_client
 
 def test_status_when_not_running():
     cfg = orderly_web.read_config("config/complete")
@@ -82,6 +82,19 @@ def test_no_devmode_no_ports():
         web = cfg.get_container("web")
         assert web.attrs["HostConfig"]["PortBindings"] is None
     finally:
+        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+
+
+def test_can_pull_on_deploy():
+    cfg = orderly_web.read_config("config/noproxy")
+    with docker_client() as cl:
+        try:
+            cl.images.remove(str(cfg.images["migrate"]), noprune=True)
+        except docker.errors.ImageNotFound:
+            pass
+        res = orderly_web.start(cfg, True)
+        img = cl.images.get(str(cfg.images["migrate"]))
+        assert str(cfg.images["migrate"]) in img.tags
         orderly_web.stop(cfg, kill=True, volumes=True, network=True)
 
 
