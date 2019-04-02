@@ -50,16 +50,16 @@ def test_start_and_stop():
         web = cfg.get_container("web")
         ports = web.attrs["HostConfig"]["PortBindings"]
         assert list(ports.keys()) == ["8888/tcp"]
-        dat = json.loads(http_get("http://localhost:8888"))
+        dat = json.loads(http_get("http://localhost:8888/api/v1"))
         assert dat["status"] == "success"
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
         ports = proxy.attrs["HostConfig"]["PortBindings"]
         assert set(ports.keys()) == set(["443/tcp", "80/tcp"])
-        dat = json.loads(http_get("http://localhost"))
+        dat = json.loads(http_get("http://localhost/api/v1"))
         assert dat["status"] == "success"
-        dat = json.loads(http_get("https://localhost"))
+        dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
 
         # Bring the whole lot down:
