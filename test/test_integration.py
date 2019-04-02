@@ -68,6 +68,7 @@ def test_start_and_stop():
         assert st.containers["orderly"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
         assert st.volumes["orderly"]["status"] == "missing"
+        assert st.volumes["orderly"]["proxy"] == "missing"
         assert st.network["status"] == "down"
     finally:
         orderly_web.stop(cfg, kill=True, volumes=True, network=True)

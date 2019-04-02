@@ -49,3 +49,12 @@ def test_container_wait_running_detects_slow_failure():
                                           detach=True)
             container_wait_running(container, 0.1, 1.2)
         assert "was running but is now exited" in str(e)
+
+
+def test_container_wait_running_returns_cintainer():
+    with docker_client() as cl:
+        container = cl.containers.run("alpine", ["sleep", "100"], detach=True)
+        res = container_wait_running(container, 0.1, 1.2)
+        assert res == container
+        container.kill()
+        container.remove()
