@@ -10,10 +10,12 @@ network: orderly_web_network
 ## Names of the docker volumes to use:
 ##
 ## orderly: stores the orderly archive
+## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
+  proxy_logs: orderly_web_proxy_logs
 
 ## Orderly configuration
 orderly:
@@ -62,3 +64,7 @@ web:
     fine_grained: true
     ## Enable montagu authentication provider
     montagu: false
+
+## No proxy enabled as the proxy section is falsy (missing is also ok,
+## null [yaml: ~] is also falsy)
+proxy: false

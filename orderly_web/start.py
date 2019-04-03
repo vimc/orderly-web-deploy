@@ -1,12 +1,13 @@
 import docker
 
 from orderly_web.status import status
+from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
-    ensure_network, ensure_volume, \
+    ensure_network, ensure_volume, container_wait_running, \
     exec_safely, string_into_container
 
 
-def start(cfg):
+def start(cfg, pull_images=False):
     st = status(cfg)
     for name, data in st.containers.items():
         if data["status"] is not "missing":
@@ -14,12 +15,15 @@ def start(cfg):
                 name, data["status"])
             print(msg)
             return False
+    if pull_images:
+        pull(cfg)
     with docker_client() as cl:
         ensure_network(cl, cfg.network)
         for v in cfg.volumes.values():
             ensure_volume(cl, v)
-        orderly = orderly_init(cfg, cl)
-        web = web_init(cfg, cl)
+        orderly_init(cfg, cl)
+        web_init(cfg, cl)
+        proxy_init(cfg, cl)
         return True
 
 
@@ -78,7 +82,10 @@ def web_container(cfg, docker_client):
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.web_dev_mode:
         port = cfg.web_port
-        ports = {"{}/tcp".format(port): ("127.0.0.1", port)}
+        # NOTE: different format to proxy below because we only
+        # expose this to the localhost, and not to any external
+        # interface
+        ports = {"{}/tcp".format(cfg.web_port): ("127.0.0.1", cfg.web_port)}
     else:
         ports = None
     container = docker_client.containers.run(
@@ -111,3 +118,36 @@ def web_migrate(cfg, docker_client):
 def web_start(container):
     print("Starting orderly server")
     exec_safely(container, ["touch", "/etc/orderly/web/go_signal"])
+
+
+def proxy_init(cfg, docker_client):
+    if not cfg.proxy_enabled:
+        return
+    container = proxy_container(cfg, docker_client)
+    proxy_certificates(cfg, container)
+
+
+def proxy_container(cfg, docker_client):
+    print("Creating proxy container")
+    image = str(cfg.images["proxy"])
+    orderly = "{}:{}".format(cfg.containers["web"], cfg.web_port)
+    args = [cfg.proxy_hostname, str(cfg.proxy_port_http),
+            str(cfg.proxy_port_https), orderly]
+    # Use a tmpfs for the /run/proxy mount so that we never risk
+    # committing the ssl certificates and other secrets.
+    tmpfs = {"/run/proxy": ""}
+    mounts = [docker.types.Mount("/var/log/nginx", cfg.volumes["proxy_logs"])]
+    ports = {
+        "{}/tcp".format(cfg.proxy_port_http): cfg.proxy_port_http,
+        "{}/tcp".format(cfg.proxy_port_https): cfg.proxy_port_https
+    }
+    ret = docker_client.containers.run(
+        image, args, detach=True, name=cfg.containers["proxy"],
+        network=cfg.network, tmpfs=tmpfs, mounts=mounts, ports=ports)
+    return container_wait_running(ret)
+
+
+def proxy_certificates(cfg, container):
+    # Need to support non-self-signed certificates here but that
+    # requires more work and probably the vault
+    exec_safely(container, ["self-signed-certificate", "/run/proxy"])

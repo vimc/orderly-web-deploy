@@ -12,15 +12,11 @@ setup(name="orderly_web",
           "License :: OSI Approved :: MIT License",
           "Operating System :: OS Independent",
       ],
-      # keywords
       url="https://github.com/vimc/orderly-web-deploy",
       author="Rich FitzJohn",
       author_email="r.fitzjohn@imperial.ac.uk",
       license='MIT',
       packages=find_packages(),
-      # install_requires
-      test_suite="nose.collector",
-      tests_require=["nose"],
       entry_points={
           'console_scripts': ['orderly-web=orderly_web.cli:main'],
       },
@@ -28,6 +24,8 @@ setup(name="orderly_web",
       zip_safe=False,
       # Extra:
       long_description_content_type="text/markdown",
+      setup_requires=["pytest-runner"],
+      tests_require=["pytest"],
       requires=[
           "docker",
           "docopt",
