@@ -60,7 +60,7 @@ def test_example_config():
     assert cfg.web_auth_github_team == ""
 
     assert cfg.proxy_enabled
-    assert cfg.proxy_self_signed
+    assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-206"
 
 

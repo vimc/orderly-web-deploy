@@ -49,14 +49,14 @@ class OrderlyWebConfig:
         if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(
                 dat, ["proxy", "enabled"])
-            self.proxy_self_signed = config_boolean(
-                dat, ["proxy", "self_signed"])
             self.proxy_hostname = config_string(
                 dat, ["proxy", "hostname"])
             self.proxy_port_http = config_integer(
                 dat, ["proxy", "port_http"])
             self.proxy_port_https = config_integer(
                 dat, ["proxy", "port_https"])
+            self.proxy_ssl_self_signed = config_boolean(
+                dat, ["proxy", "ssl", "self_signed"])
             self.images["proxy"] = config_image_reference(
                 dat, ["proxy", "image"])
             self.volumes["proxy_logs"] = config_string(
