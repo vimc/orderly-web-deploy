@@ -1,5 +1,6 @@
 from orderly_web.docker_helpers import docker_client
 
+
 def pull(cfg):
     print("Pulling orderly-web images:")
     with docker_client() as cl:
