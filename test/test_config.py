@@ -1,4 +1,5 @@
 import pytest
+import vault_dev
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
     config_image_reference, read_config, DockerImageReference
@@ -83,3 +84,30 @@ def test_config_image_reference():
 def test_config_no_proxy():
     cfg = read_config("config/noproxy")
     assert not cfg.proxy_enabled
+
+
+def test_can_substitute_secrets():
+    with vault_dev.server() as s:
+        cl = s.client()
+        # Copy the certificates into the vault where we will later on
+        # pull from from.
+        cert = read_file("proxy/ssl/certificate.pem")
+        key = read_file("proxy/ssl/ssl_key.pem")
+        cl.write("secret/ssl/certificate", value=cert)
+        cl.write("secret/ssl/key", value=key)
+
+        # When reading the configuration we have to interpolate in the
+        # correct values here for the vault connection
+        cfg = read_config("config/vault")
+        cfg.vault.url = "http://localhost:{}".format(s.port)
+        cfg.vault.auth_args["token"] = s.token
+
+        cfg.resolve_secrets()
+        assert not cfg.proxy_ssl_self_signed
+        assert cfg.proxy_ssl_certificate == cert
+        assert cfg.proxy_ssl_key == key
+
+
+def read_file(path):
+    with open(path, "r") as f:
+        return f.read()

@@ -2,6 +2,7 @@ import docker
 import yaml
 
 from orderly_web.docker_helpers import docker_client
+from orderly_web.vault import resolve_secret, vault_config
 
 
 def read_config(path):
@@ -15,6 +16,7 @@ class OrderlyWebConfig:
 
     def __init__(self, dat):
         self.data = dat
+        self.vault = config_vault(dat, ["vault"])
         self.network = config_string(dat, ["network"])
         self.volumes = {
             "orderly": config_string(dat, ["volumes", "orderly"])
@@ -57,6 +59,10 @@ class OrderlyWebConfig:
                 dat, ["proxy", "port_https"])
             self.proxy_ssl_self_signed = config_boolean(
                 dat, ["proxy", "ssl", "self_signed"])
+            self.proxy_ssl_certificate = config_string(
+                dat, ["proxy", "ssl", "certificate"], True)
+            self.proxy_ssl_key = config_string(
+                dat, ["proxy", "ssl", "key"], True)
             self.images["proxy"] = config_image_reference(
                 dat, ["proxy", "image"])
             self.volumes["proxy_logs"] = config_string(
@@ -68,6 +74,14 @@ class OrderlyWebConfig:
     def get_container(self, name):
         with docker_client() as cl:
             return cl.containers.get(self.containers[name])
+
+    def resolve_secrets(self):
+        vault_client = self.vault.client()
+        for k, v in vars(self).items():
+            if type(v) == str:
+                updated, v = resolve_secret(v, vault_client)
+                if updated:
+                    setattr(self, k, v)
 
 
 class DockerImageReference:
@@ -89,6 +103,8 @@ def config_value(data, path, data_type, is_optional):
     for i, p in enumerate(path):
         try:
             data = data[p]
+            if data is None:
+                raise KeyError()
         except KeyError as e:
             if is_optional:
                 return None
@@ -97,11 +113,22 @@ def config_value(data, path, data_type, is_optional):
 
     expected = {"string": str,
                 "integer": int,
-                "boolean": bool}
+                "boolean": bool,
+                "dict": dict}
     if type(data) is not expected[data_type]:
         raise ValueError("Expected {} for {}".format(
             data_type, ":".join(path)))
     return data
+
+
+# TODO: once we have support for easily overriding parts of
+# configuration, this can be made better with respect to optional
+# values (e.g., if url is present other keys are required).
+def config_vault(data, path):
+    url = config_string(data, path + ["addr"], True)
+    auth_method = config_string(data, path + ["auth", "method"], True)
+    auth_args = config_dict(data, path + ["auth", "args"], True)
+    return vault_config(url, auth_method, auth_args)
 
 
 def config_string(data, path, is_optional=False):
@@ -114,6 +141,10 @@ def config_integer(data, path, is_optional=False):
 
 def config_boolean(data, path, is_optional=False):
     return config_value(data, path, "boolean", is_optional)
+
+
+def config_dict(data, path, is_optional=False):
+    return config_value(data, path, "dict", is_optional)
 
 
 def config_image_reference(dat, path, name="name"):
