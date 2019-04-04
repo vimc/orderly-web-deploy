@@ -62,7 +62,7 @@ def test_example_config():
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
-    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-206"
+    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-211"
 
 
 def test_string_representation():
@@ -92,7 +92,7 @@ def test_can_substitute_secrets():
         # Copy the certificates into the vault where we will later on
         # pull from from.
         cert = read_file("proxy/ssl/certificate.pem")
-        key = read_file("proxy/ssl/ssl_key.pem")
+        key = read_file("proxy/ssl/key.pem")
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
 
