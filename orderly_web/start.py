@@ -15,6 +15,7 @@ def start(cfg, pull_images=False):
                 name, data["status"])
             print(msg)
             return False
+    cfg.resolve_secrets()
     if pull_images:
         pull(cfg)
     with docker_client() as cl:
@@ -133,9 +134,6 @@ def proxy_container(cfg, docker_client):
     orderly = "{}:{}".format(cfg.containers["web"], cfg.web_port)
     args = [cfg.proxy_hostname, str(cfg.proxy_port_http),
             str(cfg.proxy_port_https), orderly]
-    # Use a tmpfs for the /run/proxy mount so that we never risk
-    # committing the ssl certificates and other secrets.
-    tmpfs = {"/run/proxy": ""}
     mounts = [docker.types.Mount("/var/log/nginx", cfg.volumes["proxy_logs"])]
     ports = {
         "{}/tcp".format(cfg.proxy_port_http): cfg.proxy_port_http,
@@ -143,11 +141,17 @@ def proxy_container(cfg, docker_client):
     }
     ret = docker_client.containers.run(
         image, args, detach=True, name=cfg.containers["proxy"],
-        network=cfg.network, tmpfs=tmpfs, mounts=mounts, ports=ports)
+        network=cfg.network, mounts=mounts, ports=ports)
     return container_wait_running(ret)
 
 
 def proxy_certificates(cfg, container):
-    # Need to support non-self-signed certificates here but that
-    # requires more work and probably the vault
-    exec_safely(container, ["self-signed-certificate", "/run/proxy"])
+    if cfg.proxy_ssl_self_signed:
+        print("Generating self-signed certificates for proxy")
+        exec_safely(container, ["self-signed-certificate", "/run/proxy"])
+    else:
+        print("Copying ssl certificate and key into proxy")
+        string_into_container(container, cfg.proxy_ssl_certificate,
+                              "/run/proxy/certificate.pem")
+        string_into_container(container, cfg.proxy_ssl_key,
+                              "/run/proxy/key.pem")
