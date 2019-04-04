@@ -70,8 +70,6 @@ web:
 ## network
 proxy:
   enabled: true
-  ssl:
-    self_signed: true
   hostname: localhost
   port_http: 80
   port_https: 443

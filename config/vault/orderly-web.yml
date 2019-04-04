@@ -105,7 +105,14 @@ web:
 proxy:
   enabled: true
   ssl:
-    self_signed: false
+    ## This section describes how to get the certificate in.  We
+    ## support two sources:
+    ##
+    ## 1. self signed certificates - just leave this section blank
+    ##
+    ## 2. certificates from strings - include the strings directly in
+    ##    the keys here, or more likely use a VAULT:<path>:<key>
+    ##    string to extract them from the vault.
     certificate: VAULT:secret/ssl/certificate:value
     key: VAULT:secret/ssl/key:value
   hostname: localhost

@@ -57,12 +57,13 @@ class OrderlyWebConfig:
                 dat, ["proxy", "port_http"])
             self.proxy_port_https = config_integer(
                 dat, ["proxy", "port_https"])
-            self.proxy_ssl_self_signed = config_boolean(
-                dat, ["proxy", "ssl", "self_signed"])
-            self.proxy_ssl_certificate = config_string(
-                dat, ["proxy", "ssl", "certificate"], True)
-            self.proxy_ssl_key = config_string(
-                dat, ["proxy", "ssl", "key"], True)
+            ssl = config_dict(dat, ["proxy", "ssl"], True)
+            self.proxy_ssl_self_signed = ssl is None
+            if not self.proxy_ssl_self_signed:
+                self.proxy_ssl_certificate = config_string(
+                    dat, ["proxy", "ssl", "certificate"], True)
+                self.proxy_ssl_key = config_string(
+                    dat, ["proxy", "ssl", "key"], True)
             self.images["proxy"] = config_image_reference(
                 dat, ["proxy", "image"])
             self.volumes["proxy_logs"] = config_string(
