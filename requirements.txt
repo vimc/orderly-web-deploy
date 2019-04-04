@@ -2,3 +2,4 @@ docker
 docopt
 pytest
 pyyaml
+vault_dev
