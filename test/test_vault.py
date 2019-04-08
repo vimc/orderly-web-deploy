@@ -2,7 +2,8 @@ import os
 import pytest
 import vault_dev
 
-from orderly_web.vault import resolve_secret, vault_config, vault_not_enabled
+from orderly_web.vault import drop_envvar, resolve_secret, vault_config, \
+    vault_not_enabled
 
 
 def test_secret_reading():
