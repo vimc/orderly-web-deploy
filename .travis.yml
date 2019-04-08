@@ -13,7 +13,7 @@ install:
 script:
   - pip3 install -r requirements.txt
   - coverage run --source=orderly_web setup.py test
-  - pycodestyle orderly_web
+  - pycodestyle orderly_web test
 
 after_success:
   - codecov
