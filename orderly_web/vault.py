@@ -58,6 +58,7 @@ class vault_config:
         # NOTE: we might actually try and pick up VAULT_TOKEN from the
         # environment, but can't let that value override any value
         # passed here.
+        # See for this workaround https://github.com/hvac/hvac/issues/421
         drop_envvar("VAULT_ADDR")
         drop_envvar("VAULT_TOKEN")
         if self.auth_method == "token":

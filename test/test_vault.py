@@ -74,3 +74,17 @@ def test_vault_config_login():
         token = os.environ["VAULT_TEST_GITHUB_PAT"]
         cfg = vault_config(url, "github", {"token": token})
         assert cfg.client().is_authenticated()
+
+
+# Utility reuired to work around https://github.com/hvac/hvac/issues/421
+def test_drop_envvar_removes_envvar():
+    name = "VAULT_DEV_TEST_VAR"
+    os.environ[name] = "x"
+    drop_envvar(name)
+    assert name not in os.environ
+
+
+def test_drop_envvar_ignores_missing_envvar():
+    name = "VAULT_DEV_TEST_VAR"
+    drop_envvar(name)
+    assert name not in os.environ
