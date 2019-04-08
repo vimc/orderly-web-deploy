@@ -95,6 +95,7 @@ def test_can_substitute_secrets():
         key = read_file("proxy/ssl/key.pem")
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
+        cl.write("secret/db/password", value="s3cret")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
@@ -106,6 +107,7 @@ def test_can_substitute_secrets():
         assert not cfg.proxy_ssl_self_signed
         assert cfg.proxy_ssl_certificate == cert
         assert cfg.proxy_ssl_key == key
+        assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
 
 
 def read_file(path):

@@ -20,6 +20,30 @@ def resolve_secret(value, client):
     return True, data["data"][key]
 
 
+def resolve_secrets(x, client):
+    if type(x) == dict:
+        resolve_secrets_dict(x, client)
+    else:
+        resolve_secrets_object(x, client)
+
+
+def resolve_secrets_object(obj, client):
+    for k, v in vars(obj).items():
+        if type(v) == str:
+            updated, v = resolve_secret(v, client)
+            if updated:
+                setattr(obj, k, v)
+
+
+def resolve_secrets_dict(d, client):
+    if d:
+        for k, v, in d.items():
+            if type(v) == str:
+                updated, v = resolve_secret(v, client)
+                if updated:
+                    d[k] = v
+
+
 class vault_config:
     def __init__(self, url, auth_method, auth_args):
         self.url = url

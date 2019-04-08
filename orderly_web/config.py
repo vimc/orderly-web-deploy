@@ -2,7 +2,7 @@ import docker
 import yaml
 
 from orderly_web.docker_helpers import docker_client
-from orderly_web.vault import resolve_secret, vault_config
+import orderly_web.vault as vault
 
 
 def read_config(path):
@@ -33,6 +33,8 @@ class OrderlyWebConfig:
             "web": config_image_reference(dat, ["web", "image"]),
             "migrate": config_image_reference(dat, ["web", "image"], "migrate")
         }
+
+        self.orderly_env = config_dict(dat, ["orderly", "env"], True)
 
         self.web_dev_mode = config_boolean(dat, ["web", "dev_mode"], True)
         self.web_port = config_integer(dat, ["web", "port"])
@@ -78,11 +80,8 @@ class OrderlyWebConfig:
 
     def resolve_secrets(self):
         vault_client = self.vault.client()
-        for k, v in vars(self).items():
-            if type(v) == str:
-                updated, v = resolve_secret(v, vault_client)
-                if updated:
-                    setattr(self, k, v)
+        vault.resolve_secrets(self, vault_client)
+        vault.resolve_secrets(self.orderly_env, vault_client)
 
 
 class DockerImageReference:
@@ -129,7 +128,7 @@ def config_vault(data, path):
     url = config_string(data, path + ["addr"], True)
     auth_method = config_string(data, path + ["auth", "method"], True)
     auth_args = config_dict(data, path + ["auth", "args"], True)
-    return vault_config(url, auth_method, auth_args)
+    return vault.vault_config(url, auth_method, auth_args)
 
 
 def config_string(data, path, is_optional=False):
