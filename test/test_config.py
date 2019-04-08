@@ -4,7 +4,8 @@ import vault_dev
 from orderly_web.config import config_string, config_integer, config_boolean, \
     config_image_reference, read_config, DockerImageReference
 
-sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True}
+sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
+               "e": None}
 
 
 def test_config_string_reads_simple_values():
@@ -21,6 +22,12 @@ def test_config_string_throws_on_missing_keys():
         config_string(sample_data, "x")
     with pytest.raises(KeyError):
         config_string(sample_data, ["b", "y"])
+
+
+def test_config_none_is_missing():
+    with pytest.raises(KeyError):
+        config_string(sample_data, ["e"], False)
+    assert config_string(sample_data, ["e"], True) is None
 
 
 def test_config_string_validates_types():
