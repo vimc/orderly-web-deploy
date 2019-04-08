@@ -14,7 +14,7 @@ def resolve_secret(value, client):
     data = client.read(path)
     if not data:
         raise Exception("Did not find secret at '{}'".format(path))
-    if not data["data"]:
+    if not key in data["data"]:
         raise Exception("Did not find key '{}' at secret path '{}'".format(
             key, path))
     return True, data["data"][key]
