@@ -33,6 +33,7 @@ def orderly_init(cfg, docker_client):
     if not orderly_is_initialised(container):
         orderly_init_demo(container)
     orderly_check_schema(container)
+    orderly_write_env(cfg.orderly_env, container)
     orderly_start(container)
     return container
 
@@ -46,6 +47,15 @@ def orderly_container(cfg, docker_client):
         image, args, mounts=mounts, network=cfg.network,
         name=cfg.containers["orderly"], working_dir="/orderly", detach=True)
     return container
+
+
+def orderly_write_env(env, container):
+    if not env:
+        return
+    print("Writing orderly environment")
+    dest = "/orderly/orderly_envir.yml"
+    txt = "".join(["{}: {}\n".format(str(k), str(v)) for k, v in env.items()])
+    string_into_container(container, txt, dest)
 
 
 def orderly_init_demo(container):

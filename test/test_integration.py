@@ -8,7 +8,7 @@ import vault_dev
 
 
 import orderly_web
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, exec_safely
 
 
 def test_status_when_not_running():
@@ -110,6 +110,7 @@ def test_vault_ssl():
         key = read_file("proxy/ssl/key.pem")
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
+        cl.write("secret/db/password", value="s3cret")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
@@ -119,6 +120,11 @@ def test_vault_ssl():
         res = orderly_web.start(cfg)
         dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
+
+        container = cfg.get_container("orderly")
+        res = container.exec_run(["cat", "orderly_envir.yml"])
+        assert "ORDERLY_DB_PASS: s3cret" in res[1].decode("UTF-8")
+
         orderly_web.stop(cfg, kill=True, volumes=True, network=True)
 
 
