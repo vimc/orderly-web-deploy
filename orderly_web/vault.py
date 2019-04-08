@@ -63,7 +63,9 @@ class vault_config:
             cl = hvac.Client(url=self.url, token=self.auth_args["token"])
         else:
             cl = hvac.Client(url=self.url)
-            getattr(cl)(**self.auth_args)
+            print("Authenticating with the vault using '{}'".format(
+                self.auth_method))
+            getattr(cl.auth, self.auth_method).login(**self.auth_args)
         return cl
 
 

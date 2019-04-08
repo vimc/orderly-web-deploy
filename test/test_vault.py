@@ -1,3 +1,4 @@
+import os
 import pytest
 import vault_dev
 
@@ -41,7 +42,6 @@ def test_error_for_missing_secret_key():
 
 def test_vault_config():
     with vault_dev.server() as s:
-        client = s.client()
         url = "http://localhost:{}".format(s.port)
         cfg = vault_config(url, "token", {"token": s.token})
         cl = cfg.client()
@@ -54,3 +54,23 @@ def test_vault_config_when_missing():
     assert type(cl) == vault_not_enabled
     with pytest.raises(Exception, match="Vault access is not enabled"):
         cl.read("secret/foo")
+
+
+# To run this test you will need a token for the vimc robot user -
+# this can be found in the montagu vault as
+# /secret/vimc-robot/vault-token
+#
+# This environment variable is configured on travis
+def test_vault_config_login():
+    if not "VAULT_TEST_GITHUB_PAT" in os.environ:
+        pytest.skip("Token 'VAULT_TEST_GITHUB_PAT' not defined")
+
+    with vault_dev.server() as s:
+        cl = s.client()
+        cl.sys.enable_auth_method(method_type="github")
+        cl.write("auth/github/config", organization="vimc")
+
+        url = "http://localhost:{}".format(s.port)
+        token = os.environ["VAULT_TEST_GITHUB_PAT"]
+        cfg = vault_config(url, "github", {"token": token})
+        assert cfg.client().is_authenticated()
