@@ -113,12 +113,13 @@ def test_vault_ssl():
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
-        cfg = read_config("config/vault")
+        cfg = orderly_web.read_config("config/vault")
         cfg.vault.url = "http://localhost:{}".format(s.port)
         cfg.vault.auth_args["token"] = s.token
         res = orderly_web.start(cfg)
         dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
+        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
 
 
 # Because we wait for a go signal to come up, we might not be able to
