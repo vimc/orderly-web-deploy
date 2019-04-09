@@ -32,6 +32,6 @@ setup(name="orderly_web",
       requires=[
           "docker",
           "docopt",
-          "hhac",
+          "hvac",
           "yaml"
       ])
