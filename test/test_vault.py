@@ -63,9 +63,6 @@ def test_vault_config_when_missing():
 #
 # This environment variable is configured on travis
 def test_vault_config_login():
-    if "VAULT_TEST_GITHUB_PAT" not in os.environ:
-        pytest.skip("Token 'VAULT_TEST_GITHUB_PAT' not defined")
-
     with vault_dev.server() as s:
         cl = s.client()
         cl.sys.enable_auth_method(method_type="github")
