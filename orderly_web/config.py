@@ -2,6 +2,7 @@ import docker
 import yaml
 
 from orderly_web.docker_helpers import docker_client
+import orderly_web.vault as vault
 
 
 def read_config(path):
@@ -15,6 +16,7 @@ class OrderlyWebConfig:
 
     def __init__(self, dat):
         self.data = dat
+        self.vault = config_vault(dat, ["vault"])
         self.network = config_string(dat, ["network"])
         self.volumes = {
             "orderly": config_string(dat, ["volumes", "orderly"])
@@ -31,6 +33,8 @@ class OrderlyWebConfig:
             "web": config_image_reference(dat, ["web", "image"]),
             "migrate": config_image_reference(dat, ["web", "image"], "migrate")
         }
+
+        self.orderly_env = config_dict(dat, ["orderly", "env"], True)
 
         self.web_dev_mode = config_boolean(dat, ["web", "dev_mode"], True)
         self.web_port = config_integer(dat, ["web", "port"])
@@ -49,14 +53,19 @@ class OrderlyWebConfig:
         if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(
                 dat, ["proxy", "enabled"])
-            self.proxy_self_signed = config_boolean(
-                dat, ["proxy", "self_signed"])
             self.proxy_hostname = config_string(
                 dat, ["proxy", "hostname"])
             self.proxy_port_http = config_integer(
                 dat, ["proxy", "port_http"])
             self.proxy_port_https = config_integer(
                 dat, ["proxy", "port_https"])
+            ssl = config_dict(dat, ["proxy", "ssl"], True)
+            self.proxy_ssl_self_signed = ssl is None
+            if not self.proxy_ssl_self_signed:
+                self.proxy_ssl_certificate = config_string(
+                    dat, ["proxy", "ssl", "certificate"], True)
+                self.proxy_ssl_key = config_string(
+                    dat, ["proxy", "ssl", "key"], True)
             self.images["proxy"] = config_image_reference(
                 dat, ["proxy", "image"])
             self.volumes["proxy_logs"] = config_string(
@@ -68,6 +77,11 @@ class OrderlyWebConfig:
     def get_container(self, name):
         with docker_client() as cl:
             return cl.containers.get(self.containers[name])
+
+    def resolve_secrets(self):
+        vault_client = self.vault.client()
+        vault.resolve_secrets(self, vault_client)
+        vault.resolve_secrets(self.orderly_env, vault_client)
 
 
 class DockerImageReference:
@@ -89,6 +103,8 @@ def config_value(data, path, data_type, is_optional):
     for i, p in enumerate(path):
         try:
             data = data[p]
+            if data is None:
+                raise KeyError()
         except KeyError as e:
             if is_optional:
                 return None
@@ -97,11 +113,22 @@ def config_value(data, path, data_type, is_optional):
 
     expected = {"string": str,
                 "integer": int,
-                "boolean": bool}
+                "boolean": bool,
+                "dict": dict}
     if type(data) is not expected[data_type]:
         raise ValueError("Expected {} for {}".format(
             data_type, ":".join(path)))
     return data
+
+
+# TODO: once we have support for easily overriding parts of
+# configuration, this can be made better with respect to optional
+# values (e.g., if url is present other keys are required).
+def config_vault(data, path):
+    url = config_string(data, path + ["addr"], True)
+    auth_method = config_string(data, path + ["auth", "method"], True)
+    auth_args = config_dict(data, path + ["auth", "args"], True)
+    return vault.vault_config(url, auth_method, auth_args)
 
 
 def config_string(data, path, is_optional=False):
@@ -114,6 +141,10 @@ def config_integer(data, path, is_optional=False):
 
 def config_boolean(data, path, is_optional=False):
     return config_value(data, path, "boolean", is_optional)
+
+
+def config_dict(data, path, is_optional=False):
+    return config_value(data, path, "dict", is_optional)
 
 
 def config_image_reference(dat, path, name="name"):

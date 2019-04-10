@@ -4,12 +4,15 @@ import urllib
 import time
 import json
 import ssl
+import vault_dev
+
 
 import orderly_web
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, exec_safely
+
 
 def test_status_when_not_running():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     st = orderly_web.status(cfg)
     assert st.containers["orderly"]["status"] == "missing"
     assert st.containers["web"]["status"] == "missing"
@@ -18,7 +21,7 @@ def test_status_when_not_running():
 
 
 def test_status_representation_is_str():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     st = orderly_web.status(cfg)
     f = io.StringIO()
     with redirect_stdout(f):
@@ -30,7 +33,7 @@ def test_status_representation_is_str():
 
 
 def test_start_and_stop():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     try:
         res = orderly_web.start(cfg)
         assert res
@@ -98,6 +101,33 @@ def test_can_pull_on_deploy():
         orderly_web.stop(cfg, kill=True, volumes=True, network=True)
 
 
+def test_vault_ssl():
+    with vault_dev.server() as s:
+        cl = s.client()
+        # Copy the certificates into the vault where we will later on
+        # pull from from.
+        cert = read_file("proxy/ssl/certificate.pem")
+        key = read_file("proxy/ssl/key.pem")
+        cl.write("secret/ssl/certificate", value=cert)
+        cl.write("secret/ssl/key", value=key)
+        cl.write("secret/db/password", value="s3cret")
+
+        # When reading the configuration we have to interpolate in the
+        # correct values here for the vault connection
+        cfg = orderly_web.read_config("config/complete")
+        cfg.vault.url = "http://localhost:{}".format(s.port)
+        cfg.vault.auth_args["token"] = s.token
+        res = orderly_web.start(cfg)
+        dat = json.loads(http_get("https://localhost/api/v1"))
+        assert dat["status"] == "success"
+
+        container = cfg.get_container("orderly")
+        res = container.exec_run(["cat", "orderly_envir.yml"])
+        assert "ORDERLY_DB_PASS: s3cret" in res[1].decode("UTF-8")
+
+        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+
+
 # Because we wait for a go signal to come up, we might not be able to
 # make the request right away:
 def http_get(url, retries=5, poll=0.5):
@@ -113,3 +143,8 @@ def http_get(url, retries=5, poll=0.5):
             time.sleep(poll)
             error = e
     raise error
+
+
+def read_file(path):
+    with open(path, "r") as f:
+        return f.read()

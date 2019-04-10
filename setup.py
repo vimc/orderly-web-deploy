@@ -25,9 +25,13 @@ setup(name="orderly_web",
       # Extra:
       long_description_content_type="text/markdown",
       setup_requires=["pytest-runner"],
-      tests_require=["pytest"],
+      tests_require=[
+          "vault_dev",
+          "pytest"
+      ],
       requires=[
           "docker",
           "docopt",
+          "hvac",
           "yaml"
       ])

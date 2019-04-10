@@ -7,6 +7,7 @@ import orderly_web
 import orderly_web.cli
 from orderly_web.docker_helpers import docker_client
 
+
 def test_cli_basic_usage():
     path = "config/noproxy"
     cfg = orderly_web.read_config(path)
@@ -27,7 +28,7 @@ def test_cli_basic_usage():
 
 
 def test_cli_pull():
-    path = "config/complete"
+    path = "config/basic"
     cfg = orderly_web.read_config(path)
     with docker_client() as cl:
         try:

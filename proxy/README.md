@@ -12,7 +12,7 @@ Before starting we need to know what we are proxying (i.e., the name of the `ord
 
 ### SSL Certificates
 
-The server will not start until the files `/run/proxy/certificate.pem` and `/run/proxy/ssl_key.pem` exist - you can get these into the container however you like; the proxy will poll for them and start within a second of them appearing.
+The server will not start until the files `/run/proxy/certificate.pem` and `/run/proxy/key.pem` exist - you can get these into the container however you like; the proxy will poll for them and start within a second of them appearing.
 
 ### Self signed certificate
 
