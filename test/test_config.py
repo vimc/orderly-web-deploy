@@ -48,7 +48,7 @@ def test_config_boolean():
 
 
 def test_example_config():
-    cfg = read_config("config/complete")
+    cfg = read_config("config/basic")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.containers["orderly"] == "orderly_web_orderly"
@@ -106,7 +106,7 @@ def test_can_substitute_secrets():
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
-        cfg = read_config("config/vault")
+        cfg = read_config("config/complete")
         cfg.vault.url = "http://localhost:{}".format(s.port)
         cfg.vault.auth_args["token"] = s.token
 

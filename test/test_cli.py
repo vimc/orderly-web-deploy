@@ -28,7 +28,7 @@ def test_cli_basic_usage():
 
 
 def test_cli_pull():
-    path = "config/complete"
+    path = "config/basic"
     cfg = orderly_web.read_config(path)
     with docker_client() as cl:
         try:

@@ -12,7 +12,7 @@ from orderly_web.docker_helpers import docker_client, exec_safely
 
 
 def test_status_when_not_running():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     st = orderly_web.status(cfg)
     assert st.containers["orderly"]["status"] == "missing"
     assert st.containers["web"]["status"] == "missing"
@@ -21,7 +21,7 @@ def test_status_when_not_running():
 
 
 def test_status_representation_is_str():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     st = orderly_web.status(cfg)
     f = io.StringIO()
     with redirect_stdout(f):
@@ -33,7 +33,7 @@ def test_status_representation_is_str():
 
 
 def test_start_and_stop():
-    cfg = orderly_web.read_config("config/complete")
+    cfg = orderly_web.read_config("config/basic")
     try:
         res = orderly_web.start(cfg)
         assert res
@@ -114,7 +114,7 @@ def test_vault_ssl():
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
-        cfg = orderly_web.read_config("config/vault")
+        cfg = orderly_web.read_config("config/complete")
         cfg.vault.url = "http://localhost:{}".format(s.port)
         cfg.vault.auth_args["token"] = s.token
         res = orderly_web.start(cfg)
