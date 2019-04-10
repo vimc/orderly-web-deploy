@@ -99,7 +99,7 @@ web:
     ## Name of the github organisation if using github auth
     github_org: vimc
     ## Name of the team within this github organisation if using
-    ## github auth (cuurrently must be "" - VIMC
+    ## github auth
     github_team: ""
     ## Enable or disable fine grained permissions
     fine_grained: true
