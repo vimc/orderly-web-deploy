@@ -2,7 +2,8 @@ import pytest
 import vault_dev
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
-    config_image_reference, read_config, DockerImageReference
+    config_image_reference, read_config, DockerImageReference, \
+    combine, combine2
 
 sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
                "e": None}
@@ -115,6 +116,23 @@ def test_can_substitute_secrets():
         assert cfg.proxy_ssl_certificate == cert
         assert cfg.proxy_ssl_key == key
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
+
+
+def test_combine2():
+    assert combine2({"a": 1}, {"b": 2}) == \
+        {"a": 1, "b": 2}
+    assert combine2({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3}, "b": 2}
+    assert combine2({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3, "y": 4}, "b": 2}
+    assert combine2({"a": None, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3}, "b": 2}
+
+
+def test_combine():
+    assert combine({"a": 1, "b": 1, "c": 1}, {"a": 2, "b": 2}, {"a": 3}) == \
+        {"a": 3, "b": 2, "c": 1}
+
 
 
 def read_file(path):
