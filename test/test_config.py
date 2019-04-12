@@ -3,7 +3,7 @@ import vault_dev
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
     config_image_reference, read_config, DockerImageReference, \
-    combine, combine2
+    combine, combine2, string_to_dict
 
 sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
                "e": None}
@@ -133,6 +133,11 @@ def test_combine():
     assert combine({"a": 1, "b": 1, "c": 1}, {"a": 2, "b": 2}, {"a": 3}) == \
         {"a": 3, "b": 2, "c": 1}
 
+
+def test_string_to_dict():
+    assert string_to_dict("a", "x") == {"a": "x"}
+    assert string_to_dict("a.b", "x") == {"a": {"b": "x"}}
+    assert string_to_dict("a.b.c", "x") == {"a": {"b": {"c": "x"}}}
 
 
 def read_file(path):
