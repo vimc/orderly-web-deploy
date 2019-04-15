@@ -1,5 +1,8 @@
 import pytest
+import shutil
+import tempfile
 import vault_dev
+import yaml
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
     config_image_reference, read_config, DockerImageReference, \
@@ -138,6 +141,16 @@ def test_string_to_dict():
     assert string_to_dict("a", "x") == {"a": "x"}
     assert string_to_dict("a.b", "x") == {"a": {"b": "x"}}
     assert string_to_dict("a.b.c", "x") == {"a": {"b": {"c": "x"}}}
+
+
+def test_read_and_patch():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"container_prefix": "patched_orderly_web"}
+            yaml.dump(data, f)
+        cfg = read_config(p, "patch")
+        assert cfg.container_prefix == "patched_orderly_web"
 
 
 def read_file(path):

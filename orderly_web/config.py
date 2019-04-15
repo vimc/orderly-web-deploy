@@ -5,11 +5,23 @@ from orderly_web.docker_helpers import docker_client
 import orderly_web.vault as vault
 
 
-def read_config(path):
-    path_yml = "{}/orderly-web.yml".format(path)
-    with open(path_yml, "r") as f:
-        dat = yaml.load(f, Loader=yaml.SafeLoader)
+def read_config(path, extra=None):
+    dat = read_config_data(path, extra)
     return OrderlyWebConfig(dat)
+
+
+def read_config_data(path, extra=None):
+    dat = read_yaml("{}/orderly-web.yml".format(path))
+    if extra:
+        dat_extra = read_yaml("{}/{}.yml".format(path, extra))
+        dat = combine(dat, dat_extra)
+    return dat
+
+
+def read_yaml(filename):
+    with open(filename, "r") as f:
+        dat = yaml.load(f, Loader=yaml.SafeLoader)
+    return dat
 
 
 class OrderlyWebConfig:
