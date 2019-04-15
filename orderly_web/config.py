@@ -168,15 +168,7 @@ def config_image_reference(dat, path, name="name"):
     return DockerImageReference(repo, name, tag)
 
 
-def combine(*args):
-    """Combine a number of dictionaries recursively"""
-    a = args[0]
-    for b in args[1:]:
-        a = combine2(a, b)
-    return a
-
-
-def combine2(a, b):
+def combine(a, b):
     """Combine exactly two dictionaries recursively"""
     for k, v in b.items():
         if k in a and type(a[k]) is dict:
