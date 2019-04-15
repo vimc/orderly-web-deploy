@@ -5,16 +5,18 @@ from orderly_web.docker_helpers import docker_client
 import orderly_web.vault as vault
 
 
-def read_config(path, extra=None):
-    dat = read_config_data(path, extra)
+def read_config(path, extra=None, options=None):
+    dat = read_config_data(path, extra, options)
     return OrderlyWebConfig(dat)
 
 
-def read_config_data(path, extra=None):
+def read_config_data(path, extra=None, options=None):
     dat = read_yaml("{}/orderly-web.yml".format(path))
     if extra:
         dat_extra = read_yaml("{}/{}.yml".format(path, extra))
         dat = combine(dat, dat_extra)
+    if options:
+        dat = combine(dat, options)
     return dat
 
 

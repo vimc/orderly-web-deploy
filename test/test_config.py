@@ -138,7 +138,7 @@ def test_string_to_dict():
     assert string_to_dict("a.b.c", "x") == {"a": {"b": {"c": "x"}}}
 
 
-def test_read_and_patch():
+def test_read_and_extra():
     with tempfile.TemporaryDirectory() as p:
         shutil.copy("config/basic/orderly-web.yml", p)
         with open("{}/patch.yml".format(p), "w+") as f:
@@ -146,6 +146,28 @@ def test_read_and_patch():
             yaml.dump(data, f)
         cfg = read_config(p, "patch")
         assert cfg.container_prefix == "patched_orderly_web"
+
+
+def test_read_and_options():
+    options = {"container_prefix": "patched_orderly_web"}
+    cfg = read_config("config/basic", options=options)
+    assert cfg.container_prefix == "patched_orderly_web"
+
+
+def test_read_complex():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        data1 = {"container_prefix": "prefix1",
+                 "volumes": {"proxy_logs": "mylogs"}}
+        data2 = {"container_prefix": "prefix2",
+                 "volumes": {"orderly": "mydata"}}
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"container_prefix": "patched_orderly_web"}
+            yaml.dump(data1, f)
+        cfg = read_config(p, "patch", data2)
+        assert cfg.container_prefix == "prefix2"
+        assert cfg.volumes["orderly"] == "mydata"
+        assert cfg.volumes["proxy_logs"] == "mylogs"
 
 
 def read_file(path):
