@@ -27,7 +27,7 @@ def test_string_into_container():
         container = cl.containers.run("alpine", ["sleep", "20"],
                                       detach=True, auto_remove=True)
         text = "a\nb\nc\n"
-        string_into_container(container, text, "/test")
+        string_into_container(text, container, "/test")
         out = container.exec_run(["cat", "/test"])
         assert out[0] == 0
         assert out[1].decode("UTF-8") == text

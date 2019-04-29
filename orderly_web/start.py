@@ -55,7 +55,7 @@ def orderly_write_env(env, container):
     print("Writing orderly environment")
     dest = "/orderly/orderly_envir.yml"
     txt = "".join(["{}: {}\n".format(str(k), str(v)) for k, v in env.items()])
-    string_into_container(container, txt, dest)
+    string_into_container(txt, container, dest)
 
 
 def orderly_init_demo(container):
@@ -116,7 +116,7 @@ def web_container_config(cfg, container):
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
-    string_into_container(container, txt, "/etc/orderly/web/config.properties")
+    string_into_container(txt, container, "/etc/orderly/web/config.properties")
 
 
 def web_migrate(cfg, docker_client):
@@ -161,7 +161,7 @@ def proxy_certificates(cfg, container):
         exec_safely(container, ["self-signed-certificate", "/run/proxy"])
     else:
         print("Copying ssl certificate and key into proxy")
-        string_into_container(container, cfg.proxy_ssl_certificate,
+        string_into_container(cfg.proxy_ssl_certificate, container,
                               "/run/proxy/certificate.pem")
-        string_into_container(container, cfg.proxy_ssl_key,
+        string_into_container(cfg.proxy_ssl_key, container,
                               "/run/proxy/key.pem")

@@ -119,9 +119,9 @@ def simple_tar_string(text, name):
 #
 # So this function assumes that the destination directory exists and
 # dumps out text into a file in the container
-def string_into_container(container, txt, dest):
-    with simple_tar_string(txt, os.path.basename(dest)) as tar:
-        container.put_archive(os.path.dirname(dest), tar)
+def string_into_container(txt, container, path):
+    with simple_tar_string(txt, os.path.basename(path)) as tar:
+        container.put_archive(os.path.dirname(path), tar)
 
 
 # There is an annoyance with docker and the requests library, where
