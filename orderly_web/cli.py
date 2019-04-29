@@ -1,7 +1,6 @@
 """Usage:
   orderly-web start <path> [--pull]
   orderly-web status <path>
-  orderly-web pull <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
 
 Options:
@@ -20,16 +19,13 @@ def main(argv=None):
     args = docopt.docopt(__doc__, argv)
     path = args["<path>"]
 
-    cfg = orderly_web.read_config(path)
     if args["start"]:
         pull_images = args["--pull"]
-        orderly_web.start(cfg, pull_images)
+        orderly_web.start(path, pull_images)
     elif args["status"]:
-        print(orderly_web.status(cfg))
-    elif args["pull"]:
-        orderly_web.pull(cfg)
+        print(orderly_web.status(path))
     elif args["stop"]:
         network = args["--network"]
         volumes = args["--volumes"]
         kill = args["--kill"]
-        orderly_web.stop(cfg, network=network, volumes=volumes, kill=kill)
+        orderly_web.stop(path, network=network, volumes=volumes, kill=kill)

@@ -1,26 +1,30 @@
 import docker
 
+from orderly_web.config import read_config
 from orderly_web.docker_helpers import docker_client
 
 
-def status(cfg):
-    return OrderlyWebStatus(cfg)
+def status(path):
+    return OrderlyWebStatus(path)
 
 
 class OrderlyWebStatus:
-
-    def __init__(self, cfg):
-        self.cfg = cfg
+    def __init__(self, path):
+        self.path = path
         self.reload()
 
     def __str__(self):
+        if not self.is_running:
+            return "<not running>"
         st_c = dict_map(self.containers, format_status)
         st_v = dict_map(self.volumes, format_status)
         st_n = "Network: {} ({})".format(
             self.network["status"], self.network["name"])
-        ret = ["OrderlyWeb: {}".format(self.cfg.web_name)]
-        ret += ["Containers:"] + st_c
-        ret += ["Volumes:"] + st_v
+        ret = ["OrderlyWeb status:"]
+        if st_c:
+            ret += ["Containers:"] + st_c
+        if st_v:
+            ret += ["Volumes:"] + st_v
         ret += [st_n]
         return "\n".join(ret)
 
@@ -28,12 +32,20 @@ class OrderlyWebStatus:
         return self.__str__()
 
     def reload(self):
+        cfg_base = read_config(self.path)
+        cfg_running = cfg_base.fetch(False)
+
+        self.is_running = bool(cfg_running)
         with docker_client() as client:
             self.containers = {k: container_status(client, v)
-                               for k, v in self.cfg.containers.items()}
-            self.volumes = {k: volume_status(client, v)
-                            for k, v in self.cfg.volumes.items()}
-            self.network = network_status(client, self.cfg.network)
+                               for k, v in cfg_base.containers.items()}
+            if cfg_running:
+                self.volumes = {k: volume_status(client, v)
+                                for k, v in cfg_running.volumes.items()}
+                self.network = network_status(client, cfg_running.network)
+            else:
+                self.volumes = {}
+                self.network = None
 
 
 def format_status(name, status):

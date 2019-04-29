@@ -1,8 +1,17 @@
+import base64
 import docker
+import pickle
 import yaml
 
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, string_from_container, \
+    string_into_container
 import orderly_web.vault as vault
+
+# We will store a configuration into this (container, path) pair; it
+# does not really matter where it is but it is ideal if it is not on a
+# part of the filesystem that is persisted (i.e., not a volume)
+# because it might contain secrets.
+PATH_CONFIG = {"container": "orderly", "path": "/orderly-web-config"}
 
 
 def read_config(path, extra=None, options=None):
@@ -91,6 +100,24 @@ class OrderlyWebConfig:
             self.containers["proxy"] = "{}_proxy".format(self.container_prefix)
         else:
             self.proxy_enabled = False
+
+    def save(self):
+        orderly = self.get_container("orderly")
+        txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
+        container = self.get_container(PATH_CONFIG["container"])
+        path = PATH_CONFIG["path"]
+        string_into_container(txt, container, path)
+
+    def fetch(self, error=True):
+        try:
+            container = self.get_container(PATH_CONFIG["container"])
+        except docker.errors.NotFound:
+            if error:
+                raise
+            return None
+        path = PATH_CONFIG["path"]
+        txt = string_from_container(container, path)
+        return pickle.loads(base64.b64decode(txt))
 
     def get_container(self, name):
         with docker_client() as cl:

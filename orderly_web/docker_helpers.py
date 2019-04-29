@@ -124,6 +124,22 @@ def string_into_container(txt, container, path):
         container.put_archive(os.path.dirname(path), tar)
 
 
+def string_from_container(container, path):
+    stream, status = container.get_archive(path)
+    try:
+        fd, tmp = tempfile.mkstemp(text=False)
+        with os.fdopen(fd, "wb") as f:
+            for d in stream:
+                f.write(d)
+        with open(tmp, "rb") as f:
+            t = tarfile.open(mode="r", fileobj=f)
+            p = t.extractfile(os.path.basename(path))
+            txt = p.readlines()
+            return "\n".join([x.decode("utf8") for x in txt])
+    finally:
+        os.remove(tmp)
+
+
 # There is an annoyance with docker and the requests library, where
 # when the http handle is reclaimed a warning is printed.  It makes
 # the test log almost impossible to read.

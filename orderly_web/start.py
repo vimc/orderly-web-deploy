@@ -1,5 +1,6 @@
 import docker
 
+from orderly_web.config import read_config
 from orderly_web.status import status
 from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
@@ -7,14 +8,15 @@ from orderly_web.docker_helpers import docker_client, \
     exec_safely, string_into_container
 
 
-def start(cfg, pull_images=False):
-    st = status(cfg)
+def start(path, extra=None, options=None, pull_images=False):
+    st = status(path)
     for name, data in st.containers.items():
         if data["status"] is not "missing":
             msg = "Container '{}' is {}; please run orderly-web stop".format(
                 name, data["status"])
             print(msg)
             return False
+    cfg = read_config(path, extra, options)
     cfg.resolve_secrets()
     if pull_images:
         pull(cfg)
@@ -25,6 +27,7 @@ def start(cfg, pull_images=False):
         orderly_init(cfg, cl)
         web_init(cfg, cl)
         proxy_init(cfg, cl)
+        config_save(cfg)
         return True
 
 
@@ -165,3 +168,8 @@ def proxy_certificates(cfg, container):
                               "/run/proxy/certificate.pem")
         string_into_container(cfg.proxy_ssl_key, container,
                               "/run/proxy/key.pem")
+
+
+def config_save(cfg):
+    print("Persisting configuration")
+    cfg.save()
