@@ -142,32 +142,50 @@ def test_read_and_extra():
     with tempfile.TemporaryDirectory() as p:
         shutil.copy("config/basic/orderly-web.yml", p)
         with open("{}/patch.yml".format(p), "w+") as f:
-            data = {"container_prefix": "patched_orderly_web"}
+            data = {"network": "patched_network"}
             yaml.dump(data, f)
         cfg = read_config(p, "patch")
-        assert cfg.container_prefix == "patched_orderly_web"
+        assert cfg.network == "patched_network"
 
 
 def test_read_and_options():
-    options = {"container_prefix": "patched_orderly_web"}
+    options = {"network": "patched_network"}
     cfg = read_config("config/basic", options=options)
-    assert cfg.container_prefix == "patched_orderly_web"
+    assert cfg.network == "patched_network"
 
 
 def test_read_complex():
     with tempfile.TemporaryDirectory() as p:
         shutil.copy("config/basic/orderly-web.yml", p)
-        data1 = {"container_prefix": "prefix1",
+        data1 = {"network": "network1",
                  "volumes": {"proxy_logs": "mylogs"}}
-        data2 = {"container_prefix": "prefix2",
+        data2 = {"network": "network2",
                  "volumes": {"orderly": "mydata"}}
         with open("{}/patch.yml".format(p), "w+") as f:
-            data = {"container_prefix": "patched_orderly_web"}
+            data = {"network": "patched_network"}
             yaml.dump(data1, f)
         cfg = read_config(p, "patch", data2)
-        assert cfg.container_prefix == "prefix2"
+        assert cfg.network == "network2"
         assert cfg.volumes["orderly"] == "mydata"
         assert cfg.volumes["proxy_logs"] == "mylogs"
+
+
+def test_cant_overwrite_prefix_with_patch():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"container_prefix": "patched_orderly_web"}
+            yaml.dump(data, f)
+        with pytest.raises(Exception,
+                           match="'container_prefix' may not be modified"):
+            read_config(p, "patch")
+
+
+def test_cant_overwrite_prefix_with_options():
+    with pytest.raises(Exception,
+                       match="'container_prefix' may not be modified"):
+        options = {"container_prefix": "patched_orderly_web"}
+        read_config("config/basic", options=options)
 
 
 def read_file(path):

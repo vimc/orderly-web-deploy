@@ -14,9 +14,13 @@ def read_config_data(path, extra=None, options=None):
     dat = read_yaml("{}/orderly-web.yml".format(path))
     if extra:
         dat_extra = read_yaml("{}/{}.yml".format(path, extra))
+        if "container_prefix" in dat_extra:
+            raise Exception("'container_prefix' may not be modified")
         dat = combine(dat, dat_extra)
     if options:
         dat = combine(dat, options)
+        if "container_prefix" in options:
+            raise Exception("'container_prefix' may not be modified")
     return dat
 
 
