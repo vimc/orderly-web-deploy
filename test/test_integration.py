@@ -39,8 +39,8 @@ def test_start_and_stop():
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
-        assert st.volumes["orderly"]["status"] == "created"
-        assert st.network["status"] == "up"
+        assert st.volumes["orderly"] == "orderly_web_volume"
+        assert st.network == "orderly_web_network"
 
         f = io.StringIO()
         with redirect_stdout(f):
