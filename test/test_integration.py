@@ -10,6 +10,7 @@ from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *
 import orderly_web
 
+
 def test_status_when_not_running():
     st = orderly_web.status("config/basic")
     assert not st.is_running

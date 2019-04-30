@@ -11,7 +11,8 @@ def stop(path, kill=False, network=False, volumes=False):
         print("Stopping OrderlyWeb from '{}'".format(path))
         with docker_client() as client:
             if "proxy" in cfg.containers:
-                stop_and_remove_container(client, cfg.containers["proxy"], kill)
+                stop_and_remove_container(client, cfg.containers["proxy"],
+                                          kill)
             stop_and_remove_container(client, cfg.containers["web"], kill)
             stop_and_remove_container(client, cfg.containers["orderly"], kill)
             if network:
