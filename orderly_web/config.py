@@ -1,4 +1,5 @@
 import base64
+import copy
 import docker
 import pickle
 import yaml
@@ -7,6 +8,35 @@ from orderly_web.docker_helpers import docker_client, string_from_container, \
     string_into_container
 import orderly_web.vault as vault
 
+# There are two types of configuration objects and three ways that
+# they turn up.  These are:
+
+# 1. A base configuration object (`OrderlyWebConfigBase`), which
+#    requires a path.  This contains only the immutable bits (which is
+#    the container prefix and the container names).  This object can
+#    be used to create or retrieve a full configuration.  These
+#    objects are created by `read_config`
+#
+# 2. A full configuration object (`OrderlyWebConfig`), with all
+#    options set.  This can be created by:
+#
+#    a. The `build()` method of the `OrderlyWebConfigBase` object, by
+#       adding additional options into the base configuration.  This
+#       is used when starting an OrderlyWeb constellation.  This is
+#       also do-able in one step with `build_config`
+#
+#    b. The `fetch()` method of the `OrderlyWebConfigBase` object,
+#       which retrieves a pickled configuration object from the
+#       running orderly container (which stores all the options as
+#       used when starting).  Also doable with `fetch_config`
+#
+# The idea here is that interacting with an existing set of containers
+# (currently limited to status and stop, but eventually we will
+# support at least upgrade too) we should not have to remember any
+# additional arguments that were passed to create the container, but
+# at the same time we want the startup to be configurable without
+# having to edit the master configuration file.
+#
 # We will store a configuration into this (container, path) pair; it
 # does not really matter where it is but it is ideal if it is not on a
 # part of the filesystem that is persisted (i.e., not a volume)
@@ -14,27 +44,16 @@ import orderly_web.vault as vault
 PATH_CONFIG = {"container": "orderly", "path": "/orderly-web-config"}
 
 
-def read_config(path, extra=None, options=None):
-    dat = read_config_data(path, extra, options)
-    return OrderlyWebConfig(dat)
+def read_config(path):
+    return OrderlyWebConfigBase(path)
+
+
+def build_config(path, extra=None, options=None):
+    return read_config(path).build(extra, options)
 
 
 def fetch_config(path, error=False):
     return read_config(path).fetch(error)
-
-
-def read_config_data(path, extra=None, options=None):
-    dat = read_yaml("{}/orderly-web.yml".format(path))
-    if extra:
-        dat_extra = read_yaml("{}/{}.yml".format(path, extra))
-        if "container_prefix" in dat_extra:
-            raise Exception("'container_prefix' may not be modified")
-        dat = combine(dat, dat_extra)
-    if options:
-        dat = combine(dat, options)
-        if "container_prefix" in options:
-            raise Exception("'container_prefix' may not be modified")
-    return dat
 
 
 def read_yaml(filename):
@@ -43,9 +62,43 @@ def read_yaml(filename):
     return dat
 
 
-class OrderlyWebConfig:
+class OrderlyWebConfigBase:
+    def __init__(self, path):
+        self.path = path
+        self.data = read_yaml("{}/orderly-web.yml".format(path))
+        self.container_prefix = config_string(self.data, ["container_prefix"])
+        self.containers = {
+            "orderly": "{}_orderly".format(self.container_prefix),
+            "web": "{}_web".format(self.container_prefix)
+        }
 
-    def __init__(self, dat):
+    def build(self, extra=None, options=None):
+        data = config_data_update(self.path, self.data, extra, options)
+        return OrderlyWebConfig(self.path, data)
+
+    def fetch(self, error=False):
+        try:
+            with docker_client() as cl:
+                name = self.containers[PATH_CONFIG["container"]]
+                container = cl.containers.get(name)
+        except docker.errors.NotFound:
+            if error:
+                raise
+            return None
+        path = PATH_CONFIG["path"]
+        txt = string_from_container(container, path)
+        cfg = pickle.loads(base64.b64decode(txt))
+        # We have to set the path because the relative path (or even
+        # absolute path) might be different between different users of
+        # the same configuration, as the docker container is a global
+        # resource.
+        cfg.path = self.path
+        return cfg
+
+
+class OrderlyWebConfig:
+    def __init__(self, path, dat):
+        self.path = path
         self.data = dat
         self.vault = config_vault(dat, ["vault"])
         self.network = config_string(dat, ["network"])
@@ -142,6 +195,20 @@ class DockerImageReference:
 
     def __str__(self):
         return "{}/{}:{}".format(self.repo, self.name, self.tag)
+
+
+def config_data_update(path, data, extra=None, options=None):
+    data = copy.deepcopy(data)
+    if extra:
+        data_extra = read_yaml("{}/{}.yml".format(path, extra))
+        if "container_prefix" in data_extra:
+            raise Exception("'container_prefix' may not be modified")
+        data = combine(data, data_extra)
+    if options:
+        data = combine(data, options)
+        if "container_prefix" in options:
+            raise Exception("'container_prefix' may not be modified")
+    return data
 
 
 # Utility function for centralising control over pulling information

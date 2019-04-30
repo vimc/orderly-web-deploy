@@ -1,12 +1,11 @@
 import docker
 
-from orderly_web.config import read_config
+from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *
 
 
 def stop(path, kill=False, network=False, volumes=False):
-    cfg_base = read_config(path)
-    cfg = cfg_base.fetch(False)
+    cfg = fetch_config(path, False)
 
     if cfg:
         print("Stopping OrderlyWeb from '{}'".format(path))

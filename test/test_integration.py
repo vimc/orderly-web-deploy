@@ -70,13 +70,13 @@ def test_start_and_stop():
         assert not st.is_running
         assert st.containers["orderly"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
-        assert st.containers["proxy"]["status"] == "missing"
         assert st.volumes == {}
         assert st.network is None
         # really removed?
         with docker_client() as cl:
             assert not network_exists(cl, cfg.network)
             assert not volume_exists(cl, cfg.volumes["orderly"])
+            assert not container_exists(cl, cfg.containers["proxy"])
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -97,15 +97,15 @@ def test_no_devmode_no_ports():
 
 def test_can_pull_on_deploy():
     path = "config/noproxy"
-    cfg = orderly_web.read_config(path)
+    migrate_image = orderly_web.config.build_config(path).images["migrate"]
     with docker_client() as cl:
         try:
-            cl.images.remove(str(cfg.images["migrate"]), noprune=True)
+            cl.images.remove(str(migrate_image), noprune=True)
         except docker.errors.ImageNotFound:
             pass
         res = orderly_web.start(path, pull_images=True)
-        img = cl.images.get(str(cfg.images["migrate"]))
-        assert str(cfg.images["migrate"]) in img.tags
+        img = cl.images.get(str(migrate_image))
+        assert str(migrate_image) in img.tags
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 

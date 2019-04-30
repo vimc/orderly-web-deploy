@@ -5,7 +5,7 @@ import vault_dev
 import yaml
 
 from orderly_web.config import config_string, config_integer, config_boolean, \
-    config_image_reference, read_config, DockerImageReference, \
+    config_image_reference, build_config, DockerImageReference, \
     combine, string_to_dict
 
 sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
@@ -52,7 +52,7 @@ def test_config_boolean():
 
 
 def test_example_config():
-    cfg = read_config("config/basic")
+    cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.containers["orderly"] == "orderly_web_orderly"
@@ -93,7 +93,7 @@ def test_config_image_reference():
 
 
 def test_config_no_proxy():
-    cfg = read_config("config/noproxy")
+    cfg = build_config("config/noproxy")
     assert not cfg.proxy_enabled
 
 
@@ -110,7 +110,7 @@ def test_can_substitute_secrets():
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
-        cfg = read_config("config/complete")
+        cfg = build_config("config/complete")
         cfg.vault.url = "http://localhost:{}".format(s.port)
         cfg.vault.auth_args["token"] = s.token
 
@@ -144,13 +144,13 @@ def test_read_and_extra():
         with open("{}/patch.yml".format(p), "w+") as f:
             data = {"network": "patched_network"}
             yaml.dump(data, f)
-        cfg = read_config(p, "patch")
+        cfg = build_config(p, "patch")
         assert cfg.network == "patched_network"
 
 
 def test_read_and_options():
     options = {"network": "patched_network"}
-    cfg = read_config("config/basic", options=options)
+    cfg = build_config("config/basic", options=options)
     assert cfg.network == "patched_network"
 
 
@@ -164,7 +164,7 @@ def test_read_complex():
         with open("{}/patch.yml".format(p), "w+") as f:
             data = {"network": "patched_network"}
             yaml.dump(data1, f)
-        cfg = read_config(p, "patch", data2)
+        cfg = build_config(p, "patch", data2)
         assert cfg.network == "network2"
         assert cfg.volumes["orderly"] == "mydata"
         assert cfg.volumes["proxy_logs"] == "mylogs"
@@ -178,14 +178,14 @@ def test_cant_overwrite_prefix_with_patch():
             yaml.dump(data, f)
         with pytest.raises(Exception,
                            match="'container_prefix' may not be modified"):
-            read_config(p, "patch")
+            build_config(p, "patch")
 
 
 def test_cant_overwrite_prefix_with_options():
     with pytest.raises(Exception,
                        match="'container_prefix' may not be modified"):
         options = {"container_prefix": "patched_orderly_web"}
-        read_config("config/basic", options=options)
+        build_config("config/basic", options=options)
 
 
 def read_file(path):

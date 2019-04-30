@@ -1,6 +1,6 @@
 import docker
 
-from orderly_web.config import read_config
+from orderly_web.config import build_config
 from orderly_web.status import status
 from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
@@ -16,7 +16,7 @@ def start(path, extra=None, options=None, pull_images=False):
                 name, data["status"])
             print(msg)
             return False
-    cfg = read_config(path, extra, options)
+    cfg = build_config(path, extra, options)
     cfg.resolve_secrets()
     if pull_images:
         pull(cfg)
