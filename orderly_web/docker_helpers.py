@@ -66,8 +66,20 @@ def remove_volume(client, name):
 
 
 def container_exists(client, name):
+    return docker_exists(client.containers, name)
+
+
+def network_exists(client, name):
+    return docker_exists(client.networks, name)
+
+
+def volume_exists(client, name):
+    return docker_exists(client.volumes, name)
+
+
+def docker_exists(collection, name):
     try:
-        client.containers.get(name)
+        collection.get(name)
         return True
     except docker.errors.NotFound:
         return False
