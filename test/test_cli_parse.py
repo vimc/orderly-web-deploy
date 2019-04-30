@@ -3,6 +3,7 @@ import pytest
 import orderly_web
 import orderly_web.cli
 from orderly_web.cli import string_to_dict
+from orderly_web.status import print_status
 
 
 def test_cli_parse_start():
@@ -26,6 +27,21 @@ def test_cli_parse_start_with_options():
     assert args == ("path", None, options, False)
 
 
+def test_cli_parse_status():
+    target, args = orderly_web.cli.parse_args(["status", "path"])
+    assert target == print_status
+    assert args == ("path", )
+
+
+def test_cli_parse_stop():
+    target, args = orderly_web.cli.parse_args(["stop", "path"])
+    assert target == orderly_web.stop
+    assert args == ("path", False)
+    target, args = orderly_web.cli.parse_args(["stop", "path", "--kill"])
+    assert target == orderly_web.stop
+    assert args == ("path", True)
+
+
 def test_cli_parse_validate_options():
     msg = "Invalid option 'foo', expected option in form key=value"
     with pytest.raises(Exception, match=msg):
@@ -36,6 +52,12 @@ def test_cli_parse_validate_options():
 
 
 def test_string_to_dict():
-    assert string_to_dict("a", "x") == {"a": "x"}
-    assert string_to_dict("a.b", "x") == {"a": {"b": "x"}}
-    assert string_to_dict("a.b.c", "x") == {"a": {"b": {"c": "x"}}}
+    assert string_to_dict("a=x") == {"a": "x"}
+    assert string_to_dict("a.b=x") == {"a": {"b": "x"}}
+    assert string_to_dict("a.b.c=x") == {"a": {"b": {"c": "x"}}}
+    msg = "Invalid option 'foo', expected option in form key=value"
+    with pytest.raises(Exception, match=msg):
+        string_to_dict("foo")
+    msg = "Invalid option 'a=b=c', expected option in form key=value"
+    with pytest.raises(Exception, match=msg):
+        string_to_dict("a=b=c")

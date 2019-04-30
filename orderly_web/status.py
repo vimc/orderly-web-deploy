@@ -4,6 +4,10 @@ from orderly_web.config import read_config
 from orderly_web.docker_helpers import docker_client
 
 
+def print_status(path):
+    print(status(path))
+
+
 def status(path):
     return OrderlyWebStatus(path)
 

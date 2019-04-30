@@ -16,6 +16,7 @@ Options:
 
 import docopt
 
+from orderly_web.status import print_status
 import orderly_web
 
 
@@ -34,12 +35,12 @@ def parse_args(argv):
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
-        target = orderly_web.status
+        target = print_status
         args = (path, )
-        print(orderly_web.status(path))
     elif args["stop"]:
+        kill = args["--kill"]
         target = orderly_web.stop
-        args = (path, network, volumes, kill)
+        args = (path, kill)
     return target, args
 
 
