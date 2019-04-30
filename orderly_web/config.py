@@ -267,13 +267,3 @@ def combine(a, b):
         else:
             a[k] = v
     return a
-
-
-def string_to_dict(key, value):
-    """Convert a configuration key a.b.c with value x to a dictionary
-{"a": {"b": "c": x}}"""
-    # Won't deal with dots embedded within quotes but that's ok as
-    # that should not be allowed generally.
-    for k in reversed(key.split(".")):
-        value = {k: value}
-    return value
