@@ -10,9 +10,9 @@ from orderly_web.docker_helpers import docker_client
 
 def test_cli_basic_usage():
     path = "config/noproxy"
-    cfg = orderly_web.read_config(path)
     orderly_web.cli.main(["start", path])
-    st = orderly_web.status(cfg)
+    st = orderly_web.status(path)
+    assert st.is_running
     assert st.containers["web"]["status"] == "running"
 
     f = io.StringIO()
@@ -23,19 +23,6 @@ def test_cli_basic_usage():
 
     stop_args = ["stop", path, "--kill", "--volumes", "--network"]
     orderly_web.cli.main(stop_args)
-    st = orderly_web.status(cfg)
+    st = orderly_web.status(path)
+    assert not st.is_running
     assert st.containers["web"]["status"] == "missing"
-
-
-def test_cli_pull():
-    path = "config/basic"
-    cfg = orderly_web.read_config(path)
-    with docker_client() as cl:
-        try:
-            cl.images.remove(str(cfg.images["proxy"]), noprune=True)
-        except docker.errors.ImageNotFound:
-            pass
-        args = ["pull", path]
-        orderly_web.cli.main(args)
-        img = cl.images.get(str(cfg.images["proxy"]))
-        assert str(cfg.images["proxy"]) in img.tags

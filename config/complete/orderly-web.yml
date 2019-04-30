@@ -1,7 +1,7 @@
 vault:
   ## Address of the vault server.  This should be a string if it is
   ## present.
-  url: ~
+  addr: ~
   auth:
     ## Authentication type - must be either "token" or the name of a
     ## supported authentication method.  These seem to be poorly

@@ -19,6 +19,10 @@ def read_config(path, extra=None, options=None):
     return OrderlyWebConfig(dat)
 
 
+def fetch_config(path, error=False):
+    return read_config(path).fetch(error)
+
+
 def read_config_data(path, extra=None, options=None):
     dat = read_yaml("{}/orderly-web.yml".format(path))
     if extra:

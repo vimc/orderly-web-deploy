@@ -6,23 +6,21 @@ import json
 import ssl
 import vault_dev
 
-
+from orderly_web.config import fetch_config
+from orderly_web.docker_helpers import *
 import orderly_web
-from orderly_web.docker_helpers import docker_client, exec_safely
-
 
 def test_status_when_not_running():
-    cfg = orderly_web.read_config("config/basic")
-    st = orderly_web.status(cfg)
+    st = orderly_web.status("config/basic")
+    assert not st.is_running
     assert st.containers["orderly"]["status"] == "missing"
     assert st.containers["web"]["status"] == "missing"
-    assert st.volumes["orderly"]["status"] == "missing"
-    assert st.network["status"] == "down"
+    assert st.volumes == {}
+    assert st.network is None
 
 
 def test_status_representation_is_str():
-    cfg = orderly_web.read_config("config/basic")
-    st = orderly_web.status(cfg)
+    st = orderly_web.status("config/basic")
     f = io.StringIO()
     with redirect_stdout(f):
         print(st)
@@ -33,11 +31,11 @@ def test_status_representation_is_str():
 
 
 def test_start_and_stop():
-    cfg = orderly_web.read_config("config/basic")
+    path = "config/basic"
     try:
-        res = orderly_web.start(cfg)
+        res = orderly_web.start(path)
         assert res
-        st = orderly_web.status(cfg)
+        st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
         assert st.volumes["orderly"]["status"] == "created"
@@ -45,11 +43,12 @@ def test_start_and_stop():
 
         f = io.StringIO()
         with redirect_stdout(f):
-            res = orderly_web.start(cfg)
+            res = orderly_web.start(path)
             msg = f.getvalue().strip()
         assert not res
         assert msg.endswith("please run orderly-web stop")
 
+        cfg = fetch_config(path)
         web = cfg.get_container("web")
         ports = web.attrs["HostConfig"]["PortBindings"]
         assert list(ports.keys()) == ["8888/tcp"]
@@ -66,39 +65,48 @@ def test_start_and_stop():
         assert dat["status"] == "success"
 
         # Bring the whole lot down:
-        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
-        st = orderly_web.status(cfg)
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+        st = orderly_web.status(path)
+        assert not st.is_running
         assert st.containers["orderly"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
         assert st.containers["proxy"]["status"] == "missing"
-        assert st.volumes["orderly"]["status"] == "missing"
-        assert st.network["status"] == "down"
+        assert st.volumes == {}
+        assert st.network is None
+        # really removed?
+        with docker_client() as cl:
+            assert not network_exists(cl, cfg.network)
+            assert not volume_exists(cl, cfg.volumes["orderly"])
     finally:
-        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def test_no_devmode_no_ports():
-    cfg = orderly_web.read_config("config/noproxy")
-    cfg.web_dev_mode = False
+    path = "config/noproxy"
+    options = {"web": {"dev_mode": False}}
+
     try:
-        orderly_web.start(cfg)
+        orderly_web.start(path, options=options)
+        cfg = fetch_config(path)
+        assert not cfg.web_dev_mode
         web = cfg.get_container("web")
         assert web.attrs["HostConfig"]["PortBindings"] is None
     finally:
-        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def test_can_pull_on_deploy():
-    cfg = orderly_web.read_config("config/noproxy")
+    path = "config/noproxy"
+    cfg = orderly_web.read_config(path)
     with docker_client() as cl:
         try:
             cl.images.remove(str(cfg.images["migrate"]), noprune=True)
         except docker.errors.ImageNotFound:
             pass
-        res = orderly_web.start(cfg, True)
+        res = orderly_web.start(path, pull_images=True)
         img = cl.images.get(str(cfg.images["migrate"]))
         assert str(cfg.images["migrate"]) in img.tags
-        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def test_vault_ssl():
@@ -112,20 +120,22 @@ def test_vault_ssl():
         cl.write("secret/ssl/key", value=key)
         cl.write("secret/db/password", value="s3cret")
 
-        # When reading the configuration we have to interpolate in the
-        # correct values here for the vault connection
-        cfg = orderly_web.read_config("config/complete")
-        cfg.vault.url = "http://localhost:{}".format(s.port)
-        cfg.vault.auth_args["token"] = s.token
-        res = orderly_web.start(cfg)
+        path = "config/complete"
+
+        vault_addr = "http://localhost:{}".format(s.port)
+        vault_auth = {"args": {"token": s.token}}
+        options = {"vault": {"addr": vault_addr, "auth": vault_auth}}
+
+        res = orderly_web.start(path, options=options)
         dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
 
+        cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = container.exec_run(["cat", "orderly_envir.yml"])
-        assert "ORDERLY_DB_PASS: s3cret" in res[1].decode("UTF-8")
+        res = string_from_container(container, "/orderly/orderly_envir.yml")
+        assert "ORDERLY_DB_PASS: s3cret" in res
 
-        orderly_web.stop(cfg, kill=True, volumes=True, network=True)
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 # Because we wait for a go signal to come up, we might not be able to
