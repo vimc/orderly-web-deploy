@@ -5,7 +5,7 @@ from orderly_web.docker_helpers import *
 
 
 def stop(path, kill=False, network=False, volumes=False):
-    cfg = fetch_config(path, False)
+    cfg = fetch_config(path)
 
     if cfg:
         print("Stopping OrderlyWeb from '{}'".format(path))

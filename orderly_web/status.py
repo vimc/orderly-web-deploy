@@ -16,10 +16,9 @@ class OrderlyWebStatus:
     def __str__(self):
         if not self.is_running:
             return "<not running>"
-        st_c = dict_map(self.containers, format_status)
-        st_v = dict_map(self.volumes, format_status)
-        st_n = "Network: {} ({})".format(
-            self.network["status"], self.network["name"])
+        st_c = dict_map(self.containers, format_container)
+        st_v = dict_map(self.volumes, format_volume)
+        st_n = "Network: {}".format(self.network)
         ret = ["OrderlyWeb status:"]
         if st_c:
             ret += ["Containers:"] + st_c
@@ -33,23 +32,26 @@ class OrderlyWebStatus:
 
     def reload(self):
         cfg_base = read_config(self.path)
-        cfg_running = cfg_base.fetch(False)
+        cfg_running = cfg_base.fetch()
 
         self.is_running = bool(cfg_running)
         with docker_client() as client:
             self.containers = {k: container_status(client, v)
                                for k, v in cfg_base.containers.items()}
             if cfg_running:
-                self.volumes = {k: volume_status(client, v)
-                                for k, v in cfg_running.volumes.items()}
-                self.network = network_status(client, cfg_running.network)
+                self.volumes = cfg_running.volumes
+                self.network = cfg_running.network
             else:
                 self.volumes = {}
                 self.network = None
 
 
-def format_status(name, status):
-    return "  {}: {} ({})".format(name, status["status"], status["name"])
+def format_container(role, status):
+    return "  {}: {} ({})".format(role, status["status"], status["name"])
+
+
+def format_volume(role, name):
+    return "  {}: {}".format(role, name)
 
 
 def container_status(client, name):
@@ -57,24 +59,6 @@ def container_status(client, name):
         status = client.containers.get(name).status
     except docker.errors.NotFound:
         status = "missing"
-    return {"name": name, "status": status}
-
-
-def volume_status(client, name):
-    try:
-        client.volumes.get(name)
-        status = "created"
-    except docker.errors.NotFound:
-        status = "missing"
-    return {"name": name, "status": status}
-
-
-def network_status(client, name):
-    try:
-        client.networks.get(name)
-        status = "up"
-    except docker.errors.NotFound:
-        status = "down"
     return {"name": name, "status": status}
 
 

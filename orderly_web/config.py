@@ -52,8 +52,8 @@ def build_config(path, extra=None, options=None):
     return read_config(path).build(extra, options)
 
 
-def fetch_config(path, error=False):
-    return read_config(path).fetch(error)
+def fetch_config(path):
+    return read_config(path).fetch()
 
 
 def read_yaml(filename):
@@ -76,14 +76,12 @@ class OrderlyWebConfigBase:
         data = config_data_update(self.path, self.data, extra, options)
         return OrderlyWebConfig(self.path, data)
 
-    def fetch(self, error=False):
+    def fetch(self):
         try:
             with docker_client() as cl:
                 name = self.containers[PATH_CONFIG["container"]]
                 container = cl.containers.get(name)
         except docker.errors.NotFound:
-            if error:
-                raise
             return None
         path = PATH_CONFIG["path"]
         txt = string_from_container(container, path)
@@ -164,17 +162,6 @@ class OrderlyWebConfig:
         container = self.get_container(PATH_CONFIG["container"])
         path = PATH_CONFIG["path"]
         string_into_container(txt, container, path)
-
-    def fetch(self, error=True):
-        try:
-            container = self.get_container(PATH_CONFIG["container"])
-        except docker.errors.NotFound:
-            if error:
-                raise
-            return None
-        path = PATH_CONFIG["path"]
-        txt = string_from_container(container, path)
-        return pickle.loads(base64.b64decode(txt))
 
     def get_container(self, name):
         with docker_client() as cl:

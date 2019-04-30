@@ -58,3 +58,21 @@ def test_container_wait_running_returns_cintainer():
         assert res == container
         container.kill()
         container.remove()
+
+
+def test_that_removing_missing_container_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_noncontainer"
+        stop_and_remove_container(client, name, True)
+
+
+def test_that_removing_missing_network_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_nonnetwork"
+        remove_network(client, name)
+
+
+def test_that_removing_missing_volume_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_nonvolume"
+        remove_volume(client, name)
