@@ -8,6 +8,7 @@ Options:
                    configuration
   --option=OPTION  Additional configuration options, in the form key=value
                    Use dots in key for hierarchical structure, e.g., a.b=value
+                   This argument may be repeated to provide multiple arguments
   --pull           Pull images before starting
   --volumes        Remove volumes (WARNING: irreversible data loss)
   --network        Remove network
