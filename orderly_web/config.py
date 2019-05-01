@@ -199,8 +199,8 @@ def config_data_update(path, data, extra=None, options=None):
 
 
 def config_check_additional(options):
-        if "container_prefix" in options:
-            raise Exception("'container_prefix' may not be modified")
+    if "container_prefix" in options:
+        raise Exception("'container_prefix' may not be modified")
 
 
 # Utility function for centralising control over pulling information
