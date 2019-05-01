@@ -55,9 +55,15 @@ def test_string_to_dict():
     assert string_to_dict("a=x") == {"a": "x"}
     assert string_to_dict("a.b=x") == {"a": {"b": "x"}}
     assert string_to_dict("a.b.c=x") == {"a": {"b": {"c": "x"}}}
+    assert string_to_dict("a.b.c=True") == {"a": {"b": {"c": True}}}
+    assert string_to_dict("a.b.c=1") == {"a": {"b": {"c": 1}}}
+    assert string_to_dict("a.b.c=1.23") == {"a": {"b": {"c": 1.23}}}
     msg = "Invalid option 'foo', expected option in form key=value"
     with pytest.raises(Exception, match=msg):
         string_to_dict("foo")
     msg = "Invalid option 'a=b=c', expected option in form key=value"
     with pytest.raises(Exception, match=msg):
         string_to_dict("a=b=c")
+    msg = "Invalid value '{}' - expected simple type"
+    with pytest.raises(Exception, match=msg):
+        string_to_dict("a={}")

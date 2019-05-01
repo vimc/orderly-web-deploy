@@ -15,6 +15,7 @@ Options:
 """
 
 import docopt
+import yaml
 
 from orderly_web.status import print_status
 import orderly_web
@@ -55,6 +56,14 @@ def string_to_dict(string):
         msg = "Invalid option '{}', expected option in form key=value".format(
             string)
         raise Exception(msg)
+    value = yaml_atom_parse(value)
     for k in reversed(key.split(".")):
         value = {k: value}
     return value
+
+
+def yaml_atom_parse(x):
+    ret = yaml.load(x, Loader=yaml.Loader)
+    if type(ret) not in [bool, int, float, str]:
+        raise Exception("Invalid value '{}' - expected simple type".format(x))
+    return ret
