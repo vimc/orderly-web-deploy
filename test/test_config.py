@@ -4,9 +4,7 @@ import tempfile
 import vault_dev
 import yaml
 
-from orderly_web.config import config_string, config_integer, config_boolean, \
-    config_image_reference, build_config, DockerImageReference, \
-    combine
+from orderly_web.config import *
 
 sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
                "e": None}
@@ -122,13 +120,17 @@ def test_can_substitute_secrets():
 
 
 def test_combine():
-    assert combine({"a": 1}, {"b": 2}) == \
+    def do_combine(a, b):
+        """lets us use combine with unnamed data"""
+        combine(a, b)
+        return a
+    assert do_combine({"a": 1}, {"b": 2}) == \
         {"a": 1, "b": 2}
-    assert combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
+    assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
         {"a": {"x": 3}, "b": 2}
-    assert combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
+    assert do_combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
         {"a": {"x": 3, "y": 4}, "b": 2}
-    assert combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
+    assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
         {"a": {"x": 3}, "b": 2}
 
 
@@ -180,6 +182,20 @@ def test_cant_overwrite_prefix_with_options():
                        match="'container_prefix' may not be modified"):
         options = {"container_prefix": "patched_orderly_web"}
         build_config("config/basic", options=options)
+
+
+def test_update_config_with_options_list():
+    options = [{"network": "patched_network"}, {"web": {"dev_mode": False}}]
+    data = build_config("config/basic", None, options=options)
+    assert not data.web_dev_mode
+    assert data.network == "patched_network"
+
+
+def test_update_config_with_options_dict():
+    options = {"network": "patched_network"}
+    data = build_config("config/basic", None, options=options)
+    assert data.web_dev_mode
+    assert data.network == "patched_network"
 
 
 def read_file(path):

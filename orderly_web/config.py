@@ -188,14 +188,19 @@ def config_data_update(path, data, extra=None, options=None):
     data = copy.deepcopy(data)
     if extra:
         data_extra = read_yaml("{}/{}.yml".format(path, extra))
-        if "container_prefix" in data_extra:
-            raise Exception("'container_prefix' may not be modified")
-        data = combine(data, data_extra)
+        config_check_additional(data_extra)
+        combine(data, data_extra)
     if options:
-        data = combine(data, options)
+        if type(options) == list:
+            options = collapse(options)
+        config_check_additional(options)
+        combine(data, options)
+    return data
+
+
+def config_check_additional(options):
         if "container_prefix" in options:
             raise Exception("'container_prefix' may not be modified")
-    return data
 
 
 # Utility function for centralising control over pulling information
@@ -259,11 +264,18 @@ def config_image_reference(dat, path, name="name"):
     return DockerImageReference(repo, name, tag)
 
 
-def combine(a, b):
-    """Combine exactly two dictionaries recursively"""
-    for k, v in b.items():
-        if k in a and type(a[k]) is dict:
-            combine(a[k], v)
+def combine(base, extra):
+    """Combine exactly two dictionaries recursively, modifying the first
+argument in place with the contets of the second"""
+    for k, v in extra.items():
+        if k in base and type(base[k]) is dict:
+            combine(base[k], v)
         else:
-            a[k] = v
-    return a
+            base[k] = v
+
+
+def collapse(options):
+    ret = {}
+    for o in options:
+        combine(ret, o)
+    return ret
