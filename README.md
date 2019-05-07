@@ -23,13 +23,19 @@ This installs the package `orderly_web` for programmatic use, and a cli tool `or
 ```
 $ orderly-web --help
 Usage:
-  orderly-web start <path>
+  orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
-  orderly-web stop <path> [--volumes] [--network]
+  orderly-web stop <path> [--volumes] [--network] [--kill]
 
 Options:
-  --volumes   Remove volumes (WARNING: irreversible data loss)
-  --network   Remove network
+  --extra=PATH     Path, relative to <path>, of yml file of additional
+                   configuration
+  --option=OPTION  Additional configuration options, in the form key=value
+                   Use dots in key for hierarchical structure, e.g., a.b=value
+  --pull           Pull images before starting
+  --volumes        Remove volumes (WARNING: irreversible data loss)
+  --network        Remove network
+  --kill           Kill the containers (faster, but possible db corruption)
 ```
 
 Here `<path>` is the path to a directory that contains a configuration file `orderly-web.yml` (more options will follow in future versions).
@@ -52,4 +58,46 @@ which are out of our control (see the helper `docker_client` in `docker_helpers.
 
 ## Configuration
 
-Configuration is a work in progress and will change as the tool progresses.  See [`config/complete/orderly-web.yml`] for an annotated configuration.
+Configuration is a work in progress and will change as the tool progresses.  See [`config/complete/orderly-web.yml`] for an annotated configuration that covers all the options.
+
+### Modified versions of configurations
+
+It is possible to create sub-configurations that adapt a configuration.  To do this, create a base configuration with shared options and save that as `orderly-web.yml`.  Then, within the same directory, create secondary yml files (named however you want) that override options.  For example if you have an `orderly-web.yml` that contains
+
+```yaml
+web:
+  port: 443
+  name: OrderlyWeb
+  dev_mode: false
+```
+
+(among other options), you could create a yaml file called `testing.yml` (in the same directory) that contains
+
+```yaml
+web:
+  port: 8000
+  dev_mode: true
+```
+
+When run with
+
+```
+orderly-web path --extra testing.yml
+```
+
+the options in `testing.yml` will override the base configuration.  The options that are not mentioned in the `testing.yml` are left unmodified (i.e, in this case we end up with
+
+```yaml
+web:
+  port: 8000
+  name: OrderlyWeb
+  dev_mode: true
+```
+
+It is also possible to change options by passing individual changes through with the `--option` flag, for example:
+
+```
+orderly-web path --option web.port=8000 --option web.dev_mode=true
+```
+
+Use `.` to indicate a level of nesting and do not use spaces around the `=`; the right-hand-side is parsed as if it was yaml.

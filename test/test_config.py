@@ -1,8 +1,10 @@
 import pytest
+import shutil
+import tempfile
 import vault_dev
+import yaml
 
-from orderly_web.config import config_string, config_integer, config_boolean, \
-    config_image_reference, read_config, DockerImageReference
+from orderly_web.config import *
 
 sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
                "e": None}
@@ -48,7 +50,7 @@ def test_config_boolean():
 
 
 def test_example_config():
-    cfg = read_config("config/basic")
+    cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.containers["orderly"] == "orderly_web_orderly"
@@ -89,7 +91,7 @@ def test_config_image_reference():
 
 
 def test_config_no_proxy():
-    cfg = read_config("config/noproxy")
+    cfg = build_config("config/noproxy")
     assert not cfg.proxy_enabled
 
 
@@ -106,7 +108,7 @@ def test_can_substitute_secrets():
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
-        cfg = read_config("config/complete")
+        cfg = build_config("config/complete")
         cfg.vault.url = "http://localhost:{}".format(s.port)
         cfg.vault.auth_args["token"] = s.token
 
@@ -115,6 +117,85 @@ def test_can_substitute_secrets():
         assert cfg.proxy_ssl_certificate == cert
         assert cfg.proxy_ssl_key == key
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
+
+
+def test_combine():
+    def do_combine(a, b):
+        """lets us use combine with unnamed data"""
+        combine(a, b)
+        return a
+    assert do_combine({"a": 1}, {"b": 2}) == \
+        {"a": 1, "b": 2}
+    assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3}, "b": 2}
+    assert do_combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3, "y": 4}, "b": 2}
+    assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
+        {"a": {"x": 3}, "b": 2}
+
+
+def test_read_and_extra():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"network": "patched_network"}
+            yaml.dump(data, f)
+        cfg = build_config(p, "patch")
+        assert cfg.network == "patched_network"
+
+
+def test_read_and_options():
+    options = {"network": "patched_network"}
+    cfg = build_config("config/basic", options=options)
+    assert cfg.network == "patched_network"
+
+
+def test_read_complex():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        data1 = {"network": "network1",
+                 "volumes": {"proxy_logs": "mylogs"}}
+        data2 = {"network": "network2",
+                 "volumes": {"orderly": "mydata"}}
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"network": "patched_network"}
+            yaml.dump(data1, f)
+        cfg = build_config(p, "patch", data2)
+        assert cfg.network == "network2"
+        assert cfg.volumes["orderly"] == "mydata"
+        assert cfg.volumes["proxy_logs"] == "mylogs"
+
+
+def test_cant_overwrite_prefix_with_patch():
+    with tempfile.TemporaryDirectory() as p:
+        shutil.copy("config/basic/orderly-web.yml", p)
+        with open("{}/patch.yml".format(p), "w+") as f:
+            data = {"container_prefix": "patched_orderly_web"}
+            yaml.dump(data, f)
+        with pytest.raises(Exception,
+                           match="'container_prefix' may not be modified"):
+            build_config(p, "patch")
+
+
+def test_cant_overwrite_prefix_with_options():
+    with pytest.raises(Exception,
+                       match="'container_prefix' may not be modified"):
+        options = {"container_prefix": "patched_orderly_web"}
+        build_config("config/basic", options=options)
+
+
+def test_update_config_with_options_list():
+    options = [{"network": "patched_network"}, {"web": {"dev_mode": False}}]
+    data = build_config("config/basic", None, options=options)
+    assert not data.web_dev_mode
+    assert data.network == "patched_network"
+
+
+def test_update_config_with_options_dict():
+    options = {"network": "patched_network"}
+    data = build_config("config/basic", None, options=options)
+    assert data.web_dev_mode
+    assert data.network == "patched_network"
 
 
 def read_file(path):

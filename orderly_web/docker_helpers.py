@@ -66,8 +66,20 @@ def remove_volume(client, name):
 
 
 def container_exists(client, name):
+    return docker_exists(client.containers, name)
+
+
+def network_exists(client, name):
+    return docker_exists(client.networks, name)
+
+
+def volume_exists(client, name):
+    return docker_exists(client.volumes, name)
+
+
+def docker_exists(collection, name):
     try:
-        client.containers.get(name)
+        collection.get(name)
         return True
     except docker.errors.NotFound:
         return False
@@ -119,9 +131,25 @@ def simple_tar_string(text, name):
 #
 # So this function assumes that the destination directory exists and
 # dumps out text into a file in the container
-def string_into_container(container, txt, dest):
-    with simple_tar_string(txt, os.path.basename(dest)) as tar:
-        container.put_archive(os.path.dirname(dest), tar)
+def string_into_container(txt, container, path):
+    with simple_tar_string(txt, os.path.basename(path)) as tar:
+        container.put_archive(os.path.dirname(path), tar)
+
+
+def string_from_container(container, path):
+    stream, status = container.get_archive(path)
+    try:
+        fd, tmp = tempfile.mkstemp(text=False)
+        with os.fdopen(fd, "wb") as f:
+            for d in stream:
+                f.write(d)
+        with open(tmp, "rb") as f:
+            t = tarfile.open(mode="r", fileobj=f)
+            p = t.extractfile(os.path.basename(path))
+            txt = p.readlines()
+            return "\n".join([x.decode("utf8") for x in txt])
+    finally:
+        os.remove(tmp)
 
 
 # There is an annoyance with docker and the requests library, where

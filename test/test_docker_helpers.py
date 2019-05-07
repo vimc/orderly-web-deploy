@@ -27,7 +27,7 @@ def test_string_into_container():
         container = cl.containers.run("alpine", ["sleep", "20"],
                                       detach=True, auto_remove=True)
         text = "a\nb\nc\n"
-        string_into_container(container, text, "/test")
+        string_into_container(text, container, "/test")
         out = container.exec_run(["cat", "/test"])
         assert out[0] == 0
         assert out[1].decode("UTF-8") == text
@@ -58,3 +58,21 @@ def test_container_wait_running_returns_cintainer():
         assert res == container
         container.kill()
         container.remove()
+
+
+def test_that_removing_missing_container_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_noncontainer"
+        stop_and_remove_container(cl, nm, True)
+
+
+def test_that_removing_missing_network_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_nonnetwork"
+        remove_network(cl, nm)
+
+
+def test_that_removing_missing_volume_is_harmless():
+    with docker_client() as cl:
+        nm = "orderly_web_nonvolume"
+        remove_volume(cl, nm)
