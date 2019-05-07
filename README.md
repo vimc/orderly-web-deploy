@@ -23,13 +23,19 @@ This installs the package `orderly_web` for programmatic use, and a cli tool `or
 ```
 $ orderly-web --help
 Usage:
-  orderly-web start <path>
+  orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
-  orderly-web stop <path> [--volumes] [--network]
+  orderly-web stop <path> [--volumes] [--network] [--kill]
 
 Options:
-  --volumes   Remove volumes (WARNING: irreversible data loss)
-  --network   Remove network
+  --extra=PATH     Path, relative to <path>, of yml file of additional
+                   configuration
+  --option=OPTION  Additional configuration options, in the form key=value
+                   Use dots in key for hierarchical structure, e.g., a.b=value
+  --pull           Pull images before starting
+  --volumes        Remove volumes (WARNING: irreversible data loss)
+  --network        Remove network
+  --kill           Kill the containers (faster, but possible db corruption)
 ```
 
 Here `<path>` is the path to a directory that contains a configuration file `orderly-web.yml` (more options will follow in future versions).
