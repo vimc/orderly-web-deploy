@@ -2,6 +2,10 @@
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
+  orderly-web add-user <email>
+  orderly-web add-group <name>
+  orderly-web add-members <group> <email>...
+  orderly-web grant <group> <permission>...
 
 Options:
   --extra=PATH     Path, relative to <path>, of yml file of additional
@@ -29,20 +33,34 @@ def main(argv=None):
 
 def parse_args(argv):
     args = docopt.docopt(__doc__, argv)
-    path = args["<path>"]
     if args["start"]:
+        path = args["<path>"]
         extra = args["--extra"]
         options = [string_to_dict(x) for x in args["--option"]]
         pull_images = args["--pull"]
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
+        path = args["<path>"]
         target = print_status
         args = (path, )
     elif args["stop"]:
+        path = args["<path>"]
         kill = args["--kill"]
         target = orderly_web.stop
         args = (path, kill)
+    elif args["add-user"]:
+        target = orderly_web.add_user
+        args = args["<email>"]
+    elif args["add-group"]:
+        target = orderly_web.add_group
+        args = args["<name>"]
+    elif args["add-members"]:
+        target = orderly_web.add_members
+        args = args["<group>", "<email>"]
+    elif args["grant"]:
+        target = orderly_web.grant
+        args = args["<group>", "<permission>"]
     return target, args
 
 

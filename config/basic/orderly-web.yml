@@ -29,6 +29,11 @@ orderly:
     tag: master
 
 ## Api and Website configuration
+user-cli:
+  image:
+    repo: vimc
+    name: orderly-web-user-cli
+    tag: master
 web:
   ## Image to use for the web components.  As for the orderly
   ## configuration these will be assembled as <repo>/<name>:<tag>.  In
