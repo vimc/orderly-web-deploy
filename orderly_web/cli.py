@@ -2,8 +2,8 @@
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
-  orderly-web add-user <email>
-  orderly-web add-group <name>
+  orderly-web add-users <email>...
+  orderly-web add-groups <name>...
   orderly-web add-members <group> <email>...
   orderly-web grant <group> <permission>...
 
@@ -49,18 +49,18 @@ def parse_args(argv):
         kill = args["--kill"]
         target = orderly_web.stop
         args = (path, kill)
-    elif args["add-user"]:
-        target = orderly_web.add_user
+    elif args["add-users"]:
+        target = orderly_web.add_users
         args = args["<email>"]
-    elif args["add-group"]:
-        target = orderly_web.add_group
+    elif args["add-groups"]:
+        target = orderly_web.add_groups
         args = args["<name>"]
     elif args["add-members"]:
         target = orderly_web.add_members
-        args = args["<group>", "<email>"]
+        args = (args["<group>"], args["<email>"])
     elif args["grant"]:
         target = orderly_web.grant
-        args = args["<group>", "<permission>"]
+        args = (args["<group>"], args["<permission>"])
     return target, args
 
 

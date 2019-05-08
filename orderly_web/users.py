@@ -4,23 +4,23 @@ from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import docker_client
 
 
-def add_user(email):
-    args = ["add-user", email]
+def add_users(emails):
+    args = ["add-users"] + emails
     run(args)
 
 
-def add_group(name):
-    args = ["add-group", name]
+def add_groups(names):
+    args = ["add-groups"] + names
     run(args)
 
 
 def add_members(name, emails):
-    args = ["add-group", name, emails]
+    args = ["add-members", name] + emails
     run(args)
 
 
 def grant(name, permissions):
-    args = ["grant", name, permissions]
+    args = ["grant", name] + permissions
     run(args)
 
 
@@ -29,4 +29,4 @@ def run(args):
     image = str(cfg.images["user-cli"])
     client = docker_client()
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-    client.containers.run(image, args, mounts=mounts, auto_remove=True)
+    return client.containers.run(image, args, mounts=mounts, auto_remove=True)

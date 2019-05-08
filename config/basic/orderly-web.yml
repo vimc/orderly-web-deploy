@@ -10,7 +10,7 @@ network: orderly_web_network
 ## Names of the docker volumes to use:
 ##
 ## orderly: stores the orderly archive
-## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
+## proxy_logs: stores logs from the reverse proxy (only use if proxy is given)
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
@@ -33,7 +33,7 @@ user-cli:
   image:
     repo: vimc
     name: orderly-web-user-cli
-    tag: master
+    tag: mrc-248
 web:
   ## Image to use for the web components.  As for the orderly
   ## configuration these will be assembled as <repo>/<name>:<tag>.  In

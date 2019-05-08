@@ -82,6 +82,16 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_user_cli():
+    path = "config/basic"
+    try:
+        orderly_web.start(path)
+        result = orderly_web.add_users(["test.user@gmail.com"])
+        assert result == "Saved user with email 'test.user@email.com' to the database"
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_no_devmode_no_ports():
     path = "config/noproxy"
     options = {"web": {"dev_mode": False}}
