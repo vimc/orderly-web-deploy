@@ -29,7 +29,11 @@ def run(path, args):
     image = str(cfg.images["user-cli"])
     with docker_client() as cl:
         mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-        container = cl.containers.run(image, args, mounts=mounts, stderr=True, detach=True)
+        container = cl.containers.run(image,
+                                      args,
+                                      mounts=mounts,
+                                      stderr=True,
+                                      detach=True)
         container.wait()
         result = container.logs()
         container.stop()
