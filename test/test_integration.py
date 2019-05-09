@@ -82,12 +82,20 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
-def test_user_cli():
+def test_admin_cli():
     path = "config/basic"
     try:
         orderly_web.start(path)
-        result = orderly_web.add_users(["test.user@gmail.com"])
-        assert result == "Saved user with email 'test.user@email.com' to the database"
+        result = orderly_web.add_users("config/basic", ["test.user@gmail.com"])
+        assert "Saved user with email 'test.user@email.com' to the database" in result
+        result = orderly_web.add_groups("config/basic", ["funders"])
+        assert "Saved user group 'funders' to the database" in result
+        result = orderly_web.add_members("config/basic", "funders", ["test.user@gmail.com"])
+        assert "Added user with email 'test.user@gmail.com' to user group 'funders'" in result
+        result = orderly_web.grant("config/basic", "funders", ["*/reports.read"])
+        assert "Gave user group 'funders' the permission '*/reports.read'" in result
+        result = orderly_web.grant("config/basic", "funders", ["*/nonsense"])
+        assert "Unknown permission 'nonsense'" in result
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
