@@ -113,9 +113,10 @@ def web_container_config(cfg, container):
     opts = {"app.port": str(cfg.web_port),
             "app.name": cfg.web_name,
             "app.email": cfg.web_email,
-            "app.github_org": cfg.web_auth_github_org,
-            "app.github_team": cfg.web_auth_github_team,
-            "app.auth": str(cfg.web_auth_fine_grained).lower(),
+            "auth.github_org": cfg.web_auth_github_org,
+            "auth.github_team": cfg.web_auth_github_team,
+            "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
+            "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])

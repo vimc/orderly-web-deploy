@@ -27,6 +27,6 @@ def grant(path, name, permissions):
 def run(path, args):
     cfg = fetch_config(path)
     image = str(cfg.images["user-cli"])
-    client = docker_client()
-    mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-    return client.containers.run(image, args, mounts=mounts, auto_remove=True)
+    with docker_client() as cl:
+        mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+        return cl.containers.run(image, args, mounts=mounts, auto_remove=True)
