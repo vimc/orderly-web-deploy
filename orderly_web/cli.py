@@ -2,10 +2,10 @@
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
-  orderly-web add-users <email>...
-  orderly-web add-groups <name>...
-  orderly-web add-members <group> <email>...
-  orderly-web grant <group> <permission>...
+  orderly-web admin <path> add-users <email>...
+  orderly-web admin <path> add-groups <name>...
+  orderly-web admin <path> add-members <group> <email>...
+  orderly-web admin <path> grant <group> <permission>...
 
 Options:
   --extra=PATH     Path, relative to <path>, of yml file of additional
@@ -33,34 +33,39 @@ def main(argv=None):
 
 def parse_args(argv):
     args = docopt.docopt(__doc__, argv)
+    path = args["<path>"]
     if args["start"]:
-        path = args["<path>"]
         extra = args["--extra"]
         options = [string_to_dict(x) for x in args["--option"]]
         pull_images = args["--pull"]
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
-        path = args["<path>"]
         target = print_status
         args = (path, )
     elif args["stop"]:
-        path = args["<path>"]
         kill = args["--kill"]
         target = orderly_web.stop
         args = (path, kill)
-    elif args["add-users"]:
+    elif args["admin"]:
+        target, args = parse_admin_args(args)
+    return target, args
+
+
+def parse_admin_args(args):
+    path = args["<path>"]
+    if args["add-users"]:
         target = orderly_web.add_users
-        args = args["<email>"]
+        args = (path, args["<email>"])
     elif args["add-groups"]:
         target = orderly_web.add_groups
-        args = args["<name>"]
+        args = (path, args["<name>"])
     elif args["add-members"]:
         target = orderly_web.add_members
-        args = (args["<group>"], args["<email>"])
+        args = (path, args["<group>"], args["<email>"])
     elif args["grant"]:
         target = orderly_web.grant
-        args = (args["<group>"], args["<permission>"])
+        args = (path, args["<group>"], args["<permission>"])
     return target, args
 
 

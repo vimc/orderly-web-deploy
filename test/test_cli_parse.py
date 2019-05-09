@@ -44,30 +44,30 @@ def test_cli_parse_stop():
 
 def test_cli_parse_add_users():
     target, args = orderly_web.cli.parse_args(
-        ["add-users", "test.user@example.com", "another.user@email.com"])
+        ["admin", "path", "add-users", "test.user@example.com", "another.user@email.com"])
     assert target == orderly_web.add_users
-    assert args == ["test.user@example.com", "another.user@email.com"]
+    assert args == ("path", ["test.user@example.com", "another.user@email.com"])
 
 
 def test_cli_parse_add_groups():
     target, args = orderly_web.cli.parse_args(
-        ["add-groups", "admin", "funders"])
+        ["admin", "path", "add-groups", "admin", "funders"])
     assert target == orderly_web.add_groups
-    assert args == ["admin", "funders"]
+    assert args == ("path", ["admin", "funders"])
 
 
 def test_cli_parse_add_members():
     target, args = orderly_web.cli.parse_args(
-        ["add-members", "admin", "test.user@email.com", "another.user@email.com"])
+        ["admin", "path", "add-members", "admin", "test.user@email.com", "another.user@email.com"])
     assert target == orderly_web.add_members
-    assert args == ("admin", ["test.user@email.com", "another.user@email.com"])
+    assert args == ("path", "admin", ["test.user@email.com", "another.user@email.com"])
 
 
 def test_cli_parse_grant():
     target, args = orderly_web.cli.parse_args(
-        ["grant", "admin", "*/reports.read", "*/reports.run"])
+        ["admin", "path", "grant", "admin", "*/reports.read", "*/reports.run"])
     assert target == orderly_web.grant
-    assert args == ("admin", ["*/reports.read", "*/reports.run"])
+    assert args == ("path", "admin", ["*/reports.read", "*/reports.run"])
 
 
 def test_cli_parse_validate_options():
