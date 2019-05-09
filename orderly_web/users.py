@@ -29,10 +29,11 @@ def run(path, args):
     image = str(cfg.images["user-cli"])
     with docker_client() as cl:
         mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-        try:
-            result = cl.containers.run(image, args, mounts=mounts, stderr=True, remove=False)
-        except docker.errors.ContainerError as e:
-            result = e.stderr
+        container = cl.containers.run(image, args, mounts=mounts, stderr=True, detach=True)
+        container.wait()
+        result = container.logs()
+        container.stop()
+        container.remove()
         result = result.decode("utf-8")
         for l in result.split("\n"):
             print(l)

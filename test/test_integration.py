@@ -95,7 +95,7 @@ def test_admin_cli():
         result = orderly_web.grant(path, "funders", ["*/reports.read"])
         assert "Gave user group 'funders' the permission '*/reports.read'" in result
         result = orderly_web.grant(path, "funders", ["*/nonsense"])
-        assert "Unknown permission 'nonsense'" in result
+        assert "Unknown permission : 'nonsense'" in result
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
