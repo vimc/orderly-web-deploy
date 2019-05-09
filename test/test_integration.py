@@ -87,13 +87,19 @@ def test_admin_cli():
     try:
         orderly_web.start(path)
         result = orderly_web.add_users(path, ["test.user@gmail.com"])
-        assert "Saved user with email 'test.user@gmail.com' to the database" in result
+        expected = "Saved user with email 'test.user@gmail.com' to the " \
+                   "database"
+        assert expected in result
         result = orderly_web.add_groups(path, ["funders"])
         assert "Saved user group 'funders' to the database" in result
-        result = orderly_web.add_members(path, "funders", ["test.user@gmail.com"])
-        assert "Added user with email 'test.user@gmail.com' to user group 'funders'" in result
+        result = orderly_web.add_members(path, "funders",
+                                         ["test.user@gmail.com"])
+        expected = "Added user with email 'test.user@gmail.com' to user " \
+                   "group 'funders'"
+        assert expected in result
         result = orderly_web.grant(path, "funders", ["*/reports.read"])
-        assert "Gave user group 'funders' the permission '*/reports.read'" in result
+        expected = "Gave user group 'funders' the permission '*/reports.read'"
+        assert expected in result
         result = orderly_web.grant(path, "funders", ["*/nonsense"])
         assert "Unknown permission : 'nonsense'" in result
     finally:
