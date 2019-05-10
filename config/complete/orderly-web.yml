@@ -78,7 +78,7 @@ orderly:
     ORDERLY_DB_PASS: VAULT:secret/db/password:value
 
 ## Api and Website configuration
-user-cli:
+admin:
   image:
     repo: vimc
     name: orderly-web-user-cli

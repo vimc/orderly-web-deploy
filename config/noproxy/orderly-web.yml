@@ -29,7 +29,7 @@ orderly:
     tag: master
 
 ## Api and Website configuration
-user-cli:
+admin:
   image:
     repo: vimc
     name: orderly-web-user-cli

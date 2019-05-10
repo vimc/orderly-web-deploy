@@ -113,7 +113,7 @@ class OrderlyWebConfig:
         self.images = {
             "orderly": config_image_reference(dat, ["orderly", "image"]),
             "web": config_image_reference(dat, ["web", "image"]),
-            "user-cli": config_image_reference(dat, ["user-cli", "image"]),
+            "admin": config_image_reference(dat, ["admin", "image"]),
             "migrate": config_image_reference(dat, ["web", "image"], "migrate")
         }
 

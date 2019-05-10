@@ -29,7 +29,7 @@ orderly:
     tag: master
 
 ## Api and Website configuration
-user-cli:
+admin:
   image:
     repo: vimc
     name: orderly-web-user-cli
@@ -45,7 +45,7 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: master
+    tag: mrc-261
     migrate: orderlyweb-migrate
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached

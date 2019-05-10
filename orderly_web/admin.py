@@ -26,19 +26,13 @@ def grant(path, name, permissions):
 
 def run(path, args):
     cfg = fetch_config(path)
-    image = str(cfg.images["user-cli"])
+    image = str(cfg.images["admin"])
     with docker_client() as cl:
         mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-        container = cl.containers.run(image,
-                                      args,
-                                      mounts=mounts,
-                                      stderr=True,
-                                      detach=True)
-        container.wait()
-        result = container.logs()
-        container.stop()
-        container.remove()
+        try:
+            result = cl.containers.run(image, args, mounts=mounts, stderr=True, remove=True)
+        except docker.errors.ContainerError as e:
+            result = e.stderr
         result = result.decode("utf-8")
-        for l in result.split("\n"):
-            print(l)
+        print(result)
         return result
