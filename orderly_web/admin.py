@@ -1,7 +1,7 @@
 import docker
 
 from orderly_web.config import fetch_config
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, return_logs_and_remove
 
 
 def add_users(path, emails):
@@ -29,10 +29,6 @@ def run(path, args):
     image = str(cfg.images["admin"])
     with docker_client() as cl:
         mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-        try:
-            result = cl.containers.run(image, args, mounts=mounts, stderr=True, remove=True)
-        except docker.errors.ContainerError as e:
-            result = e.stderr
-        result = result.decode("utf-8")
+        result = return_logs_and_remove(cl, image, args, mounts)
         print(result)
         return result
