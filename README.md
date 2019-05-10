@@ -26,6 +26,10 @@ Usage:
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
+  orderly-web admin <path> add-users <email>...
+  orderly-web admin <path> add-groups <name>...
+  orderly-web admin <path> add-members <group> <email>...
+  orderly-web admin <path> grant <group> <permission>...
 
 Options:
   --extra=PATH     Path, relative to <path>, of yml file of additional
@@ -39,6 +43,29 @@ Options:
 ```
 
 Here `<path>` is the path to a directory that contains a configuration file `orderly-web.yml` (more options will follow in future versions).
+
+### Examples
+
+To deploy with 2 users:
+```
+orderly-web start ./config/basic
+orderly-web admin ./config/basic add-users test.user@example.com admin.user@example.com
+```
+
+To grant the users permissions on an individual basis:
+```
+orderly-web admin ./config/basic grant test.user@example.com */reports.read
+orderly-web admin ./config/basic grant admin.user@example.com */reports.read */reports.review */reports.run
+```
+
+Or to add 2 user groups, "funders" and "admin", and grant users permissions via group membership: 
+```
+orderly-web admin ./config/basic add-groups funders admin
+orderly-web admin ./config/basic grant funders */reports.read
+orderly-web admin ./config/basic grant admin */reports.read */reports.review */reports.run
+orderly-web admin ./config/basic add-members funders test.user@example.com
+orderly-web admin ./config/basic add-members admin admin.user@example.com
+```
 
 ## Testing
 
