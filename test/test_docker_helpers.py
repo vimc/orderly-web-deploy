@@ -63,13 +63,13 @@ def test_container_wait_running_returns_cintainer():
 def test_return_logs_and_remove_returns_stdout():
     with docker_client() as cl:
         result = return_logs_and_remove(cl, "alpine", ["echo", "1234"])
-        assert result == "1234"
+        assert "1234" in result
 
 
 def test_return_logs_and_remove_returns_stderr():
     with docker_client() as cl:
-        result = return_logs_and_remove(cl, "alpine", ["./nonsense"])
-        assert "./nonsense: No such file or directory" in result
+        result = return_logs_and_remove(cl, "alpine", ["sh", "./nonsense"])
+        assert "can't open './nonsense'" in result
 
 
 def test_that_removing_missing_container_is_harmless():

@@ -127,7 +127,7 @@ def web_migrate(cfg, docker_client):
     print("Migrating the web tables")
     image = str(cfg.images["migrate"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-    docker_client.containers.run(image, mounts=mounts, auto_remove=True)
+    docker_client.containers.run(image, mounts=mounts, remove=True)
 
 
 def web_start(container):
