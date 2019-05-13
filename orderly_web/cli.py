@@ -2,6 +2,10 @@
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill]
+  orderly-web admin <path> add-users <email>...
+  orderly-web admin <path> add-groups <name>...
+  orderly-web admin <path> add-members <group> <email>...
+  orderly-web admin <path> grant <group> <permission>...
 
 Options:
   --extra=PATH     Path, relative to <path>, of yml file of additional
@@ -43,6 +47,25 @@ def parse_args(argv):
         kill = args["--kill"]
         target = orderly_web.stop
         args = (path, kill)
+    elif args["admin"]:
+        target, args = parse_admin_args(args)
+    return target, args
+
+
+def parse_admin_args(args):
+    path = args["<path>"]
+    if args["add-users"]:
+        target = orderly_web.add_users
+        args = (path, args["<email>"])
+    elif args["add-groups"]:
+        target = orderly_web.add_groups
+        args = (path, args["<name>"])
+    elif args["add-members"]:
+        target = orderly_web.add_members
+        args = (path, args["<group>"], args["<email>"])
+    elif args["grant"]:
+        target = orderly_web.grant
+        args = (path, args["<group>"], args["<permission>"])
     return target, args
 
 

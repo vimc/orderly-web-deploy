@@ -82,6 +82,30 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_admin_cli():
+    path = "config/basic"
+    try:
+        orderly_web.start(path)
+        result = orderly_web.add_users(path, ["test.user@gmail.com"])
+        expected = "Saved user with email 'test.user@gmail.com' to the " \
+                   "database"
+        assert expected in result
+        result = orderly_web.add_groups(path, ["funders"])
+        assert "Saved user group 'funders' to the database" in result
+        result = orderly_web.add_members(path, "funders",
+                                         ["test.user@gmail.com"])
+        expected = "Added user with email 'test.user@gmail.com' to user " \
+                   "group 'funders'"
+        assert expected in result
+        result = orderly_web.grant(path, "funders", ["*/reports.read"])
+        expected = "Gave user group 'funders' the permission '*/reports.read'"
+        assert expected in result
+        result = orderly_web.grant(path, "funders", ["*/nonsense"])
+        assert "Unknown permission : 'nonsense'" in result
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_no_devmode_no_ports():
     path = "config/noproxy"
     options = {"web": {"dev_mode": False}}

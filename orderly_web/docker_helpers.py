@@ -31,6 +31,18 @@ def exec_safely(container, args):
     return ans
 
 
+def return_logs_and_remove(client, image, args=None, mounts=None):
+    try:
+        result = client.containers.run(image,
+                                       args,
+                                       mounts=mounts,
+                                       stderr=True,
+                                       remove=True)
+    except docker.errors.ContainerError as e:
+        result = e.stderr
+    return result.decode("UTF-8")
+
+
 def stop_and_remove_container(client, name, kill, timeout=10):
     try:
         container = client.containers.get(name)
