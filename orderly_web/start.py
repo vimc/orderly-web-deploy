@@ -83,6 +83,8 @@ def orderly_start(container):
 
 
 def web_init(cfg, docker_client):
+    if cfg.sass_variables is not None:
+        web_generate_css(cfg, docker_client)
     container = web_container(cfg, docker_client)
     web_container_config(cfg, container)
     web_migrate(cfg, docker_client)
@@ -94,6 +96,8 @@ def web_container(cfg, docker_client):
     print("Creating web container")
     image = str(cfg.images["web"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    if cfg.sass_variables is not None:
+        mounts.append(docker.types.Mount("/static/public", cfg.volumes["css"]))
     if cfg.web_dev_mode:
         port = cfg.web_port
         # NOTE: different format to proxy below because we only
@@ -127,6 +131,19 @@ def web_migrate(cfg, docker_client):
     print("Migrating the web tables")
     image = str(cfg.images["migrate"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    docker_client.containers.run(image, mounts=mounts, remove=True)
+
+
+def web_generate_css(cfg, docker_client):
+    print("Generating custom css")
+    image = str(cfg.images["css-generator"])
+    compiled_css_mount = \
+        docker.types.Mount("/static/public", cfg.volumes["css"])
+    variable_mount = \
+        docker.types.Mount("/static/src/scss/partials/user-variables.scss",
+                           cfg.sass_variables, type="bind")
+
+    mounts = [compiled_css_mount, variable_mount]
     docker_client.containers.run(image, mounts=mounts, remove=True)
 
 

@@ -40,3 +40,6 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 .coverage
+
+# IDE files
+.idea
