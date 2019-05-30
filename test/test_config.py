@@ -79,7 +79,7 @@ def test_example_config():
 
 
 def test_config_custom_styles():
-    cfg = build_config("config/complete")
+    cfg = build_config("config/customcss")
     assert cfg.sass_variables == os.path.abspath(os.path.join(cfg.path,
                                                               "variables.scss"))
     assert cfg.volumes["css"] == "orderly_web_css"

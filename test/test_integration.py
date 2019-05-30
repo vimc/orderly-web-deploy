@@ -82,6 +82,20 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_start_with_custom_styles():
+    path = "config/customcss"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert st.volumes["css"] == "orderly_web_css"
+        assert st.network == "orderly_web_network"
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_admin_cli():
     path = "config/basic"
     try:
