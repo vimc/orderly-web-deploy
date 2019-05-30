@@ -33,7 +33,7 @@ admin:
   image:
     repo: vimc
     name: orderly-web-user-cli
-    tag: mrc-248
+    tag: master
 web:
   ## Image to use for the web components.  As for the orderly
   ## configuration these will be assembled as <repo>/<name>:<tag>.  In

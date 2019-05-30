@@ -117,9 +117,7 @@ class OrderlyWebConfig:
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["admin", "image"]),
             "migrate": config_image_reference(dat, ["web", "image"],
-                                              "migrate"),
-            "css-generator":
-                config_image_reference(dat, ["web", "image"], "css-generator")
+                                              "migrate")
         }
 
         self.orderly_env = config_dict(dat, ["orderly", "env"], True)
@@ -147,6 +145,10 @@ class OrderlyWebConfig:
                 os.path.join(self.path, self.sass_variables))
             self.sass_variables = variables_abspath
             self.volumes["css"] = config_string(dat, ["volumes", "css"])
+            css_generator = config_image_reference(dat,
+                                                   ["web", "image"],
+                                                   "css-generator")
+            self.images["css-generator"] = css_generator
 
         if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(

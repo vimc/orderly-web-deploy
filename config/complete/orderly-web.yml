@@ -58,6 +58,7 @@ network: orderly_web_network
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
+  css: orderly_web_css
 
 ## Orderly configuration
 orderly:
@@ -75,14 +76,14 @@ orderly:
   env:
     ORDERLY_DB_HOST: db_host
     ORDERLY_DB_USER: db_user
-
+    ORDERLY_DB_PASS: VAULT:secret/db/password:value
 
 ## Api and Website configuration
 admin:
   image:
     repo: vimc
     name: orderly-web-user-cli
-    tag: mrc-248
+    tag: master
 web:
   ## Image to use for the web components.  As for the orderly
   ## configuration these will be assembled as <repo>/<name>:<tag>.  In
@@ -94,8 +95,9 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: master
+    tag: mrc-275
     migrate: orderlyweb-migrate
+    css-generator: orderly-web-css-generator
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached
   ## only to the localhost and will not be available from other
@@ -118,6 +120,9 @@ web:
     fine_grained: true
     ## Enable montagu authentication provider
     montagu: false
+  ## Optional sass variables to override default styles. Should be a
+  ## file path relative to the config file
+  sass_variables: variables.scss
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
