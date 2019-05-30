@@ -80,8 +80,8 @@ def test_example_config():
 
 def test_config_custom_styles():
     cfg = build_config("config/customcss")
-    assert cfg.sass_variables == os.path.abspath(os.path.join(cfg.path,
-                                                              "variables.scss"))
+    expected_path = os.path.abspath(os.path.join(cfg.path, "variables.scss"))
+    assert cfg.sass_variables == expected_path
     assert cfg.volumes["css"] == "orderly_web_css"
     assert cfg.images["css-generator"].repo == "vimc"
     assert cfg.images["css-generator"].name == "orderly-web-css-generator"
@@ -140,13 +140,13 @@ def test_combine():
         return a
 
     assert do_combine({"a": 1}, {"b": 2}) == \
-           {"a": 1, "b": 2}
+        {"a": 1, "b": 2}
     assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3}, "b": 2}
+        {"a": {"x": 3}, "b": 2}
     assert do_combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3, "y": 4}, "b": 2}
+        {"a": {"x": 3, "y": 4}, "b": 2}
     assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3}, "b": 2}
+        {"a": {"x": 3}, "b": 2}
 
 
 def test_read_and_extra():
