@@ -53,11 +53,14 @@ network: orderly_web_network
 ##
 ## orderly: stores the orderly archive
 ## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
+## css: stores compiled css for the web app (only needed if custom sass variables
+## are given as sass_variables in web section below)
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
+  css: orderly_web_css
 
 ## Orderly configuration
 orderly:
@@ -90,12 +93,15 @@ web:
   ## be used as <repo>/<migrate>:<tag>.  It is not expected (unlike
   ## the orderly image) that the 'name' and 'migrate' will need to be
   ## changed often, and it is expected that a web image will go
-  ## together with a corresponding migration image.
+  ## together with a corresponding migration image. If custom sass
+  ## variables are provided below as sass_variables, a third image
+  ## for generating css is required.
   image:
     repo: vimc
     name: orderly-web
     tag: mrc-275
     migrate: orderlyweb-migrate
+    css-generator: orderly-web-css-generator
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached
   ## only to the localhost and will not be available from other
@@ -118,6 +124,9 @@ web:
     fine_grained: true
     ## Enable montagu authentication provider
     montagu: false
+  ## Optional sass variables to override default styles. Should be a
+  ## file path relative to the config file
+  sass_variables: variables.scss
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker

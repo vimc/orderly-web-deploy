@@ -99,7 +99,8 @@ def test_start_with_custom_styles():
         api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
         details = api_client.inspect_container(cfg.containers["web"])
         assert len(details['Mounts']) == 2
-        css_volume = details['Mounts'][1]
+        css_volume = [v for v in details['Mounts']
+                      if v['Name'] == "orderly_web_css"][0]
         assert css_volume['Name'] == "orderly_web_css"
         assert css_volume['Destination'] == "/static/public"
 
