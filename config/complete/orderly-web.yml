@@ -99,7 +99,7 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: mrc-286
+    tag: mrc-275
     migrate: orderlyweb-migrate
     css-generator: orderly-web-css-generator
   ## If dev_mode is true then the port is exposed to the host (as
