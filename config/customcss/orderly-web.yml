@@ -78,6 +78,9 @@ web:
   ## Optional sass variables to override default styles. Should be a
   ## file path relative to the config file
   sass_variables: variables.scss
+  ## Optional custom logo image. Should be a file path
+  ## relative to the config file
+  logo: ./my-logo.png
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
