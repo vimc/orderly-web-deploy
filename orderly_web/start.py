@@ -98,7 +98,7 @@ def web_container(cfg, docker_client):
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.sass_variables is not None:
         mounts.append(docker.types.Mount("/static/public", cfg.volumes["css"]))
-    if cfg.logo is not None:
+    if cfg.logo_name is not None:
         logo_in_container = "/static/public/img/logo/{}".format(cfg.logo_name)
         mounts.append(docker.types.Mount(logo_in_container,
                                          cfg.logo_path,

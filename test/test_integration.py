@@ -4,6 +4,9 @@ import urllib
 import time
 import json
 import ssl
+from urllib import request
+
+import requests
 import vault_dev
 
 from orderly_web.config import fetch_config
@@ -110,11 +113,13 @@ def test_start_with_custom_styles():
                                       "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
+        # check that the custom logo is mounted and appears on the page
         logo_mount = [v for v in details['Mounts']
                       if "my-logo" in v['Name']][0]
         expected_destination = "/static/public/img/logo/my-logo.jpg"
         assert logo_mount['Destination'] == expected_destination
-        
+        response = requests.get("http://localhost:8888").content
+        assert """<img src="/img/logo/my-logo.jpg""" in response
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
