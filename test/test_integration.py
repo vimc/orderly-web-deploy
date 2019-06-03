@@ -98,7 +98,7 @@ def test_start_with_custom_styles():
         # check that the style volume is really mounted
         api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
         details = api_client.inspect_container(cfg.containers["web"])
-        assert len(details['Mounts']) == 2
+        assert len(details['Mounts']) == 3
         css_volume = [v for v in details['Mounts']
                       if v['Name'] == "orderly_web_css"][0]
         assert css_volume['Name'] == "orderly_web_css"
@@ -110,6 +110,11 @@ def test_start_with_custom_styles():
                                       "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
+        logo_mount = [v for v in details['Mounts']
+                      if "my-logo" in v['Name']][0]
+        expected_destination = "/static/public/img/logo/my-logo.jpg"
+        assert logo_mount['Destination'] == expected_destination
+        
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 

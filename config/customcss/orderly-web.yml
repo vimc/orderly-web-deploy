@@ -50,7 +50,7 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: mrc-275
+    tag: mrc-286
     migrate: orderlyweb-migrate
     css-generator: orderly-web-css-generator
   ## If dev_mode is true then the port is exposed to the host (as
@@ -78,9 +78,9 @@ web:
   ## Optional sass variables to override default styles. Should be a
   ## file path relative to the config file
   sass_variables: variables.scss
-  ## Optional custom logo image. Should be a file path
-  ## relative to the config file
-  logo: ./my-logo.png
+  ## Optional custom logo image, any valid image format. Should be a
+  ## file path relative to the config file.
+  logo: ./my-logo.jpg
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
