@@ -119,8 +119,8 @@ def test_start_with_custom_styles():
                       if v['Type'] == "bind"][0]
         expected_destination = "/static/public/img/logo/my-logo.jpg"
         assert logo_mount['Destination'] == expected_destination
-        response = requests.get("http://localhost:8888").content
-        assert """<img src="/img/logo/my-logo.jpg""" in response
+        response = requests.get("http://localhost:8888")
+        assert """<img src="/img/logo/my-logo.jpg""" in response.text
         response = requests.get("http://localhost:8888/img/logo/my-logo.jpg")
         assert response.status_code == 200
     finally:
