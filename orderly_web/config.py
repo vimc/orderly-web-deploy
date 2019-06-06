@@ -1,5 +1,7 @@
 import base64
 import copy
+import os
+
 import docker
 import pickle
 import yaml
@@ -114,7 +116,8 @@ class OrderlyWebConfig:
             "orderly": config_image_reference(dat, ["orderly", "image"]),
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["admin", "image"]),
-            "migrate": config_image_reference(dat, ["web", "image"], "migrate")
+            "migrate": config_image_reference(dat, ["web", "image"],
+                                              "migrate")
         }
 
         self.orderly_env = config_dict(dat, ["orderly", "env"], True)
@@ -132,6 +135,20 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "github_org"], True)
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
+
+        self.sass_variables = config_string(dat,
+                                            ["web", "sass_variables"],
+                                            True)
+
+        if self.sass_variables is not None:
+            variables_abspath = os.path.abspath(
+                os.path.join(self.path, self.sass_variables))
+            self.sass_variables = variables_abspath
+            self.volumes["css"] = config_string(dat, ["volumes", "css"])
+            css_generator = config_image_reference(dat,
+                                                   ["web", "image"],
+                                                   "css-generator")
+            self.images["css-generator"] = css_generator
 
         if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(
@@ -217,7 +234,7 @@ def config_value(data, path, data_type, is_optional):
         except KeyError as e:
             if is_optional:
                 return None
-            e.args = (":".join(path[:(i + 1)]), )
+            e.args = (":".join(path[:(i + 1)]),)
             raise e
 
     expected = {"string": str,

@@ -82,6 +82,38 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_start_with_custom_styles():
+    path = "config/customcss"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert st.volumes["css"] == "orderly_web_css"
+        assert st.network == "orderly_web_network"
+
+        cfg = fetch_config(path)
+
+        # check that the style volume is really mounted
+        api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+        details = api_client.inspect_container(cfg.containers["web"])
+        assert len(details['Mounts']) == 2
+        css_volume = [v for v in details['Mounts']
+                      if v['Name'] == "orderly_web_css"][0]
+        assert css_volume['Name'] == "orderly_web_css"
+        assert css_volume['Destination'] == "/static/public"
+
+        # check that the style files have been compiled with the custom vars
+        web_container = cfg.get_container("web")
+        style = string_from_container(web_container,
+                                      "/static/public/css/style.css")
+        assert "/* Example custom config */" in style
+
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_admin_cli():
     path = "config/basic"
     try:

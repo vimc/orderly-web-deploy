@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import vault_dev
 import yaml
+import os
 
 from orderly_web.config import *
 
@@ -68,10 +69,24 @@ def test_example_config():
     assert cfg.web_auth_fine_grained
     assert cfg.web_auth_github_org == "vimc"
     assert cfg.web_auth_github_team == ""
+    assert cfg.sass_variables is None
+    assert "css-generator" not in cfg.images
+    assert "css" not in cfg.volumes
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-211"
+
+
+def test_config_custom_styles():
+    path = "config/customcss"
+    cfg = build_config(path)
+    expected_path = os.path.abspath(os.path.join(cfg.path, "variables.scss"))
+    assert cfg.sass_variables == expected_path
+    assert cfg.volumes["css"] == "orderly_web_css"
+    assert cfg.images["css-generator"].repo == "vimc"
+    assert cfg.images["css-generator"].name == "orderly-web-css-generator"
+    assert cfg.images["css-generator"].tag == "mrc-275"
 
 
 def test_string_representation():
@@ -124,6 +139,7 @@ def test_combine():
         """lets us use combine with unnamed data"""
         combine(a, b)
         return a
+
     assert do_combine({"a": 1}, {"b": 2}) == \
         {"a": 1, "b": 2}
     assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
