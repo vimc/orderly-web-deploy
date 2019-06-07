@@ -117,7 +117,7 @@ def test_start_with_custom_styles():
         # check that the custom logo is mounted and appears on the page
         logo_mount = [v for v in details['Mounts']
                       if v['Type'] == "bind"][0]
-        expected_destination = "/static/public/img/logo/my-logo.jpg"
+        expected_destination = "/static/public/img/logo/my-test-logo.png"
         assert logo_mount['Destination'] == expected_destination
         res = requests.get("http://localhost:8888")
         assert """<img src="/img/logo/my-test-logo.png""" in res.text
