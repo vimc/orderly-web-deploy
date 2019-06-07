@@ -98,6 +98,11 @@ def web_container(cfg, docker_client):
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.sass_variables is not None:
         mounts.append(docker.types.Mount("/static/public", cfg.volumes["css"]))
+    if cfg.logo_name is not None:
+        logo_in_container = "/static/public/img/logo/{}".format(cfg.logo_name)
+        mounts.append(docker.types.Mount(logo_in_container,
+                                         cfg.logo_path,
+                                         type="bind"))
     if cfg.web_dev_mode:
         port = cfg.web_port
         # NOTE: different format to proxy below because we only
@@ -122,6 +127,8 @@ def web_container_config(cfg, container):
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
+    if cfg.logo_name is not None:
+        opts["app.logo"] = cfg.logo_name
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     string_into_container(txt, container, "/etc/orderly/web/config.properties")

@@ -72,6 +72,8 @@ def test_example_config():
     assert cfg.sass_variables is None
     assert "css-generator" not in cfg.images
     assert "css" not in cfg.volumes
+    assert cfg.logo_name is None
+    assert cfg.logo_path is None
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
@@ -86,7 +88,10 @@ def test_config_custom_styles():
     assert cfg.volumes["css"] == "orderly_web_css"
     assert cfg.images["css-generator"].repo == "vimc"
     assert cfg.images["css-generator"].name == "orderly-web-css-generator"
-    assert cfg.images["css-generator"].tag == "mrc-275"
+    assert cfg.images["css-generator"].tag == "mrc-286"
+    assert cfg.logo_name == "my-test-logo.png"
+    expected_path = os.path.abspath(os.path.join(cfg.path, "my-test-logo.png"))
+    assert cfg.logo_path == expected_path
 
 
 def test_string_representation():

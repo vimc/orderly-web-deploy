@@ -4,6 +4,9 @@ import urllib
 import time
 import json
 import ssl
+from urllib import request
+
+import requests
 import vault_dev
 
 from orderly_web.config import fetch_config
@@ -98,9 +101,10 @@ def test_start_with_custom_styles():
         # check that the style volume is really mounted
         api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
         details = api_client.inspect_container(cfg.containers["web"])
-        assert len(details['Mounts']) == 2
+        assert len(details['Mounts']) == 3
         css_volume = [v for v in details['Mounts']
-                      if v['Name'] == "orderly_web_css"][0]
+                      if v['Type'] == "volume" and
+                      v['Name'] == "orderly_web_css"][0]
         assert css_volume['Name'] == "orderly_web_css"
         assert css_volume['Destination'] == "/static/public"
 
@@ -110,6 +114,15 @@ def test_start_with_custom_styles():
                                       "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
+        # check that the custom logo is mounted and appears on the page
+        logo_mount = [v for v in details['Mounts']
+                      if v['Type'] == "bind"][0]
+        expected_destination = "/static/public/img/logo/my-test-logo.png"
+        assert logo_mount['Destination'] == expected_destination
+        res = requests.get("http://localhost:8888")
+        assert """<img src="/img/logo/my-test-logo.png""" in res.text
+        res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
+        assert res.status_code == 200
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
