@@ -89,8 +89,8 @@ def test_config_custom_styles():
     assert cfg.images["css-generator"].repo == "vimc"
     assert cfg.images["css-generator"].name == "orderly-web-css-generator"
     assert cfg.images["css-generator"].tag == "mrc-286"
-    assert cfg.logo_name == "my-logo.jpg"
-    expected_path = os.path.abspath(os.path.join(cfg.path, "my-logo.jpg"))
+    assert cfg.logo_name == "my-test-logo.png"
+    expected_path = os.path.abspath(os.path.join(cfg.path, "my-test-logo.png"))
     assert cfg.logo_path == expected_path
 
 

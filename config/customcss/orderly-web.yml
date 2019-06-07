@@ -80,7 +80,7 @@ web:
   sass_variables: variables.scss
   ## Optional custom logo image, any valid image format. Should be a
   ## file path relative to the config file.
-  logo: my-logo.jpg
+  logo: my-test-logo.png
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker

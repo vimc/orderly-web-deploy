@@ -141,15 +141,13 @@ class OrderlyWebConfig:
                                             True)
         self.logo_path = config_string(dat, ["web", "logo"], True)
         if self.logo_path is not None:
-            self.logo_path = os.path.abspath(
-                os.path.join(self.path, self.logo_path))
-            self.logo_name = os.path.split(self.logo_path)[1]
+            self.logo_path = self.get_abs_path(self.logo_path)
+            self.logo_name = os.path.basename(self.logo_path)
         else:
             self.logo_name = None
 
         if self.sass_variables is not None:
-            variables_abspath = os.path.abspath(
-                os.path.join(self.path, self.sass_variables))
+            variables_abspath = self.get_abs_path(self.sass_variables)
             self.sass_variables = variables_abspath
             self.volumes["css"] = config_string(dat, ["volumes", "css"])
             css_generator = config_image_reference(dat,
@@ -196,6 +194,9 @@ class OrderlyWebConfig:
         vault_client = self.vault.client()
         vault.resolve_secrets(self, vault_client)
         vault.resolve_secrets(self.orderly_env, vault_client)
+
+    def get_abs_path(self, relative_path):
+        return os.path.abspath(os.path.join(self.path, relative_path))
 
 
 class DockerImageReference:

@@ -119,10 +119,10 @@ def test_start_with_custom_styles():
                       if v['Type'] == "bind"][0]
         expected_destination = "/static/public/img/logo/my-logo.jpg"
         assert logo_mount['Destination'] == expected_destination
-        response = requests.get("http://localhost:8888")
-        assert """<img src="/img/logo/my-logo.jpg""" in response.text
-        response = requests.get("http://localhost:8888/img/logo/my-logo.jpg")
-        assert response.status_code == 200
+        res = requests.get("http://localhost:8888")
+        assert """<img src="/img/logo/my-test-logo.png""" in res.text
+        res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
+        assert res.status_code == 200
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
