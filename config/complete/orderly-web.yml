@@ -81,19 +81,14 @@ orderly:
     ORDERLY_DB_PASS: VAULT:secret/db/password:value
 
 ## Api and Website configuration
-admin:
-  image:
-    repo: vimc
-    name: orderly-web-user-cli
-    tag: master
 web:
   ## Image to use for the web components.  As for the orderly
   ## configuration these will be assembled as <repo>/<name>:<tag>.  In
   ## addition, a second image with the database migration support will
-  ## be used as <repo>/<migrate>:<tag>.  It is not expected (unlike
+  ## be used as <repo>/<migrate>:<tag>. It is not expected (unlike
   ## the orderly image) that the 'name' and 'migrate' will need to be
   ## changed often, and it is expected that a web image will go
-  ## together with a corresponding migration image. If custom sass
+  ## together with corresponding migration and admin images. If custom sass
   ## variables are provided below as sass_variables, a third image
   ## for generating css is required.
   image:
@@ -101,6 +96,7 @@ web:
     name: orderly-web
     tag: mrc-286
     migrate: orderlyweb-migrate
+    admin: orderly-web-user-cli
     css-generator: orderly-web-css-generator
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached
