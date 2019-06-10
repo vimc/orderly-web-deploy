@@ -94,7 +94,7 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: mrc-286
+    tag: master
     migrate: orderlyweb-migrate
     admin: orderly-web-user-cli
     css-generator: orderly-web-css-generator
