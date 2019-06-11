@@ -114,6 +114,10 @@ def test_start_with_custom_styles():
                                       "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
+        # check that js files are there also
+        res = requests.get("http://localhost:8888/js/index.bundle.js")
+        assert res.status_code == 200
+
         # check that the custom logo is mounted and appears on the page
         logo_mount = [v for v in details['Mounts']
                       if v['Type'] == "bind"][0]
