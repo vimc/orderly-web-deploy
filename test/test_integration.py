@@ -104,7 +104,7 @@ def test_start_with_custom_styles():
         cfg = fetch_config(path)
 
         # check that the style volume is really mounted
-        api_client = docker.client.from_env().api()
+        api_client = docker.client.from_env().api
         details = api_client.inspect_container(cfg.containers["web"])
         assert len(details['Mounts']) == 3
         css_volume = [v for v in details['Mounts']
