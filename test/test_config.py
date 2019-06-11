@@ -139,7 +139,7 @@ def test_can_substitute_secrets():
         assert cfg.proxy_ssl_certificate == cert
         assert cfg.proxy_ssl_key == key
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
-        assert cfg.web_auth_github_app["key"] == "ghkey"
+        assert cfg.web_auth_github_app["id"] == "ghkey"
         assert cfg.web_auth_github_app["secret"] == "ghs3cret"
 
 
