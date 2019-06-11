@@ -187,7 +187,7 @@ class OrderlyWebConfig:
             elif self.web_dev_mode:
                 self.web_url = "http://localhost:{}".format(self.web_port)
             else:
-                raise Error("web_url must be provided")
+                raise Exception("web_url must be provided")
 
     def save(self):
         orderly = self.get_container("orderly")
