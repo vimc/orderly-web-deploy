@@ -92,7 +92,8 @@ def test_start_and_stop():
 def test_start_with_custom_styles():
     path = "config/customcss"
     try:
-        res = orderly_web.start(path)
+        options = {"web": {"url": "http://localhost:8888"}}
+        res = orderly_web.start(path, options=options)
         assert res
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
@@ -103,7 +104,7 @@ def test_start_with_custom_styles():
         cfg = fetch_config(path)
 
         # check that the style volume is really mounted
-        api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+        api_client = docker.client.from_env().api()
         details = api_client.inspect_container(cfg.containers["web"])
         assert len(details['Mounts']) == 3
         css_volume = [v for v in details['Mounts']
