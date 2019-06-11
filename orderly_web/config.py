@@ -184,7 +184,7 @@ class OrderlyWebConfig:
             if self.proxy_enabled:
                 self.web_url = "https://{}:{}".format(
                     self.proxy_hostname, self.proxy_port_https)
-            elif self.web.dev_mode:
+            elif self.web_dev_mode:
                 self.web_url = "http://localhost:{}".format(self.web_port)
             else:
                 raise Error("web_url must be provided")
