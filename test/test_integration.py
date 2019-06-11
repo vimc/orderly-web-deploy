@@ -106,7 +106,7 @@ def test_start_with_custom_styles():
                       if v['Type'] == "volume" and
                       v['Name'] == "orderly_web_css"][0]
         assert css_volume['Name'] == "orderly_web_css"
-        assert css_volume['Destination'] == "/static/public"
+        assert css_volume['Destination'] == "/static/public/css"
 
         # check that the style files have been compiled with the custom vars
         web_container = cfg.get_container("web")
@@ -193,6 +193,8 @@ def test_vault_ssl():
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
         cl.write("secret/db/password", value="s3cret")
+        cl.write("secret/github/id", value="ghid")
+        cl.write("secret/github/secret", value="ghs3cret")
 
         path = "config/complete"
 

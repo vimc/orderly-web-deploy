@@ -125,8 +125,8 @@ def test_can_substitute_secrets():
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
         cl.write("secret/db/password", value="s3cret")
-        cl.write("secret/orderly/github_key", value="ghkey")
-        cl.write("secret/orderly/github_secret", value="ghs3cret")
+        cl.write("secret/github/id", value="ghkey")
+        cl.write("secret/github/secret", value="ghs3cret")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
