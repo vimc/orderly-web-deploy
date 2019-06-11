@@ -126,6 +126,8 @@ def web_container_config(cfg, container):
             "auth.github_team": cfg.web_auth_github_team,
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
+            "auth.github_key": cfg.web_auth_github_app["key"],
+            "auth.github_secret": cfg.web_auth_github_app["secret"],
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
