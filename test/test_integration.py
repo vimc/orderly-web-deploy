@@ -157,7 +157,8 @@ def test_admin_cli():
 
 def test_no_devmode_no_ports():
     path = "config/noproxy"
-    options = {"web": {"dev_mode": False}}
+    options = {"web": {"dev_mode": False,
+                       "url": "http://localhost"}}
 
     try:
         orderly_web.start(path, options=options)
