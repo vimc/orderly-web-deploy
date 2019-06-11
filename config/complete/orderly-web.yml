@@ -99,7 +99,7 @@ web:
   image:
     repo: vimc
     name: orderly-web
-    tag: master
+    tag: mrc-286
     migrate: orderlyweb-migrate
     css-generator: orderly-web-css-generator
   ## Public-facing url for the whole web service, including protocol
