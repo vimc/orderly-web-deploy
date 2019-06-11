@@ -59,6 +59,10 @@ def test_start_and_stop():
         dat = json.loads(http_get("http://localhost:8888/api/v1"))
         assert dat["status"] == "success"
 
+        web_config = string_from_container(
+            web, "/etc/orderly/web/config.properties")
+        assert "app.url=https://localhost" in web_config.split("\n")
+
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
         ports = proxy.attrs["HostConfig"]["PortBindings"]
