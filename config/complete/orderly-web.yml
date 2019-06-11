@@ -98,6 +98,12 @@ web:
     migrate: orderlyweb-migrate
     admin: orderly-web-user-cli
     css-generator: orderly-web-css-generator
+  ## Public-facing url for the whole web service, including protocol
+  ## (ideally https://), hostname and port (if not using standard
+  ## ports).  Here, we're going to use the same as for the proxy but
+  ## if you are using an external proxy then you'd use its hostname
+  ## and port.
+  url: https://localhost
   ## If dev_mode is true then the port is exposed to the host (as
   ## plain http).  Do not use in production.  The port is attached
   ## only to the localhost and will not be available from other

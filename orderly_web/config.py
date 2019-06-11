@@ -179,6 +179,16 @@ class OrderlyWebConfig:
         else:
             self.proxy_enabled = False
 
+        self.web_url = config_string(dat, ["web", "url"], True)
+        if not self.web_url:
+            if self.proxy_enabled:
+                self.web_url = "https://{}:{}".format(
+                    self.proxy_hostname, self.proxy_port_https)
+            elif self.web_dev_mode:
+                self.web_url = "http://localhost:{}".format(self.web_port)
+            else:
+                raise Exception("web_url must be provided")
+
     def save(self):
         orderly = self.get_container("orderly")
         txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
