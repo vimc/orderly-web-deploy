@@ -142,7 +142,7 @@ def test_stop_broken_orderly_web():
 
     assert start_failed
 
-    orderly_web.stop(path)
+    orderly_web.stop("config/breaking")
 
     # stop without force should have left containers without throwing
     with docker_client() as cl:
