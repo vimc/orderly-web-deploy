@@ -1,3 +1,5 @@
+import os
+
 import docker
 
 from orderly_web.config import build_config
@@ -5,7 +7,8 @@ from orderly_web.status import status
 from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
     ensure_network, ensure_volume, container_wait_running, \
-    exec_safely, string_into_container
+    exec_safely, string_into_container, file_into_container
+from PIL import Image
 
 
 def start(path, extra=None, options=None, pull_images=False):
@@ -115,7 +118,17 @@ def web_container(cfg, docker_client):
     container = docker_client.containers.run(
         image, mounts=mounts, network=cfg.network, ports=ports,
         name=cfg.containers["web"], detach=True)
+    if cfg.logo_name is not None:
+        generate_favicon(cfg.logo_path)
+        file_into_container("favicon.ico", container, "/static/public")
+        os.remove("favicon.ico")
     return container
+
+
+def generate_favicon(logo_path):
+    filename = logo_path
+    img = Image.open(filename)
+    img.save('favicon.ico')
 
 
 def web_container_config(cfg, container):

@@ -148,6 +148,11 @@ def string_into_container(txt, container, path):
         container.put_archive(os.path.dirname(path), tar)
 
 
+def file_into_container(local_path, container, destination_path):
+    tar = simple_tar(local_path, os.path.basename(local_path))
+    container.put_archive(destination_path, tar)
+
+
 def string_from_container(container, path):
     stream, status = container.get_archive(path)
     try:
