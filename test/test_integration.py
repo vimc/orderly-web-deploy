@@ -4,6 +4,7 @@ import urllib
 import time
 import json
 import ssl
+from unittest import mock
 from urllib import request
 
 import requests
@@ -219,42 +220,45 @@ def test_vault_ssl():
 # /secret/vimc-robot/vault-token
 # This environment variable is configured on travis
 def test_vault_github_login():
-    os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
-    with vault_dev.server() as s:
-        cl = s.client()
-        cl.sys.enable_auth_method(method_type="github")
-        policy = """
-        path "secret/*" {
-          capabilities = ["read", "list"]
-        }
-        """
+    if "VAULT_AUTH_GITHUB_TOKEN" in os.environ:
+        del os.environ["VAULT_AUTH_GITHUB_TOKEN"]
+    with mock.patch('builtins.input',
+                    return_value=os.environ["VAULT_TEST_GITHUB_PAT"]):
+        with vault_dev.server() as s:
+            cl = s.client()
+            cl.sys.enable_auth_method(method_type="github")
+            policy = """
+            path "secret/*" {
+              capabilities = ["read", "list"]
+            }
+            """
 
-        cl.sys.create_or_update_policy(
-            name='secret-reader',
-            policy=policy,
-        )
+            cl.sys.create_or_update_policy(
+                name='secret-reader',
+                policy=policy,
+            )
 
-        cl.auth.github.map_team(
-            team_name="robots",
-            policies=["secret-reader"],
-        )
+            cl.auth.github.map_team(
+                team_name="robots",
+                policies=["secret-reader"],
+            )
 
-        cl.write("auth/github/config", organization="vimc")
-        cl.write("secret/db/password", value="s3cret")
+            cl.write("auth/github/config", organization="vimc")
+            cl.write("secret/db/password", value="s3cret")
 
-        path = "config/vault"
+            path = "config/vault"
 
-        vault_addr = "http://localhost:{}".format(s.port)
-        options = {"vault": {"addr": vault_addr}}
+            vault_addr = "http://localhost:{}".format(s.port)
+            options = {"vault": {"addr": vault_addr}}
 
-        orderly_web.start(path, options=options)
+            orderly_web.start(path, options=options)
 
-        cfg = fetch_config(path)
-        container = cfg.get_container("orderly")
-        res = string_from_container(container, "/orderly/orderly_envir.yml")
-        assert "ORDERLY_DB_PASS: s3cret" in res
+            cfg = fetch_config(path)
+            container = cfg.get_container("orderly")
+            res = string_from_container(container, "/orderly/orderly_envir.yml")
+            assert "ORDERLY_DB_PASS: s3cret" in res
 
-        orderly_web.stop(path, kill=True, volumes=True, network=True)
+            orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 # Because we wait for a go signal to come up, we might not be able to
