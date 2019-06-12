@@ -177,7 +177,29 @@ def test_stop_broken_orderly_web_with_option():
         assert not  network_exists(cl, "ow_broken_test")
 
 
-# TODO: test_stop_broken_with_extra
+def test_stop_broken_orderly_web_with_extra():
+
+    path = "config/breaking"
+    extra = "config/extra.yml"
+
+    start_failed = False
+    try:
+        orderly_web.start(path, extra=extra)
+    except docker.errors.APIError:
+        start_failed = True
+
+    assert start_failed
+
+    with docker_client() as cl:
+        assert container_exists(cl, "orderly_web_orderly")
+        assert network_exists(cl, "ow_broken_extra_test")
+
+    orderly_web.stop(path, force=True, network=True, volumes=True, extra=extra)
+
+    with docker_client() as cl:
+        assert not container_exists(cl, "orderly_web_orderly")
+        assert not  network_exists(cl, "ow_broken_extra_test")
+
 
 def test_admin_cli():
     path = "config/basic"
