@@ -53,6 +53,9 @@ class vault_config:
         self.auth_args = auth_args
 
     def client(self):
+        print(self.auth_method)
+        print(self.auth_args)
+        print(self.url)
         if not self.url:
             return vault_not_enabled()
         # NOTE: we might actually try and pick up VAULT_TOKEN from the
@@ -61,6 +64,7 @@ class vault_config:
         # See for this workaround https://github.com/hvac/hvac/issues/421
         drop_envvar("VAULT_ADDR")
         drop_envvar("VAULT_TOKEN")
+
         if self.auth_method == "token":
             cl = hvac.Client(url=self.url, token=self.auth_args["token"])
         else:

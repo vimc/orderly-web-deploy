@@ -8,6 +8,7 @@ from urllib import request
 
 import requests
 import vault_dev
+from orderly_web.vault import vault_config
 
 from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *
@@ -205,6 +206,49 @@ def test_vault_ssl():
         res = orderly_web.start(path, options=options)
         dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
+
+        cfg = fetch_config(path)
+        container = cfg.get_container("orderly")
+        res = string_from_container(container, "/orderly/orderly_envir.yml")
+        assert "ORDERLY_DB_PASS: s3cret" in res
+
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+# To run this test you will need a token for the vimc robot user -
+# this can be found in the montagu vault as
+# /secret/vimc-robot/vault-token
+# This environment variable is configured on travis
+def test_vault_github_login():
+    os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
+    with vault_dev.server() as s:
+        cl = s.client()
+        cl.sys.enable_auth_method(method_type="github")
+        policy = """
+        path "secret/*" {
+          capabilities = ["read", "list"]
+        }
+        """
+
+        cl.sys.create_or_update_policy(
+            name='secret-reader',
+            policy=policy,
+        )
+
+        cl.auth.github.map_team(
+            team_name="robots",
+            policies=["secret-reader"],
+        )
+
+        cl.write("auth/github/config", organization="vimc")
+        cl.write("secret/db/password", value="s3cret")
+
+        path = "config/vault"
+
+        vault_addr = "http://localhost:{}".format(s.port)
+        options = {"vault": {"addr": vault_addr}}
+
+        orderly_web.start(path, options=options)
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
