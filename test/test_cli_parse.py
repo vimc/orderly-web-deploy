@@ -36,10 +36,20 @@ def test_cli_parse_status():
 def test_cli_parse_stop():
     target, args = orderly_web.cli.parse_args(["stop", "path"])
     assert target == orderly_web.stop
-    assert args == ("path", False)
+    assert args == ("path", False, False, False, False, None, [])
+
     target, args = orderly_web.cli.parse_args(["stop", "path", "--kill"])
     assert target == orderly_web.stop
-    assert args == ("path", True)
+    assert args == ("path", True, False, False, False, None, [])
+
+    target, args = orderly_web.cli.parse_args(["stop", "path", "--network"])
+    assert args == ("path", False, True, False, False, None, [])
+
+    target, args = orderly_web.cli.parse_args(["stop", "path", "--volumes"])
+    assert args == ("path", False, False, True, False, None, [])
+
+    target, args = orderly_web.cli.parse_args(["stop", "path", "--force", "--extra=./extra_path", "--option=k=v"])
+    assert args == ("path", False, False, False, True, "./extra_path", [{"k": "v"}])
 
 
 def test_cli_parse_add_users():
