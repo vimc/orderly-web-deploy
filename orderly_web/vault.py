@@ -85,7 +85,7 @@ def get_github_token():
     try:
         return os.environ["VAULT_AUTH_GITHUB_TOKEN"]
     except KeyError:
-        return input("Enter GitHub token for vault:").strip()
+        return input("Enter GitHub token for vault: ").strip()
 
 
 def drop_envvar(name):
