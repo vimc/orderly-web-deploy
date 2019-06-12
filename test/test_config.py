@@ -77,7 +77,7 @@ def test_example_config():
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
-    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-211"
+    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
 
 
 def test_config_custom_styles():

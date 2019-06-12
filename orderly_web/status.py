@@ -2,6 +2,7 @@ import docker
 
 from orderly_web.config import read_config
 from orderly_web.docker_helpers import docker_client
+from requests.exceptions import HTTPError
 
 
 def print_status(path):
@@ -18,6 +19,9 @@ class OrderlyWebStatus:
         self.reload()
 
     def __str__(self):
+        if self.cannot_read_status:
+            return "Cannot read status from orderly-web because it has not " \
+                "started successfully or is in an error state."
         if not self.is_running:
             return "<not running>"
         st_c = dict_map(self.containers, format_container)
@@ -36,7 +40,14 @@ class OrderlyWebStatus:
 
     def reload(self):
         cfg_base = read_config(self.path)
-        cfg_running = cfg_base.fetch()
+
+        cfg_running = False
+
+        try:
+            cfg_running = cfg_base.fetch()
+            self.cannot_read_status = False
+        except HTTPError:
+            self.cannot_read_status = True
 
         self.is_running = bool(cfg_running)
         with docker_client() as client:
