@@ -136,9 +136,11 @@ class OrderlyWebConfig:
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
 
-        self.web_auth_github_app = config_dict(dat,
-                                               ["web", "auth", "github_oauth"],
-                                               True)
+        if not self.web_auth_montagu:
+            self.web_auth_github_app = config_dict(dat,
+                                               ["web", "auth", "github_oauth"])
+        else:
+            self.web_auth_github_app = None
 
         self.sass_variables = config_string(dat,
                                             ["web", "sass_variables"],

@@ -232,6 +232,21 @@ def test_vault_ssl():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_without_github_app_for_montagu():
+    path = "config/basic"
+    options = {"web": {"auth": {"montagu": True,
+                                "github_key": None,
+                                "github_secret": None}}}
+    res = orderly_web.start(path, options=options)
+    assert res
+    st = orderly_web.status(path)
+    assert st.containers["orderly"]["status"] == "running"
+    assert st.containers["web"]["status"] == "running"
+    assert st.network == "orderly_web_network"
+
+    orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token

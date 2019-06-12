@@ -93,7 +93,7 @@ web:
     ## Enable or disable fine grained permissions
     fine_grained: true
     ## Enable montagu authentication provider
-    montagu: false
+    montagu: true
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
