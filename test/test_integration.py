@@ -8,7 +8,6 @@ from urllib import request
 
 import requests
 import vault_dev
-from orderly_web.vault import vault_config
 
 from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *

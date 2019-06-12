@@ -53,9 +53,6 @@ class vault_config:
         self.auth_args = auth_args
 
     def client(self):
-        print(self.auth_method)
-        print(self.auth_args)
-        print(self.url)
         if not self.url:
             return vault_not_enabled()
         # NOTE: we might actually try and pick up VAULT_TOKEN from the
