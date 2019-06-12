@@ -61,8 +61,11 @@ def test_start_and_stop():
         assert dat["status"] == "success"
 
         web_config = string_from_container(
-            web, "/etc/orderly/web/config.properties")
-        assert "app.url=https://localhost" in web_config.split("\n")
+            web, "/etc/orderly/web/config.properties").split("\n")
+
+        assert "app.url=https://localhost" in web_config
+        assert "auth.github_key=notarealid" in web_config
+        assert "auth.github_secret=notarealsecret" in web_config
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
@@ -112,13 +115,17 @@ def test_start_with_custom_styles():
                       if v['Type'] == "volume" and
                       v['Name'] == "orderly_web_css"][0]
         assert css_volume['Name'] == "orderly_web_css"
-        assert css_volume['Destination'] == "/static/public"
+        assert css_volume['Destination'] == "/static/public/css"
 
         # check that the style files have been compiled with the custom vars
         web_container = cfg.get_container("web")
         style = string_from_container(web_container,
                                       "/static/public/css/style.css")
         assert "/* Example custom config */" in style
+
+        # check that js files are there also
+        res = requests.get("http://localhost:8888/js/index.bundle.js")
+        assert res.status_code == 200
 
         # check that the custom logo is mounted and appears on the page
         logo_mount = [v for v in details['Mounts']
@@ -196,6 +203,8 @@ def test_vault_ssl():
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
         cl.write("secret/db/password", value="s3cret")
+        cl.write("secret/github/id", value="ghid")
+        cl.write("secret/github/secret", value="ghs3cret")
 
         path = "config/complete"
 
@@ -211,6 +220,14 @@ def test_vault_ssl():
         container = cfg.get_container("orderly")
         res = string_from_container(container, "/orderly/orderly_envir.yml")
         assert "ORDERLY_DB_PASS: s3cret" in res
+
+        web_container = cfg.get_container("web")
+        web_config = string_from_container(
+            web_container,
+            "/etc/orderly/web/config.properties").split("\n")
+
+        assert "auth.github_key=ghid" in web_config
+        assert "auth.github_secret=ghs3cret" in web_config
 
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 

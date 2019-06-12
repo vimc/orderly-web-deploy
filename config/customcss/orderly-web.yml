@@ -67,6 +67,13 @@ web:
     ## Name of the team within this github organisation if using
     ## github auth (cuurrently must be "" - VIMC
     github_team: ""
+    ## If using github auth you will need to register a github oauth app
+    ## https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
+    ## The "Authorization callback URL" must be set to the public facing url
+    ## that you configured above
+    github_oauth:
+      id: ""
+      secret: ""
     ## Enable or disable fine grained permissions
     fine_grained: true
     ## Enable montagu authentication provider
