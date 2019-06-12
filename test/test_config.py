@@ -158,13 +158,13 @@ def test_combine():
         return a
 
     assert do_combine({"a": 1}, {"b": 2}) == \
-           {"a": 1, "b": 2}
+        {"a": 1, "b": 2}
     assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3}, "b": 2}
+        {"a": {"x": 3}, "b": 2}
     assert do_combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3, "y": 4}, "b": 2}
+        {"a": {"x": 3, "y": 4}, "b": 2}
     assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
-           {"a": {"x": 3}, "b": 2}
+        {"a": {"x": 3}, "b": 2}
 
 
 def test_read_and_extra():
