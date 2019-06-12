@@ -72,8 +72,8 @@ web:
     ## The "Authorization callback URL" must be set to the public facing url
     ## that you configured above
     github_oauth:
-      id: ""
-      secret: ""
+      id: "notarealid"
+      secret: "notarealsecret"
     ## Enable or disable fine grained permissions
     fine_grained: true
     ## Enable montagu authentication provider

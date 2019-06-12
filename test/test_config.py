@@ -69,6 +69,8 @@ def test_example_config():
     assert cfg.web_auth_fine_grained
     assert cfg.web_auth_github_org == "vimc"
     assert cfg.web_auth_github_team == ""
+    assert cfg.web_auth_github_app["id"] == "notarealid"
+    assert cfg.web_auth_github_app["secret"] == "notarealsecret"
     assert cfg.sass_variables is None
     assert "css-generator" not in cfg.images
     assert "css" not in cfg.volumes

@@ -60,8 +60,11 @@ def test_start_and_stop():
         assert dat["status"] == "success"
 
         web_config = string_from_container(
-            web, "/etc/orderly/web/config.properties")
-        assert "app.url=https://localhost" in web_config.split("\n")
+            web, "/etc/orderly/web/config.properties").split("\n")
+
+        assert "app.url=https://localhost" in web_config
+        assert "auth.github_key=notarealid" in web_config
+        assert "auth.github_secret=notarealsecret" in web_config
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
@@ -216,6 +219,14 @@ def test_vault_ssl():
         container = cfg.get_container("orderly")
         res = string_from_container(container, "/orderly/orderly_envir.yml")
         assert "ORDERLY_DB_PASS: s3cret" in res
+
+        web_container = cfg.get_container("web")
+        web_config = string_from_container(
+            web_container,
+            "/etc/orderly/web/config.properties").split("\n")
+
+        assert "auth.github_key=ghid" in web_config
+        assert "auth.github_secret=ghs3cret" in web_config
 
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
