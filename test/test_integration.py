@@ -139,6 +139,28 @@ def test_start_with_custom_styles():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_start_with_montagu_config():
+    path = "config/montagu"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert st.network == "orderly_web_network"
+
+        cfg = fetch_config(path)
+        web = cfg.get_container("web")
+        web_config = string_from_container(
+            web, "/etc/orderly/web/config.properties").split("\n")
+
+        assert "montagu.url=http://montagu" in web_config
+        assert "montagu.api_url=http://montagu/api" in web_config
+
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_admin_cli():
     path = "config/basic"
     try:

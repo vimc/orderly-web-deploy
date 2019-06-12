@@ -96,6 +96,13 @@ def test_config_custom_styles():
     assert cfg.logo_path == expected_path
 
 
+def test_config_montagu():
+    path = "config/montagu"
+    cfg = build_config(path)
+    assert cfg.montagu_url == "http://montagu"
+    assert cfg.montagu_api_url == "http://montagu/api"
+
+
 def test_string_representation():
     img = DockerImageReference("a", "b", "c")
     assert str(img) == "a/b:c"
