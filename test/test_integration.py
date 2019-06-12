@@ -133,11 +133,10 @@ def test_start_with_custom_styles():
 
 
 def test_stop_broken_orderly_web():
-    path = "config/breaking"
 
     start_failed = False
     try:
-        orderly_web.start(path)
+        orderly_web.start("config/breaking")
     except docker.errors.APIError:
         start_failed = True
 
@@ -145,16 +144,40 @@ def test_stop_broken_orderly_web():
 
     orderly_web.stop(path)
 
-    # stopping without force should have left containers running without throwing
+    # stop without force should have left containers without throwing
     with docker_client() as cl:
         assert container_exists(cl, "orderly_web_orderly")
 
-    orderly_web.stop(path, force=True)
+    orderly_web.stop(path, force=True, network=True, volumes=True)
     with docker_client() as cl:
         assert not container_exists(cl, "orderly_web_orderly")
 
 
-# TODO: test_stop_broken_with_extra & with_options
+def test_stop_broken_orderly_web_with_option():
+
+    path = "config/breaking"
+    options = [{"network": "ow_broken_test"}]
+
+    start_failed = False
+    try:
+        orderly_web.start(path, options=options)
+    except docker.errors.APIError:
+        start_failed = True
+
+    assert start_failed
+
+    with docker_client() as cl:
+        assert container_exists(cl, "orderly_web_orderly")
+        assert network_exists(cl, "ow_broken_test")
+
+    orderly_web.stop(path, force=True, network=True, volumes=True, options=options)
+
+    with docker_client() as cl:
+        assert not container_exists(cl, "orderly_web_orderly")
+        assert not  network_exists(cl, "ow_broken_test")
+
+
+# TODO: test_stop_broken_with_extra
 
 def test_admin_cli():
     path = "config/basic"

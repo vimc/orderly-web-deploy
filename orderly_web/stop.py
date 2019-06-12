@@ -5,7 +5,8 @@ from orderly_web.docker_helpers import *
 from requests.exceptions import HTTPError
 
 
-def stop(path, kill=False, network=False, volumes=False, force=False, extra=None, options=None):
+def stop(path, kill=False, network=False, volumes=False, force=False,
+         extra=None, options=None):
     try:
         cfg = fetch_config(path)
     except HTTPError:
@@ -14,7 +15,8 @@ def stop(path, kill=False, network=False, volumes=False, force=False, extra=None
             print("Forcing stop.")
             cfg = build_config(path, extra, options)
         else:
-            print("To force stop, re-run with --force option and any configuration options in --extra and --options.")
+            print("To force stop, re-run with --force option and any " 
+                  "configuration options in --extra and --options.")
             return
 
     if cfg:

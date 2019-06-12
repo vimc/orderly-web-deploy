@@ -48,8 +48,11 @@ def test_cli_parse_stop():
     target, args = orderly_web.cli.parse_args(["stop", "path", "--volumes"])
     assert args == ("path", False, False, True, False, None, [])
 
-    target, args = orderly_web.cli.parse_args(["stop", "path", "--force", "--extra=./extra_path", "--option=k=v"])
-    assert args == ("path", False, False, False, True, "./extra_path", [{"k": "v"}])
+    target, args = orderly_web.cli.parse_args(["stop", "path", "--force",
+                                               "--extra=./extra_path",
+                                               "--option=k=v"])
+    assert args == ("path", False, False, False, True, "./extra_path",
+                    [{"k": "v"}])
 
 
 def test_cli_parse_add_users():
