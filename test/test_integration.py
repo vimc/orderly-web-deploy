@@ -226,8 +226,7 @@ def test_vault_github_login_with_prompt():
                     return_value=os.environ["VAULT_TEST_GITHUB_PAT"]):
         with vault_dev.server() as s:
             cl = s.client()
-
-            cl.write("auth/github/config", organization="vimc")
+            enable_github_login(cl)
             cl.write("secret/db/password", value="s3cret")
 
             path = "config/vault"
