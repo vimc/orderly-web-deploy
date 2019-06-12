@@ -1,4 +1,7 @@
+import base64
+
 import pytest
+from PIL import Image
 
 from orderly_web.docker_helpers import *
 
@@ -32,6 +35,22 @@ def test_string_into_container():
         assert out[0] == 0
         assert out[1].decode("UTF-8") == text
         container.kill()
+
+
+def test_file_into_container():
+    with docker_client() as cl:
+        container = cl.containers.run("alpine", ["sleep", "20"],
+                                      detach=True, auto_remove=True)
+        img = Image.new("RGB", (60, 30), color="red")
+        img.save("pil_red.png")
+        file_into_container("pil_red.png", container, ".")
+        out = container.exec_run(["cat", "pil_red.png"])
+        with open("pil_red.png", "rb") as image:
+            b64string = base64.b64encode(image.read())
+        assert out[0] == 0
+        assert base64.b64encode(out[1]) == b64string
+        container.kill()
+        os.remove("pil_red.png")
 
 
 def test_container_wait_running_detects_start_failure():

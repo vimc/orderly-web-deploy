@@ -1,6 +1,6 @@
 import os
-
 import docker
+from PIL import Image
 
 from orderly_web.config import build_config
 from orderly_web.status import status
@@ -8,7 +8,6 @@ from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
     ensure_network, ensure_volume, container_wait_running, \
     exec_safely, string_into_container, file_into_container
-from PIL import Image
 
 
 def start(path, extra=None, options=None, pull_images=False):
