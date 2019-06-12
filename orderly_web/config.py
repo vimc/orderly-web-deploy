@@ -136,6 +136,10 @@ class OrderlyWebConfig:
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
 
+        self.web_auth_github_app = config_dict(dat,
+                                               ["web", "auth", "github_oauth"],
+                                               True)
+
         self.sass_variables = config_string(dat,
                                             ["web", "sass_variables"],
                                             True)
@@ -204,6 +208,7 @@ class OrderlyWebConfig:
         vault_client = self.vault.client()
         vault.resolve_secrets(self, vault_client)
         vault.resolve_secrets(self.orderly_env, vault_client)
+        vault.resolve_secrets(self.web_auth_github_app, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))

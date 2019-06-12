@@ -69,6 +69,8 @@ def test_example_config():
     assert cfg.web_auth_fine_grained
     assert cfg.web_auth_github_org == "vimc"
     assert cfg.web_auth_github_team == ""
+    assert cfg.web_auth_github_app["id"] == "notarealid"
+    assert cfg.web_auth_github_app["secret"] == "notarealsecret"
     assert cfg.sass_variables is None
     assert "css-generator" not in cfg.images
     assert "css" not in cfg.volumes
@@ -125,6 +127,8 @@ def test_can_substitute_secrets():
         cl.write("secret/ssl/certificate", value=cert)
         cl.write("secret/ssl/key", value=key)
         cl.write("secret/db/password", value="s3cret")
+        cl.write("secret/github/id", value="ghkey")
+        cl.write("secret/github/secret", value="ghs3cret")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
@@ -137,6 +141,8 @@ def test_can_substitute_secrets():
         assert cfg.proxy_ssl_certificate == cert
         assert cfg.proxy_ssl_key == key
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
+        assert cfg.web_auth_github_app["id"] == "ghkey"
+        assert cfg.web_auth_github_app["secret"] == "ghs3cret"
 
 
 def test_combine():

@@ -97,7 +97,8 @@ def web_container(cfg, docker_client):
     image = str(cfg.images["web"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
     if cfg.sass_variables is not None:
-        mounts.append(docker.types.Mount("/static/public", cfg.volumes["css"]))
+        mounts.append(docker.types.Mount("/static/public/css",
+                                         cfg.volumes["css"]))
     if cfg.logo_name is not None:
         logo_in_container = "/static/public/img/logo/{}".format(cfg.logo_name)
         mounts.append(docker.types.Mount(logo_in_container,
@@ -127,6 +128,8 @@ def web_container_config(cfg, container):
             "auth.github_team": cfg.web_auth_github_team,
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
+            "auth.github_key": cfg.web_auth_github_app["id"],
+            "auth.github_secret": cfg.web_auth_github_app["secret"],
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
@@ -146,7 +149,7 @@ def web_generate_css(cfg, docker_client):
     print("Generating custom css")
     image = str(cfg.images["css-generator"])
     compiled_css_mount = \
-        docker.types.Mount("/static/public", cfg.volumes["css"])
+        docker.types.Mount("/static/public/css", cfg.volumes["css"])
     variable_mount = \
         docker.types.Mount("/static/src/scss/partials/user-variables.scss",
                            cfg.sass_variables, type="bind")
