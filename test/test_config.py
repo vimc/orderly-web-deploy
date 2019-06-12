@@ -115,6 +115,12 @@ def test_config_no_proxy():
     assert not cfg.proxy_enabled
 
 
+def test_config_proxy_not_enabled():
+    options = {"proxy": {"enabled": False}}
+    cfg = build_config("config/noproxy", options=options)
+    assert not cfg.proxy_enabled
+
+
 def test_can_substitute_secrets():
     with vault_dev.server() as s:
         cl = s.client()
