@@ -1,7 +1,7 @@
 """Usage:
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
-  orderly-web stop <path> [--volumes] [--network] [--kill]
+  orderly-web stop <path> [--volumes] [--network] [--kill] [--force] [--extra=PATH] [--option=OPTION]...
   orderly-web admin <path> add-users <email>...
   orderly-web admin <path> add-groups <name>...
   orderly-web admin <path> add-members <group> <email>...
@@ -17,6 +17,8 @@ Options:
   --volumes        Remove volumes (WARNING: irreversible data loss)
   --network        Remove network
   --kill           Kill the containers (faster, but possible db corruption)
+  --force          Force stop even if containers are corrupted and cannot signal their running configuration.
+                   Use with extra and/or option to force stop with configuration options.
 """
 
 import docopt
@@ -36,7 +38,7 @@ def parse_args(argv):
     path = args["<path>"]
     if args["start"]:
         extra = args["--extra"]
-        options = [string_to_dict(x) for x in args["--option"]]
+        options = parse_option(args)
         pull_images = args["--pull"]
         target = orderly_web.start
         args = (path, extra, options, pull_images)
@@ -45,11 +47,20 @@ def parse_args(argv):
         args = (path, )
     elif args["stop"]:
         kill = args["--kill"]
+        network = args["--network"]
+        volumes = args["--volumes"]
+        force = args["--force"]
+        extra = args["--extra"]
+        options = parse_option(args)
         target = orderly_web.stop
-        args = (path, kill)
+        args = (path, kill, network, volumes, force, extra, options)
     elif args["admin"]:
         target, args = parse_admin_args(args)
     return target, args
+
+
+def parse_option(args):
+    return [string_to_dict(x) for x in args["--option"]]
 
 
 def parse_admin_args(args):

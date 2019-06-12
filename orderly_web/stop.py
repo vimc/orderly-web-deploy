@@ -1,11 +1,21 @@
 import docker
 
-from orderly_web.config import fetch_config
+from orderly_web.config import fetch_config, build_config
 from orderly_web.docker_helpers import *
+from requests.exceptions import HTTPError
 
 
-def stop(path, kill=False, network=False, volumes=False):
-    cfg = fetch_config(path)
+def stop(path, kill=False, network=False, volumes=False, force=False, extra=None, options=None):
+    try:
+        cfg = fetch_config(path)
+    except HTTPError:
+        print("Unable to fetch config from orderly-web.")
+        if force:
+            print("Forcing stop.")
+            cfg = build_config(path, extra, options)
+        else:
+            print("To force stop, re-run with --force option and any configuration options in --extra and --options.")
+            return
 
     if cfg:
         print("Stopping OrderlyWeb from '{}'".format(path))
