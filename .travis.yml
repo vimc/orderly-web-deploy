@@ -6,6 +6,8 @@ before_install:
   - docker pull vimc/orderly.server:master
   - docker pull vimc/orderly-web:master
   - docker pull vimc/orderlyweb-migrate:master
+  - docker pull vimc/orderly-web-user-cli:master
+  - docker pull vimc/orderly-web-css-generator:master
 
 install:
   - pip3 install codecov pycodestyle

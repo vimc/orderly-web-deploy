@@ -115,7 +115,7 @@ class OrderlyWebConfig:
         self.images = {
             "orderly": config_image_reference(dat, ["orderly", "image"]),
             "web": config_image_reference(dat, ["web", "image"]),
-            "admin": config_image_reference(dat, ["admin", "image"]),
+            "admin": config_image_reference(dat, ["web", "image"], "admin"),
             "migrate": config_image_reference(dat, ["web", "image"],
                                               "migrate")
         }
@@ -182,6 +182,16 @@ class OrderlyWebConfig:
             self.containers["proxy"] = "{}_proxy".format(self.container_prefix)
         else:
             self.proxy_enabled = False
+
+        self.web_url = config_string(dat, ["web", "url"], True)
+        if not self.web_url:
+            if self.proxy_enabled:
+                self.web_url = "https://{}:{}".format(
+                    self.proxy_hostname, self.proxy_port_https)
+            elif self.web_dev_mode:
+                self.web_url = "http://localhost:{}".format(self.web_port)
+            else:
+                raise Exception("web_url must be provided")
 
     def save(self):
         orderly = self.get_container("orderly")

@@ -123,6 +123,7 @@ def web_container_config(cfg, container):
     opts = {"app.port": str(cfg.web_port),
             "app.name": cfg.web_name,
             "app.email": cfg.web_email,
+            "app.url": cfg.web_url,
             "auth.github_org": cfg.web_auth_github_org,
             "auth.github_team": cfg.web_auth_github_team,
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),

@@ -88,7 +88,7 @@ def test_config_custom_styles():
     assert cfg.volumes["css"] == "orderly_web_css"
     assert cfg.images["css-generator"].repo == "vimc"
     assert cfg.images["css-generator"].name == "orderly-web-css-generator"
-    assert cfg.images["css-generator"].tag == "mrc-286"
+    assert cfg.images["css-generator"].tag == "master"
     assert cfg.logo_name == "my-test-logo.png"
     expected_path = os.path.abspath(os.path.join(cfg.path, "my-test-logo.png"))
     assert cfg.logo_path == expected_path
@@ -221,6 +221,26 @@ def test_update_config_with_options_dict():
     data = build_config("config/basic", None, options=options)
     assert data.web_dev_mode
     assert data.network == "patched_network"
+
+
+def test_web_url_is_read_from_config():
+    data = build_config("config/basic")
+    assert data.web_url == "https://localhost"
+
+
+def test_web_url_default_depends_on_proxy():
+    options = {"web": {"url": None}}
+    data = build_config("config/basic", options=options)
+    assert data.web_url == "https://localhost:443"
+    data = build_config("config/noproxy", options=options)
+    assert data.web_url == "http://localhost:8888"
+
+
+def test_web_url_required_if_not_proxied():
+    with pytest.raises(Exception,
+                       match="web_url must be provided"):
+        options = {"web": {"url": None, "dev_mode": False}}
+        build_config("config/noproxy", options=options)
 
 
 def read_file(path):

@@ -59,6 +59,10 @@ def test_start_and_stop():
         dat = json.loads(http_get("http://localhost:8888/api/v1"))
         assert dat["status"] == "success"
 
+        web_config = string_from_container(
+            web, "/etc/orderly/web/config.properties")
+        assert "app.url=https://localhost" in web_config.split("\n")
+
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
         ports = proxy.attrs["HostConfig"]["PortBindings"]
@@ -88,7 +92,8 @@ def test_start_and_stop():
 def test_start_with_custom_styles():
     path = "config/customcss"
     try:
-        res = orderly_web.start(path)
+        options = {"web": {"url": "http://localhost:8888"}}
+        res = orderly_web.start(path, options=options)
         assert res
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
@@ -99,7 +104,7 @@ def test_start_with_custom_styles():
         cfg = fetch_config(path)
 
         # check that the style volume is really mounted
-        api_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+        api_client = docker.client.from_env().api
         details = api_client.inspect_container(cfg.containers["web"])
         assert len(details['Mounts']) == 3
         css_volume = [v for v in details['Mounts']
@@ -157,7 +162,8 @@ def test_admin_cli():
 
 def test_no_devmode_no_ports():
     path = "config/noproxy"
-    options = {"web": {"dev_mode": False}}
+    options = {"web": {"dev_mode": False,
+                       "url": "http://localhost"}}
 
     try:
         orderly_web.start(path, options=options)
