@@ -237,7 +237,8 @@ def test_vault_github_login_with_prompt():
 
             cfg = fetch_config(path)
             container = cfg.get_container("orderly")
-            res = string_from_container(container, "/orderly/orderly_envir.yml")
+            res = string_from_container(container,
+                                        "/orderly/orderly_envir.yml")
             assert "ORDERLY_DB_PASS: s3cret" in res
 
             orderly_web.stop(path, kill=True, volumes=True, network=True)
