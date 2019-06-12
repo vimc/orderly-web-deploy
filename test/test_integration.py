@@ -132,6 +132,30 @@ def test_start_with_custom_styles():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_stop_broken_orderly_web():
+    path = "config/breaking"
+
+    start_failed = False
+    try:
+        orderly_web.start(path)
+    except docker.errors.APIError:
+        start_failed = True
+
+    assert start_failed
+
+    orderly_web.stop(path)
+
+    # stopping without force should have left containers running without throwing
+    with docker_client() as cl:
+        assert container_exists(cl, "orderly_web_orderly")
+
+    orderly_web.stop(path, force=True)
+    with docker_client() as cl:
+        assert not container_exists(cl, "orderly_web_orderly")
+
+
+# TODO: test_stop_broken_with_extra & with_options
+
 def test_admin_cli():
     path = "config/basic"
     try:

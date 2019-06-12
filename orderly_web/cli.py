@@ -1,7 +1,8 @@
 """Usage:
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
   orderly-web status <path>
-  orderly-web stop <path> [--volumes] [--network] [--kill] [--force] [--extra=PATH] [--option=OPTION]...
+  orderly-web stop <path> [--volumes] [--network] [--kill] [--force]
+    [--extra=PATH] [--option=OPTION]...
   orderly-web admin <path> add-users <email>...
   orderly-web admin <path> add-groups <name>...
   orderly-web admin <path> add-members <group> <email>...
@@ -17,8 +18,9 @@ Options:
   --volumes        Remove volumes (WARNING: irreversible data loss)
   --network        Remove network
   --kill           Kill the containers (faster, but possible db corruption)
-  --force          Force stop even if containers are corrupted and cannot signal their running configuration.
-                   Use with extra and/or option to force stop with configuration options.
+  --force          Force stop even if containers are corrupted and cannot
+                   signal their running configuration. Use with extra and/or
+                   option to force stop with configuration options.
 """
 
 import docopt
