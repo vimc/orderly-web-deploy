@@ -137,8 +137,8 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "github_team"], True)
 
         if not self.web_auth_montagu:
-            self.web_auth_github_app = config_dict(dat,
-                                               ["web", "auth", "github_oauth"])
+            self.web_auth_github_app = config_dict(dat, ["web", "auth",
+                                                         "github_oauth"])
         else:
             self.web_auth_github_app = None
 
