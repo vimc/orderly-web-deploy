@@ -80,6 +80,7 @@ orderly:
     ORDERLY_DB_USER: db_user
     ORDERLY_DB_PASS: VAULT:secret/db/password:value
 
+
 ## Api and Website configuration
 web:
   ## Image to use for the web components.  As for the orderly
@@ -122,8 +123,15 @@ web:
     ## Name of the team within this github organisation if using
     ## github auth
     github_team: ""
+    ## If using github auth you will need to register a github oauth app
+    ## https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
+    ## The "Authorization callback URL" must be set to the public facing url
+    ## that you configured above
+    github_oauth:
+      id: VAULT:secret/github/id:value
+      secret: VAULT:secret/github/secret:value
     ## Enable or disable fine grained permissions
-    fine_grained: true
+    fine_grained: false
     ## Enable montagu authentication provider
     montagu: false
   ## Optional sass variables to override default styles. Should be a
