@@ -28,6 +28,9 @@ web:
   auth:
     github_org: vimc
     github_team: ""
+    github_oauth:
+      id: ""
+      secret: ""
     fine_grained: true
     montagu: false
 
