@@ -136,9 +136,11 @@ class OrderlyWebConfig:
         self.web_auth_github_team = config_string(
             dat, ["web", "auth", "github_team"], True)
 
-        self.web_auth_github_app = config_dict(dat,
-                                               ["web", "auth", "github_oauth"],
-                                               True)
+        if not self.web_auth_montagu:
+            self.web_auth_github_app = config_dict(dat, ["web", "auth",
+                                                         "github_oauth"])
+        else:
+            self.web_auth_github_app = None
 
         self.sass_variables = config_string(dat,
                                             ["web", "sass_variables"],
@@ -161,25 +163,28 @@ class OrderlyWebConfig:
 
         if "proxy" in dat and dat["proxy"]:
             self.proxy_enabled = config_boolean(
-                dat, ["proxy", "enabled"])
-            self.proxy_hostname = config_string(
-                dat, ["proxy", "hostname"])
-            self.proxy_port_http = config_integer(
-                dat, ["proxy", "port_http"])
-            self.proxy_port_https = config_integer(
-                dat, ["proxy", "port_https"])
-            ssl = config_dict(dat, ["proxy", "ssl"], True)
-            self.proxy_ssl_self_signed = ssl is None
-            if not self.proxy_ssl_self_signed:
-                self.proxy_ssl_certificate = config_string(
-                    dat, ["proxy", "ssl", "certificate"], True)
-                self.proxy_ssl_key = config_string(
-                    dat, ["proxy", "ssl", "key"], True)
-            self.images["proxy"] = config_image_reference(
-                dat, ["proxy", "image"])
-            self.volumes["proxy_logs"] = config_string(
-                dat, ["volumes", "proxy_logs"])
-            self.containers["proxy"] = "{}_proxy".format(self.container_prefix)
+                dat, ["proxy", "enabled"], True)
+
+            if self.proxy_enabled:
+                self.proxy_hostname = config_string(
+                    dat, ["proxy", "hostname"])
+                self.proxy_port_http = config_integer(
+                    dat, ["proxy", "port_http"])
+                self.proxy_port_https = config_integer(
+                    dat, ["proxy", "port_https"])
+                ssl = config_dict(dat, ["proxy", "ssl"], True)
+                self.proxy_ssl_self_signed = ssl is None
+                if not self.proxy_ssl_self_signed:
+                    self.proxy_ssl_certificate = config_string(
+                        dat, ["proxy", "ssl", "certificate"], True)
+                    self.proxy_ssl_key = config_string(
+                        dat, ["proxy", "ssl", "key"], True)
+                self.images["proxy"] = config_image_reference(
+                    dat, ["proxy", "image"])
+                self.volumes["proxy_logs"] = config_string(
+                    dat, ["volumes", "proxy_logs"])
+                self.containers["proxy"] = "{}_proxy".format(
+                    self.container_prefix)
         else:
             self.proxy_enabled = False
 
@@ -215,7 +220,6 @@ class OrderlyWebConfig:
 
 
 class DockerImageReference:
-
     def __init__(self, repo, name, tag):
         self.repo = repo
         self.name = name
