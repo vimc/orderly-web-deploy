@@ -15,7 +15,7 @@ orderly:
 web:
   image:
     # This is the breaking change!
-    repo: sabotage!
+    repo: SABOTAGE!
     name: orderly-web
     tag: master
     migrate: orderlyweb-migrate

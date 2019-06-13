@@ -15,7 +15,7 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
             print("Forcing stop.")
             cfg = build_config(path, extra, options)
         else:
-            print("To force stop, re-run with --force option and any " 
+            print("To force stop, re-run with --force option and any "
                   "configuration options in --extra and --options.")
             return
 
