@@ -133,10 +133,11 @@ def test_start_with_custom_styles():
 
 
 def test_stop_broken_orderly_web():
+    path = "config/breaking"
 
     start_failed = False
     try:
-        orderly_web.start("config/breaking")
+        orderly_web.start(path)
     except docker.errors.APIError:
         start_failed = True
 
