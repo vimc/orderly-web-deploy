@@ -244,7 +244,9 @@ def test_web_url_is_read_from_config():
 
 
 def test_github_app_not_needed_if_using_montagu():
-    options = {"web": {"auth": {"montagu": True}}}
+    options = {"web": {"auth": {"montagu": True,
+                       "montagu_url": "whatever",
+                       "montagu_api_url": "whatever"}}}
     data = build_config("config/basic", options=options)
     assert data.web_auth_github_app is None
 
