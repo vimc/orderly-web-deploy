@@ -142,6 +142,14 @@ class OrderlyWebConfig:
         else:
             self.web_auth_github_app = None
 
+        if self.web_auth_montagu:
+            self.montagu_url = config_string(dat,
+                                             ["web", "auth", "montagu_url"])
+            self.montagu_api_url = config_string(dat,
+                                                 ["web",
+                                                  "auth",
+                                                  "montagu_api_url"])
+
         self.sass_variables = config_string(dat,
                                             ["web", "sass_variables"],
                                             True)

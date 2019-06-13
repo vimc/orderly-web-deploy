@@ -96,6 +96,13 @@ def test_config_custom_styles():
     assert cfg.logo_path == expected_path
 
 
+def test_config_montagu():
+    path = "config/montagu"
+    cfg = build_config(path)
+    assert cfg.montagu_url == "http://montagu"
+    assert cfg.montagu_api_url == "http://montagu/api"
+
+
 def test_string_representation():
     img = DockerImageReference("a", "b", "c")
     assert str(img) == "a/b:c"
@@ -237,7 +244,9 @@ def test_web_url_is_read_from_config():
 
 
 def test_github_app_not_needed_if_using_montagu():
-    options = {"web": {"auth": {"montagu": True}}}
+    options = {"web": {"auth": {"montagu": True,
+                                "montagu_url": "whatever",
+                                "montagu_api_url": "whatever"}}}
     data = build_config("config/basic", options=options)
     assert data.web_auth_github_app is None
 

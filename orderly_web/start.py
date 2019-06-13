@@ -131,9 +131,13 @@ def web_container_config(cfg, container):
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
+    if cfg.web_auth_montagu:
+        opts["montagu.url"] = cfg.montagu_url
+        opts["montagu.api_url"] = cfg.montagu_api_url
     if cfg.web_auth_github_app:
         opts["auth.github_key"] = cfg.web_auth_github_app["id"]
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
+
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     string_into_container(txt, container, "/etc/orderly/web/config.properties")
