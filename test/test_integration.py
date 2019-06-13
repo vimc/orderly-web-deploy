@@ -175,13 +175,13 @@ def test_stop_broken_orderly_web_with_option():
 
     with docker_client() as cl:
         assert not container_exists(cl, "orderly_web_orderly")
-        assert not  network_exists(cl, "ow_broken_test")
+        assert not network_exists(cl, "ow_broken_test")
 
 
 def test_stop_broken_orderly_web_with_extra():
 
     path = "config/breaking"
-    extra = "config/extra.yml"
+    extra = "extra"  # defines network as "ow_broken_extra_test"
 
     start_failed = False
     try:
@@ -199,7 +199,7 @@ def test_stop_broken_orderly_web_with_extra():
 
     with docker_client() as cl:
         assert not container_exists(cl, "orderly_web_orderly")
-        assert not  network_exists(cl, "ow_broken_extra_test")
+        assert not network_exists(cl, "ow_broken_extra_test")
 
 
 def test_admin_cli():
