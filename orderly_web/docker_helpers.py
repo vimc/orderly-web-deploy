@@ -148,8 +148,8 @@ def string_into_container(txt, container, path):
         container.put_archive(os.path.dirname(path), tar)
 
 
-def file_into_container(local_path, container, destination_path):
-    tar = simple_tar(local_path, os.path.basename(local_path))
+def file_into_container(local_path, container, destination_path, name):
+    tar = simple_tar(local_path, name)
     container.put_archive(destination_path, tar)
 
 

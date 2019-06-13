@@ -43,8 +43,8 @@ def test_file_into_container():
                                       detach=True, auto_remove=True)
         img = Image.new("RGB", (60, 30), color="red")
         img.save("pil_red.png")
-        file_into_container("pil_red.png", container, ".")
-        out = container.exec_run(["cat", "pil_red.png"])
+        file_into_container("pil_red.png", container, ".", "test_name.png")
+        out = container.exec_run(["cat", "test_name.png"])
         with open("pil_red.png", "rb") as image:
             b64string = base64.b64encode(image.read())
         assert out[0] == 0

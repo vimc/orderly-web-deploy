@@ -1,4 +1,6 @@
 import os
+import tempfile
+
 import docker
 from PIL import Image
 
@@ -117,17 +119,21 @@ def web_container(cfg, docker_client):
     container = docker_client.containers.run(
         image, mounts=mounts, network=cfg.network, ports=ports,
         name=cfg.containers["web"], detach=True)
-    if cfg.logo_name is not None:
-        generate_favicon(cfg.logo_path)
-        file_into_container("favicon.ico", container, "/static/public")
-        os.remove("favicon.ico")
+    if cfg.favicon_path is not None:
+        img = generate_favicon(cfg.favicon_path)
+        file_into_container(img,
+                            container,
+                            "/static/public",
+                            "favicon.ico")
+        os.remove(img)
     return container
 
 
-def generate_favicon(logo_path):
-    filename = logo_path
-    img = Image.open(filename)
-    img.save('favicon.ico')
+def generate_favicon(source):
+    img = Image.open(source)
+    fd, name = tempfile.mkstemp()
+    img.save(name, format="ico")
+    return name
 
 
 def web_container_config(cfg, container):
