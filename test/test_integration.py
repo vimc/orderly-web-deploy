@@ -257,6 +257,8 @@ def test_vault_ssl():
 def test_without_github_app_for_montagu():
     path = "config/basic"
     options = {"web": {"auth": {"montagu": True,
+                                "montagu_url": "montagu",
+                                "montagu_api_url": "montagu/api",
                                 "github_key": None,
                                 "github_secret": None}}}
     res = orderly_web.start(path, options=options)
