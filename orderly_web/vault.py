@@ -61,12 +61,17 @@ class vault_config:
         # See for this workaround https://github.com/hvac/hvac/issues/421
         drop_envvar("VAULT_ADDR")
         drop_envvar("VAULT_TOKEN")
+
         if self.auth_method == "token":
             cl = hvac.Client(url=self.url, token=self.auth_args["token"])
         else:
             cl = hvac.Client(url=self.url)
             print("Authenticating with the vault using '{}'".format(
                 self.auth_method))
+
+            if not self.auth_args and self.auth_method == "github":
+                self.auth_args = {"token": get_github_token()}
+
             getattr(cl.auth, self.auth_method).login(**self.auth_args)
         return cl
 
@@ -74,6 +79,13 @@ class vault_config:
 class vault_not_enabled:
     def __getattr__(self, name):
         raise Exception("Vault access is not enabled")
+
+
+def get_github_token():
+    try:
+        return os.environ["VAULT_AUTH_GITHUB_TOKEN"]
+    except KeyError:
+        return input("Enter GitHub token for vault: ").strip()
 
 
 def drop_envvar(name):

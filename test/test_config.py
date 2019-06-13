@@ -117,6 +117,12 @@ def test_config_no_proxy():
     assert not cfg.proxy_enabled
 
 
+def test_config_proxy_not_enabled():
+    options = {"proxy": {"enabled": False}}
+    cfg = build_config("config/noproxy", options=options)
+    assert not cfg.proxy_enabled
+
+
 def test_can_substitute_secrets():
     with vault_dev.server() as s:
         cl = s.client()
@@ -228,6 +234,12 @@ def test_update_config_with_options_dict():
 def test_web_url_is_read_from_config():
     data = build_config("config/basic")
     assert data.web_url == "https://localhost"
+
+
+def test_github_app_not_needed_if_using_montagu():
+    options = {"web": {"auth": {"montagu": True}}}
+    data = build_config("config/basic", options=options)
+    assert data.web_auth_github_app is None
 
 
 def test_web_url_default_depends_on_proxy():
