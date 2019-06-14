@@ -160,6 +160,10 @@ class OrderlyWebConfig:
         else:
             self.logo_name = None
 
+        self.favicon_path = config_string(dat, ["web", "favicon"], True)
+        if self.favicon_path is not None:
+            self.favicon_path = self.get_abs_path(self.favicon_path)
+
         if self.sass_variables is not None:
             variables_abspath = self.get_abs_path(self.sass_variables)
             self.sass_variables = variables_abspath

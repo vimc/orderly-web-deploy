@@ -76,6 +76,7 @@ def test_example_config():
     assert "css" not in cfg.volumes
     assert cfg.logo_name is None
     assert cfg.logo_path is None
+    assert cfg.favicon_path is None
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
@@ -94,6 +95,9 @@ def test_config_custom_styles():
     assert cfg.logo_name == "my-test-logo.png"
     expected_path = os.path.abspath(os.path.join(cfg.path, "my-test-logo.png"))
     assert cfg.logo_path == expected_path
+    expected_icon_path = os.path.abspath(
+        os.path.join(cfg.path, "my-test-favicon.png"))
+    assert cfg.favicon_path == expected_icon_path
 
 
 def test_config_montagu():

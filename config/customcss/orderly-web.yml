@@ -84,6 +84,9 @@ web:
   ## Optional custom logo image, any valid image format. Should be a
   ## file path relative to the config file.
   logo: my-test-logo.png
+  ## Optional image to create favicon from, any valid image format.
+  ## Should be a file path relative to the config file.
+  favicon: my-test-favicon.png
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
