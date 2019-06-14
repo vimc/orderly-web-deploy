@@ -3,7 +3,6 @@ import docker
 from orderly_web.config import fetch_config, build_config
 from orderly_web.docker_helpers import *
 from orderly_web.errors import OrderlyWebConfigError
-from requests.exceptions import HTTPError
 
 
 def stop(path, kill=False, network=False, volumes=False, force=False,
@@ -15,10 +14,10 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
             print("Unable to fetch config from orderly-web, forcing stop.")
             cfg = build_config(path, extra, options)
         else:
-            raise OrderlyWebConfigError("Unable to fetch config from "
-                  "orderly-web. "
-                  "To force stop, provide --force option and any "
-                  "configuration options in --extra and --options.") from e
+            msg = ("Unable to fetch config from orderly-web. To force stop, "
+                   "provide --force option and any configuration options in "
+                   "--extra and --options.")
+            raise OrderlyWebConfigError(msg) from e
 
     if cfg:
         print("Stopping OrderlyWeb from '{}'".format(path))
