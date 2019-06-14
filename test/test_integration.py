@@ -12,6 +12,7 @@ import vault_dev
 
 from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *
+from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
 
 
@@ -151,9 +152,14 @@ def test_stop_broken_orderly_web():
 
         assert start_failed
 
-        orderly_web.stop("config/breaking")
+        stop_failed = False
+        try:
+            orderly_web.stop("config/breaking")
+        except OrderlyWebConfigError:
+            stop_failed = True
 
-        # stop without force should have left containers without throwing
+        assert stop_failed
+
         with docker_client() as cl:
             assert container_exists(cl, "orderly_web_orderly")
     finally:

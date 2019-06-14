@@ -46,7 +46,7 @@ class OrderlyWebStatus:
         try:
             cfg_running = cfg_base.fetch()
             self.cannot_read_status = False
-        except HTTPError:
+        except docker.errors.NotFound:
             self.cannot_read_status = True
 
         self.is_running = bool(cfg_running)
