@@ -76,6 +76,7 @@ def test_example_config():
     assert "css" not in cfg.volumes
     assert cfg.logo_name is None
     assert cfg.logo_path is None
+    assert cfg.favicon_path is None
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
@@ -94,6 +95,16 @@ def test_config_custom_styles():
     assert cfg.logo_name == "my-test-logo.png"
     expected_path = os.path.abspath(os.path.join(cfg.path, "my-test-logo.png"))
     assert cfg.logo_path == expected_path
+    expected_icon_path = os.path.abspath(
+        os.path.join(cfg.path, "my-test-favicon.png"))
+    assert cfg.favicon_path == expected_icon_path
+
+
+def test_config_montagu():
+    path = "config/montagu"
+    cfg = build_config(path)
+    assert cfg.montagu_url == "http://montagu"
+    assert cfg.montagu_api_url == "http://montagu/api"
 
 
 def test_string_representation():
@@ -237,7 +248,9 @@ def test_web_url_is_read_from_config():
 
 
 def test_github_app_not_needed_if_using_montagu():
-    options = {"web": {"auth": {"montagu": True}}}
+    options = {"web": {"auth": {"montagu": True,
+                                "montagu_url": "whatever",
+                                "montagu_api_url": "whatever"}}}
     data = build_config("config/basic", options=options)
     assert data.web_auth_github_app is None
 

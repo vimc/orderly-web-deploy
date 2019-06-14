@@ -142,6 +142,14 @@ class OrderlyWebConfig:
         else:
             self.web_auth_github_app = None
 
+        if self.web_auth_montagu:
+            self.montagu_url = config_string(dat,
+                                             ["web", "auth", "montagu_url"])
+            self.montagu_api_url = config_string(dat,
+                                                 ["web",
+                                                  "auth",
+                                                  "montagu_api_url"])
+
         self.sass_variables = config_string(dat,
                                             ["web", "sass_variables"],
                                             True)
@@ -151,6 +159,10 @@ class OrderlyWebConfig:
             self.logo_name = os.path.basename(self.logo_path)
         else:
             self.logo_name = None
+
+        self.favicon_path = config_string(dat, ["web", "favicon"], True)
+        if self.favicon_path is not None:
+            self.favicon_path = self.get_abs_path(self.favicon_path)
 
         if self.sass_variables is not None:
             variables_abspath = self.get_abs_path(self.sass_variables)

@@ -134,6 +134,9 @@ web:
     fine_grained: false
     ## Enable montagu authentication provider
     montagu: false
+    ## If using Montagu auth you also need the following
+    montagu_url: http://localhost
+    montagu_api_url: http://localhost:8080/v1
   ## Optional sass variables to override default styles. Should be a
   ## file path relative to the config file
   sass_variables: variables.scss

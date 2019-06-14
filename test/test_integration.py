@@ -232,6 +232,29 @@ def test_status_from_broken_orderly_web():
         orderly_web.stop(path, force=True, network=True, volumes=True)
 
 
+def test_start_with_montagu_config():
+    path = "config/montagu"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert st.network == "orderly_web_network"
+
+        cfg = fetch_config(path)
+        web = cfg.get_container("web")
+        web_config = string_from_container(
+            web, "/etc/orderly/web/config.properties").split("\n")
+
+        assert "montagu.url=http://montagu" in web_config
+        assert "montagu.api_url=http://montagu/api" in web_config
+
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+>>>>>>> master
+
+
 def test_admin_cli():
     path = "config/basic"
     try:
@@ -327,6 +350,8 @@ def test_vault_ssl():
 def test_without_github_app_for_montagu():
     path = "config/basic"
     options = {"web": {"auth": {"montagu": True,
+                                "montagu_url": "montagu",
+                                "montagu_api_url": "montagu/api",
                                 "github_key": None,
                                 "github_secret": None}}}
     res = orderly_web.start(path, options=options)

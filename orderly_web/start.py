@@ -1,11 +1,15 @@
+import os
+import tempfile
+
 import docker
+from PIL import Image
 
 from orderly_web.config import build_config
 from orderly_web.status import status
 from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
     ensure_network, ensure_volume, container_wait_running, \
-    exec_safely, string_into_container
+    exec_safely, string_into_container, file_into_container
 
 
 def start(path, extra=None, options=None, pull_images=False):
@@ -115,7 +119,21 @@ def web_container(cfg, docker_client):
     container = docker_client.containers.run(
         image, mounts=mounts, network=cfg.network, ports=ports,
         name=cfg.containers["web"], detach=True)
+    if cfg.favicon_path is not None:
+        img = generate_favicon(cfg.favicon_path)
+        file_into_container(img,
+                            container,
+                            "/static/public",
+                            "favicon.ico")
+        os.remove(img)
     return container
+
+
+def generate_favicon(source):
+    img = Image.open(source)
+    fd, name = tempfile.mkstemp()
+    img.save(name, format="ico")
+    return name
 
 
 def web_container_config(cfg, container):
@@ -131,9 +149,13 @@ def web_container_config(cfg, container):
             "orderly.server": "{}:8321".format(cfg.containers["orderly"])}
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
+    if cfg.web_auth_montagu:
+        opts["montagu.url"] = cfg.montagu_url
+        opts["montagu.api_url"] = cfg.montagu_api_url
     if cfg.web_auth_github_app:
         opts["auth.github_key"] = cfg.web_auth_github_app["id"]
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
+
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     string_into_container(txt, container, "/etc/orderly/web/config.properties")
