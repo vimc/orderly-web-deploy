@@ -252,7 +252,6 @@ def test_start_with_montagu_config():
 
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
->>>>>>> master
 
 
 def test_admin_cli():
