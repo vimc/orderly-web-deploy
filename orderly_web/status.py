@@ -2,7 +2,6 @@ import docker
 
 from orderly_web.config import read_config
 from orderly_web.docker_helpers import docker_client
-from requests.exceptions import HTTPError
 
 
 def print_status(path):
