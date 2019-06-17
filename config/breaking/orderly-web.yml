@@ -1,0 +1,45 @@
+container_prefix: orderly_web
+
+network: orderly_web_network
+
+volumes:
+  orderly: orderly_web_volume
+  proxy_logs: orderly_web_proxy_logs
+
+orderly:
+  image:
+    repo: vimc
+    name: orderly.server
+    tag: master
+
+web:
+  image:
+    # This is the breaking change!
+    repo: SABOTAGE!
+    name: orderly-web
+    tag: master
+    migrate: orderlyweb-migrate
+    admin: orderly-web-user-cli
+  url: https://localhost
+  dev_mode: true
+  port: 8888
+  name: OrderlyWeb
+  email: admin@example.com
+  auth:
+    github_org: vimc
+    github_team: ""
+    github_oauth:
+      id: ""
+      secret: ""
+    fine_grained: true
+    montagu: false
+
+proxy:
+  enabled: true
+  hostname: localhost
+  port_http: 80
+  port_https: 443
+  image:
+    repo: vimc
+    name: orderly-web-proxy
+    tag: master

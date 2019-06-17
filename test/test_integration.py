@@ -12,6 +12,7 @@ import vault_dev
 
 from orderly_web.config import fetch_config
 from orderly_web.docker_helpers import *
+from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
 
 
@@ -138,6 +139,97 @@ def test_start_with_custom_styles():
         assert res.status_code == 200
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_stop_broken_orderly_web():
+    path = "config/breaking"
+    try:
+        start_failed = False
+        try:
+            orderly_web.start(path)
+        except docker.errors.APIError:
+            start_failed = True
+
+        assert start_failed
+
+        stop_failed = False
+        try:
+            orderly_web.stop("config/breaking")
+        except OrderlyWebConfigError:
+            stop_failed = True
+
+        assert stop_failed
+
+        with docker_client() as cl:
+            assert container_exists(cl, "orderly_web_orderly")
+    finally:
+        orderly_web.stop(path, force=True, network=True, volumes=True)
+        with docker_client() as cl:
+            assert not container_exists(cl, "orderly_web_orderly")
+
+
+def test_stop_broken_orderly_web_with_option():
+    path = "config/breaking"
+    options = [{"network": "ow_broken_test"}]
+    try:
+        start_failed = False
+        try:
+            orderly_web.start(path, options=options)
+        except docker.errors.APIError:
+            start_failed = True
+
+        assert start_failed
+
+        with docker_client() as cl:
+            assert container_exists(cl, "orderly_web_orderly")
+            assert network_exists(cl, "ow_broken_test")
+    finally:
+        orderly_web.stop(path, force=True, network=True, volumes=True,
+                         options=options)
+        with docker_client() as cl:
+            assert not container_exists(cl, "orderly_web_orderly")
+            assert not network_exists(cl, "ow_broken_test")
+
+
+def test_stop_broken_orderly_web_with_extra():
+    path = "config/breaking"
+    extra = "extra"  # defines network as "ow_broken_extra_test"
+    try:
+        start_failed = False
+        try:
+            orderly_web.start(path, extra=extra)
+        except docker.errors.APIError:
+            start_failed = True
+
+        assert start_failed
+
+        with docker_client() as cl:
+            assert container_exists(cl, "orderly_web_orderly")
+            assert network_exists(cl, "ow_broken_extra_test")
+    finally:
+        orderly_web.stop(path, force=True, network=True, volumes=True,
+                         extra=extra)
+        with docker_client() as cl:
+            assert not container_exists(cl, "orderly_web_orderly")
+            assert not network_exists(cl, "ow_broken_extra_test")
+
+
+def test_status_from_broken_orderly_web():
+    path = "config/breaking"
+    try:
+        start_failed = False
+        try:
+            orderly_web.start(path)
+        except docker.errors.APIError:
+            start_failed = True
+
+        assert start_failed
+
+        status = orderly_web.status(path)
+        assert str(status) == "Cannot read status from orderly-web because " \
+            "it has not started successfully or is in an error state."
+    finally:
+        orderly_web.stop(path, force=True, network=True, volumes=True)
 
 
 def test_start_with_montagu_config():
