@@ -67,6 +67,7 @@ def test_start_and_stop():
         assert "app.url=https://localhost" in web_config
         assert "auth.github_key=notarealid" in web_config
         assert "auth.github_secret=notarealsecret" in web_config
+        assert "orderly.server=http://orderly_web_orderly:8321" in web_config
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
@@ -134,7 +135,8 @@ def test_start_with_custom_styles():
         expected_destination = "/static/public/img/logo/my-test-logo.png"
         assert logo_mount['Destination'] == expected_destination
         res = requests.get("http://localhost:8888")
-        assert """<img src="/img/logo/my-test-logo.png""" in res.text
+        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
+               in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
     finally:
