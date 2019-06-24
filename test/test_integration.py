@@ -133,7 +133,8 @@ def test_start_with_custom_styles():
         expected_destination = "/static/public/img/logo/my-test-logo.png"
         assert logo_mount['Destination'] == expected_destination
         res = requests.get("http://localhost:8888")
-        assert """<img src="/img/logo/my-test-logo.png""" in res.text
+        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
+               in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
     finally:
