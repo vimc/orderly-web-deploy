@@ -33,5 +33,6 @@ setup(name="orderly_web",
           "docker",
           "docopt",
           "hvac",
-          "yaml"
+          "yaml",
+          "Pillow"
       ])
