@@ -66,6 +66,7 @@ def test_start_and_stop():
         assert "app.url=https://localhost" in web_config
         assert "auth.github_key=notarealid" in web_config
         assert "auth.github_secret=notarealsecret" in web_config
+        assert "orderly.server=http://orderly_web_orderly:8321" in web_config
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
