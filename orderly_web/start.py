@@ -97,6 +97,7 @@ def orderly_write_ssh_keys(orderly_ssh, container):
     string_into_container(hosts[1].decode("UTF-8"), container,
                           path_known_hosts)
 
+
 def orderly_start(container):
     print("Starting orderly server")
     exec_safely(container, ["touch", "/go_signal"])
