@@ -146,6 +146,8 @@ def test_can_substitute_secrets():
         cl.write("secret/db/password", value="s3cret")
         cl.write("secret/github/id", value="ghkey")
         cl.write("secret/github/secret", value="ghs3cret")
+        cl.write("secret/ssh", public="public-key-data",
+                 private="private-key-data")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
@@ -160,6 +162,8 @@ def test_can_substitute_secrets():
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
         assert cfg.web_auth_github_app["id"] == "ghkey"
         assert cfg.web_auth_github_app["secret"] == "ghs3cret"
+        assert cfg.orderly_ssh["private"] == "private-key-data"
+        assert cfg.orderly_ssh["public"] == "public-key-data"
 
 
 def test_combine():

@@ -212,6 +212,13 @@ class OrderlyWebConfig:
             else:
                 raise Exception("web_url must be provided")
 
+        if "ssh" in dat["orderly"] and dat["orderly"]["ssh"]:
+            public = config_string(dat, ["orderly", "ssh", "public"])
+            private = config_string(dat, ["orderly", "ssh", "private"])
+            self.orderly_ssh = {"public": public, "private": private}
+        else:
+            self.orderly_ssh = None
+
     def save(self):
         orderly = self.get_container("orderly")
         txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
@@ -228,6 +235,7 @@ class OrderlyWebConfig:
         vault.resolve_secrets(self, vault_client)
         vault.resolve_secrets(self.orderly_env, vault_client)
         vault.resolve_secrets(self.web_auth_github_app, vault_client)
+        vault.resolve_secrets(self.orderly_ssh, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))

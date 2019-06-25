@@ -37,6 +37,7 @@ def start(path, extra=None, options=None, pull_images=False):
 
 def orderly_init(cfg, docker_client):
     container = orderly_container(cfg, docker_client)
+    orderly_write_ssh_keys(cfg.orderly_ssh, container)
     if not orderly_is_initialised(container):
         orderly_init_demo(container)
     orderly_check_schema(container)
@@ -80,6 +81,21 @@ def orderly_check_schema(container):
     print("Checking orderly schema is current")
     exec_safely(container, ["orderly", "rebuild", "--if-schema-changed"])
 
+
+def orderly_write_ssh_keys(orderly_ssh, container):
+    if not orderly_ssh:
+        return
+    print("Configuring ssh")
+    path_private = "/root/.ssh/id_rsa"
+    path_public = "/root/.ssh/id_rsa.pub"
+    path_known_hosts = "/root/.ssh/known_hosts"
+    exec_safely(container, ["mkdir", "-p", "/root/.ssh"])
+    string_into_container(orderly_ssh["private"], container, path_private)
+    string_into_container(orderly_ssh["public"], container, path_public)
+    exec_safely(container, ["chmod", "600", path_private])
+    hosts = exec_safely(container, ["ssh-keyscan", "github.com"])
+    string_into_container(hosts[1].decode("UTF-8"), container,
+                          path_known_hosts)
 
 def orderly_start(container):
     print("Starting orderly server")
