@@ -346,7 +346,8 @@ def test_vault_ssl():
         public = string_from_container(container, "/root/.ssh/id_rsa.pub")
         assert public == "public-key-data"
 
-        known_hosts = string_from_container(container, "/root/.ssh/known-hosts")
+        known_hosts = string_from_container(container,
+                                            "/root/.ssh/known_hosts")
         assert "github.com" in known_hosts
 
         web_container = cfg.get_container("web")
