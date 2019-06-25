@@ -143,8 +143,8 @@ def web_container_config(cfg, container):
             "app.name": cfg.web_name,
             "app.email": cfg.web_email,
             "app.url": cfg.web_url,
-            "auth.github_org": cfg.web_auth_github_org,
-            "auth.github_team": cfg.web_auth_github_team,
+            "auth.github_org": cfg.web_auth_github_org or "",
+            "auth.github_team": cfg.web_auth_github_team or "",
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
             "orderly.server": "http://{}:8321".format(orderly_container)}
