@@ -251,6 +251,8 @@ def test_start_with_montagu_config():
 
         assert "montagu.url=http://montagu" in web_config
         assert "montagu.api_url=http://montagu/api" in web_config
+        assert 'auth.github_org=' in web_config
+        assert 'auth.github_team=' in web_config
 
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)

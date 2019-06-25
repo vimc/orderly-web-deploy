@@ -270,6 +270,22 @@ def test_web_url_required_if_not_proxied():
         build_config("config/noproxy", options=options)
 
 
+def test_github_auth_required_if_not_using_montagu():
+    with pytest.raises(KeyError, match="web:auth:github_org"):
+        options = {"web": {"auth": {"github_org": None}}}
+        cfg = build_config("config/basic", options=options)
+
+
+def test_github_auth_ignored_if_using_montagu():
+    options = {"web": {"auth": {"montagu": True,
+                                "montagu_url": "https://localhost",
+                                "montagu_api_url": "https://localhost"}}}
+    cfg = build_config("config/basic", options=options)
+    assert cfg.web_auth_github_app is None
+    assert cfg.web_auth_github_org is None
+    assert cfg.web_auth_github_team is None
+
+
 def read_file(path):
     with open(path, "r") as f:
         return f.read()

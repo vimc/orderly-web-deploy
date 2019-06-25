@@ -131,16 +131,18 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "montagu"])
         self.web_auth_fine_grained = config_boolean(
             dat, ["web", "auth", "fine_grained"])
-        self.web_auth_github_org = config_string(
-            dat, ["web", "auth", "github_org"], True)
-        self.web_auth_github_team = config_string(
-            dat, ["web", "auth", "github_team"], True)
 
         if not self.web_auth_montagu:
             self.web_auth_github_app = config_dict(dat, ["web", "auth",
                                                          "github_oauth"])
+            self.web_auth_github_org = config_string(
+                dat, ["web", "auth", "github_org"])
+            self.web_auth_github_team = config_string(
+                dat, ["web", "auth", "github_team"], True)
         else:
             self.web_auth_github_app = None
+            self.web_auth_github_org = None
+            self.web_auth_github_team = None
 
         if self.web_auth_montagu:
             self.montagu_url = config_string(dat,
