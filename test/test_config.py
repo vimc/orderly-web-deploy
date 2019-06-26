@@ -106,6 +106,7 @@ def test_example_config():
     assert cfg.orderly_initial_source is "demo"
     assert cfg.orderly_initial_url is None
 
+
 def test_config_custom_styles():
     path = "config/customcss"
     cfg = build_config(path)

@@ -78,6 +78,13 @@ def test_start_and_stop():
         dat = json.loads(http_get("https://localhost/api/v1"))
         assert dat["status"] == "success"
 
+        # Orderly volume contains only the stripped down example from
+        # the URL, not the whole demo:
+        orderly = cfg.get_container("orderly")
+        src = exec_safely(orderly, ["ls", "/orderly/src"])[1]
+        src_contents = src.decode("UTF-8").strip().split("\n")
+        assert set(src_contents) == set(["README.md", "example"])
+
         # Bring the whole lot down:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
         st = orderly_web.status(path)
