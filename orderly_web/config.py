@@ -133,8 +133,8 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "fine_grained"])
 
         if not self.web_auth_montagu:
-            self.web_auth_github_app = config_dict(dat, ["web", "auth",
-                                                         "github_oauth"])
+            self.web_auth_github_app = config_dict_strict(
+                dat, ["web", "auth", "github_oauth"], ["id", "secret"])
             self.web_auth_github_org = config_string(
                 dat, ["web", "auth", "github_org"])
             self.web_auth_github_team = config_string(
@@ -212,12 +212,8 @@ class OrderlyWebConfig:
             else:
                 raise Exception("web_url must be provided")
 
-        if "ssh" in dat["orderly"] and dat["orderly"]["ssh"]:
-            public = config_string(dat, ["orderly", "ssh", "public"])
-            private = config_string(dat, ["orderly", "ssh", "private"])
-            self.orderly_ssh = {"public": public, "private": private}
-        else:
-            self.orderly_ssh = None
+        self.orderly_ssh = config_dict_strict(
+            dat, ["orderly", "ssh"], ["public", "private"], True)
 
     def save(self):
         orderly = self.get_container("orderly")
@@ -320,6 +316,20 @@ def config_boolean(data, path, is_optional=False):
 
 def config_dict(data, path, is_optional=False):
     return config_value(data, path, "dict", is_optional)
+
+
+def config_dict_strict(data, path, keys, is_optional=False):
+    d = config_dict(data, path, is_optional)
+    if not d:
+        return None
+    if set(keys) != set(d.keys()):
+        raise ValueError("Expected keys {} for {}".format(
+            ", ".join(keys), ":".join(path)))
+    for k, v in d.items():
+        if type(v) is not str:
+            raise ValueError("Expected a string for {}".format(
+            ":".join(path + [k])))
+    return d
 
 
 def config_image_reference(dat, path, name="name"):
