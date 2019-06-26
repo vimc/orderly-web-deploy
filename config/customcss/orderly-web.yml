@@ -30,6 +30,8 @@ orderly:
     repo: vimc
     name: orderly.server
     tag: master
+  initial:
+    source: demo
 
 ## Api and Website configuration
 web:

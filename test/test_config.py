@@ -1,3 +1,5 @@
+import io
+from contextlib import redirect_stdout
 import pytest
 import shutil
 import tempfile
@@ -101,6 +103,8 @@ def test_example_config():
     assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
 
+    assert cfg.orderly_initial_source is "demo"
+    assert cfg.orderly_initial_url is None
 
 def test_config_custom_styles():
     path = "config/customcss"
@@ -307,6 +311,30 @@ def test_github_auth_ignored_if_using_montagu():
     assert cfg.web_auth_github_app is None
     assert cfg.web_auth_github_org is None
     assert cfg.web_auth_github_team is None
+
+
+def test_can_use_url_for_initial_source():
+    url = "https://github.com/reside-ic/orderly-example"
+    options = {"orderly": {"initial": {"source": "clone", "url": url}}}
+    cfg = build_config("config/basic", options=options)
+    assert cfg.orderly_initial_source == "clone"
+    assert cfg.orderly_initial_url == url
+
+
+def test_initial_clone_requires_url():
+    options = {"orderly": {"initial": {"source": "clone"}}}
+    with pytest.raises(KeyError, match="orderly:initial:url"):
+        cfg = build_config("config/basic", options=options)
+
+
+def test_initial_demo_ignores_url():
+    url = "https://github.com/reside-ic/orderly-example"
+    options = {"orderly": {"initial": {"source": "demo", "url": url}}}
+    f = io.StringIO()
+    with redirect_stdout(f):
+        cfg = build_config("config/basic", options=options)
+    out = f.getvalue()
+    assert "NOTE: Ignoring orderly:initial:url" in out
 
 
 def read_file(path):

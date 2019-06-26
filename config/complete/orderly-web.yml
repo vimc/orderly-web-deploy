@@ -86,7 +86,14 @@ orderly:
   ssh:
     public: VAULT:secret/ssh:public
     private: VAULT:secret/ssh:private
-
+  ## Initial data source
+  initial:
+    ## Source must be one of "clone" or "demo"
+    source: clone
+    ## If source is "clone", then "url" must be given.  If using a
+    ## private repo, then use an ssh url and provide ssh keys in the
+    ## "ssh" section.
+    url: https://github.com/reside-ic/orderly-example
 
 ## Api and Website configuration
 web:

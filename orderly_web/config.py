@@ -215,6 +215,18 @@ class OrderlyWebConfig:
         self.orderly_ssh = config_dict_strict(
             dat, ["orderly", "ssh"], ["public", "private"], True)
 
+        self.orderly_initial_source = None
+        self.orderly_initial_url = None
+        if "initial" in dat["orderly"] and dat["orderly"]["initial"]:
+            self.orderly_initial_source = config_enum(
+                dat, ["orderly", "initial", "source"], ["demo", "clone"])
+            if self.orderly_initial_source == "clone":
+                self.orderly_initial_url = config_string(
+                    dat, ["orderly", "initial", "url"])
+            elif "url" in dat["orderly"]["initial"]:
+                # I think an error is a bit harsh
+                print("NOTE: Ignoring orderly:initial:url")
+
     def save(self):
         orderly = self.get_container("orderly")
         txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
@@ -330,6 +342,14 @@ def config_dict_strict(data, path, keys, is_optional=False):
             raise ValueError("Expected a string for {}".format(
                 ":".join(path + [k])))
     return d
+
+
+def config_enum(data, path, values, is_optional=False):
+    value = config_string(data, path, is_optional)
+    if value not in values:
+        raise ValueError("Expected one of [{}] for {}".format(
+            ", ".join(values), ":".join(path)))
+    return value
 
 
 def config_image_reference(dat, path, name="name"):
