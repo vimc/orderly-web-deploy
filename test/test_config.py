@@ -103,8 +103,9 @@ def test_example_config():
     assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
 
-    assert cfg.orderly_initial_source is "demo"
-    assert cfg.orderly_initial_url is None
+    assert cfg.orderly_initial_source == "clone"
+    assert cfg.orderly_initial_url == \
+        "https://github.com/reside-ic/orderly-example"
 
 
 def test_config_custom_styles():
@@ -325,7 +326,7 @@ def test_can_use_url_for_initial_source():
 def test_initial_clone_requires_url():
     options = {"orderly": {"initial": {"source": "clone"}}}
     with pytest.raises(KeyError, match="orderly:initial:url"):
-        cfg = build_config("config/basic", options=options)
+        cfg = build_config("config/montagu", options=options)
 
 
 def test_initial_demo_ignores_url():
