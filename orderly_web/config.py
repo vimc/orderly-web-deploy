@@ -328,7 +328,7 @@ def config_dict_strict(data, path, keys, is_optional=False):
     for k, v in d.items():
         if type(v) is not str:
             raise ValueError("Expected a string for {}".format(
-            ":".join(path + [k])))
+                ":".join(path + [k])))
     return d
 
 
