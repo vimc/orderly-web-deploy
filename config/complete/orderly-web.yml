@@ -79,6 +79,13 @@ orderly:
     ORDERLY_DB_HOST: db_host
     ORDERLY_DB_USER: db_user
     ORDERLY_DB_PASS: VAULT:secret/db/password:value
+  ## Path to ssh key for interacting with git; this will be set up at
+  ## ~/.ssh in the orderly container so that pull and fetch work.  You
+  ## might use a github deploy key here.  For completeness both the
+  ## public and private parts of the keypair are listed.
+  ssh:
+    public: VAULT:secret/ssh:public
+    private: VAULT:secret/ssh:private
 
 
 ## Api and Website configuration

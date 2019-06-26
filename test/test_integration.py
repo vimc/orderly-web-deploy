@@ -323,6 +323,8 @@ def test_vault_ssl():
         cl.write("secret/db/password", value="s3cret")
         cl.write("secret/github/id", value="ghid")
         cl.write("secret/github/secret", value="ghs3cret")
+        cl.write("secret/ssh", public="public-key-data",
+                 private="private-key-data")
 
         path = "config/complete"
 
@@ -338,6 +340,15 @@ def test_vault_ssl():
         container = cfg.get_container("orderly")
         res = string_from_container(container, "/orderly/orderly_envir.yml")
         assert "ORDERLY_DB_PASS: s3cret" in res
+
+        private = string_from_container(container, "/root/.ssh/id_rsa")
+        assert private == "private-key-data"
+        public = string_from_container(container, "/root/.ssh/id_rsa.pub")
+        assert public == "public-key-data"
+
+        known_hosts = string_from_container(container,
+                                            "/root/.ssh/known_hosts")
+        assert "github.com" in known_hosts
 
         web_container = cfg.get_container("web")
         web_config = string_from_container(

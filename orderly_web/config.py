@@ -133,8 +133,8 @@ class OrderlyWebConfig:
             dat, ["web", "auth", "fine_grained"])
 
         if not self.web_auth_montagu:
-            self.web_auth_github_app = config_dict(dat, ["web", "auth",
-                                                         "github_oauth"])
+            self.web_auth_github_app = config_dict_strict(
+                dat, ["web", "auth", "github_oauth"], ["id", "secret"])
             self.web_auth_github_org = config_string(
                 dat, ["web", "auth", "github_org"])
             self.web_auth_github_team = config_string(
@@ -212,6 +212,9 @@ class OrderlyWebConfig:
             else:
                 raise Exception("web_url must be provided")
 
+        self.orderly_ssh = config_dict_strict(
+            dat, ["orderly", "ssh"], ["public", "private"], True)
+
     def save(self):
         orderly = self.get_container("orderly")
         txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
@@ -228,6 +231,7 @@ class OrderlyWebConfig:
         vault.resolve_secrets(self, vault_client)
         vault.resolve_secrets(self.orderly_env, vault_client)
         vault.resolve_secrets(self.web_auth_github_app, vault_client)
+        vault.resolve_secrets(self.orderly_ssh, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))
@@ -312,6 +316,20 @@ def config_boolean(data, path, is_optional=False):
 
 def config_dict(data, path, is_optional=False):
     return config_value(data, path, "dict", is_optional)
+
+
+def config_dict_strict(data, path, keys, is_optional=False):
+    d = config_dict(data, path, is_optional)
+    if not d:
+        return None
+    if set(keys) != set(d.keys()):
+        raise ValueError("Expected keys {} for {}".format(
+            ", ".join(keys), ":".join(path)))
+    for k, v in d.items():
+        if type(v) is not str:
+            raise ValueError("Expected a string for {}".format(
+                ":".join(path + [k])))
+    return d
 
 
 def config_image_reference(dat, path, name="name"):

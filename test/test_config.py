@@ -50,6 +50,25 @@ def test_config_boolean():
     assert config_boolean(sample_data, "d")
 
 
+def test_config_dict_returns_dict():
+    assert config_dict(sample_data, ["b"]) == sample_data["b"]
+
+
+def test_config_dict_strict_returns_dict():
+    assert config_dict_strict(sample_data, ["b"], ["x"]) == sample_data["b"]
+
+
+def test_config_dict_strict_raises_if_keys_missing():
+    with pytest.raises(ValueError, match="Expected keys x, y for b"):
+        config_dict_strict(sample_data, ["b"], ["x", "y"])
+
+
+def test_config_dict_strict_raises_if_not_strings():
+    dat = {"a": {"b": {"c": 1}}}
+    with pytest.raises(ValueError, match="Expected a string for a:b:c"):
+        config_dict_strict(dat, ["a", "b"], "c")
+
+
 def test_example_config():
     cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
@@ -146,6 +165,8 @@ def test_can_substitute_secrets():
         cl.write("secret/db/password", value="s3cret")
         cl.write("secret/github/id", value="ghkey")
         cl.write("secret/github/secret", value="ghs3cret")
+        cl.write("secret/ssh", public="public-key-data",
+                 private="private-key-data")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection
@@ -160,6 +181,8 @@ def test_can_substitute_secrets():
         assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
         assert cfg.web_auth_github_app["id"] == "ghkey"
         assert cfg.web_auth_github_app["secret"] == "ghs3cret"
+        assert cfg.orderly_ssh["private"] == "private-key-data"
+        assert cfg.orderly_ssh["public"] == "public-key-data"
 
 
 def test_combine():
