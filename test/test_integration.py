@@ -1,5 +1,6 @@
 import io
 from contextlib import redirect_stdout
+import pytest
 import urllib
 import time
 import json
