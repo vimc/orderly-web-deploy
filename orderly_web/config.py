@@ -365,7 +365,7 @@ def combine(base, extra):
     """Combine exactly two dictionaries recursively, modifying the first
 argument in place with the contets of the second"""
     for k, v in extra.items():
-        if k in base and type(base[k]) is dict:
+        if k in base and type(base[k]) is dict and v is not None:
             combine(base[k], v)
         else:
             base[k] = v

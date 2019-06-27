@@ -218,6 +218,13 @@ def test_combine():
         {"a": {"x": 3}, "b": 2}
 
 
+def combine_can_replace_dict():
+    base = {"a": {"c": {"d": "x"}}, "b": "y"}
+    options = {"a": {"c": None}}
+    combine(base, options)
+    assert base["a"]["c"] == None
+
+
 def test_read_and_extra():
     with tempfile.TemporaryDirectory() as p:
         shutil.copy("config/basic/orderly-web.yml", p)
