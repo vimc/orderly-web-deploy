@@ -222,7 +222,7 @@ def combine_can_replace_dict():
     base = {"a": {"c": {"d": "x"}}, "b": "y"}
     options = {"a": {"c": None}}
     combine(base, options)
-    assert base["a"]["c"] == None
+    assert base["a"]["c"] is None
 
 
 def test_read_and_extra():
