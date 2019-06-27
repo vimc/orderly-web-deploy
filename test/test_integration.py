@@ -10,7 +10,7 @@ from urllib import request
 import requests
 import vault_dev
 
-from orderly_web.config import fetch_config
+from orderly_web.config import fetch_config, build_config
 from orderly_web.docker_helpers import *
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
@@ -439,6 +439,31 @@ def test_vault_github_login_from_env():
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
+
+
+def test_error_if_orderly_not_initialised():
+    path = "config/basic"
+    options = {"orderly": {"initial": None}}
+    cfg = build_config(path, options=options)
+    # ensure this test behaves sensibly if state is a bit messy:
+    with docker_client() as cl:
+        remove_volume(cl, cfg.volumes["orderly"])
+    try:
+        with pytest.raises(Exception,
+                           match="Orderly volume not initialised"):
+            res = orderly_web.start(path, options=options)
+        # now we have this container up we can initialise it anyway:
+        container = cfg.get_container("orderly")
+        args = ["Rscript", "-e", "orderly:::create_orderly_demo('/orderly')"]
+        exec_safely(container, args)
+        # still need to tear it down
+        container.kill()
+        container.remove()
+        # then start
+        res = orderly_web.start(path, options=options)
+        assert res
+    finally:
+        orderly_web.stop(path, network=True, volumes=True, kill=True)
 
 
 def enable_github_login(cl):
