@@ -71,6 +71,17 @@ def test_config_dict_strict_raises_if_not_strings():
         config_dict_strict(dat, ["a", "b"], "c")
 
 
+def test_config_enum_returns_string():
+    assert config_enum(sample_data, ["b", "x"], ["value1", "value2"]) == \
+        "value2"
+
+
+def test_config_enum_raises_if_invalid():
+    with pytest.raises(ValueError,
+                       match=r"Expected one of \[enum1, enum2\] for b:x"):
+        config_enum(sample_data, ["b", "x"], ["enum1", "enum2"])
+
+
 def test_example_config():
     cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
