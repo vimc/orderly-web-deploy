@@ -86,7 +86,11 @@ orderly:
   ssh:
     public: VAULT:secret/ssh:public
     private: VAULT:secret/ssh:private
-  ## Initial data source
+  ## Initial data source for the orderly reports.  This section is
+  ## optional - if not present, it is up to you to initialise the
+  ## orderly volume (in the volumes section above) with appropriate
+  ## data (if data is not present, orderly will not start).  This
+  ## section only has an effect if the volume is empty.
   initial:
     ## Source must be one of "clone" or "demo"
     source: clone
