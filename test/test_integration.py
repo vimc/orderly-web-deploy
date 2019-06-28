@@ -453,18 +453,35 @@ def test_error_if_orderly_not_initialised():
         with pytest.raises(Exception,
                            match="Orderly volume not initialised"):
             res = orderly_web.start(path, options=options)
-        # now we have this container up we can initialise it anyway:
-        container = cfg.get_container("orderly")
-        args = ["Rscript", "-e", "orderly:::create_orderly_demo('/orderly')"]
-        exec_safely(container, args)
-        # still need to tear it down
-        container.kill()
-        container.remove()
-        # then start
-        res = orderly_web.start(path, options=options)
-        assert res
     finally:
-        orderly_web.stop(path, network=True, volumes=True, kill=True)
+        orderly_web.stop(path, force=True, network=True, volumes=True,
+                         kill=True)
+
+
+def test_can_start_with_prepared_volume():
+    path = "config/basic"
+    options = {"orderly": {"initial": None}}
+    cfg = build_config(path, options=options)
+
+    # ensure this test behaves sensibly if state is a bit messy:
+    with docker_client() as cl:
+        remove_volume(cl, cfg.volumes["orderly"])
+        image = str(cfg.images["orderly"])
+        mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+        args = ["Rscript", "-e", "orderly:::create_orderly_demo('/orderly')"]
+        cl.containers.run(
+            image, entrypoint=args, mounts=mounts, auto_remove=True)
+
+    try:
+        f = io.StringIO()
+        with redirect_stdout(f):
+            res = orderly_web.start(path, options=options)
+        assert res
+        out = f.getvalue()
+        expected = 'orderly volume already contains data - not initialising'
+        assert expected in out.splitlines()
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def enable_github_login(cl):
