@@ -57,7 +57,9 @@ def orderly_container(cfg, docker_client):
 
 
 def orderly_initial_data(cfg, container):
-    if not orderly_is_initialised(container):
+    if orderly_is_initialised(container):
+        print("orderly volume already contains data - not initialising")
+    else:
         if cfg.orderly_initial_source == "demo":
             orderly_init_demo(container)
         elif cfg.orderly_initial_source == "clone":
