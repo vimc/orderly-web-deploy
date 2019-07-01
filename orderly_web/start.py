@@ -38,8 +38,7 @@ def start(path, extra=None, options=None, pull_images=False):
 def orderly_init(cfg, docker_client):
     container = orderly_container(cfg, docker_client)
     orderly_write_ssh_keys(cfg.orderly_ssh, container)
-    if not orderly_is_initialised(container):
-        orderly_init_demo(container)
+    orderly_initial_data(cfg, container)
     orderly_check_schema(container)
     orderly_write_env(cfg.orderly_env, container)
     orderly_start(container)
@@ -57,6 +56,18 @@ def orderly_container(cfg, docker_client):
     return container
 
 
+def orderly_initial_data(cfg, container):
+    if orderly_is_initialised(container):
+        print("orderly volume already contains data - not initialising")
+    else:
+        if cfg.orderly_initial_source == "demo":
+            orderly_init_demo(container)
+        elif cfg.orderly_initial_source == "clone":
+            orderly_init_clone(container, cfg.orderly_initial_url)
+        else:
+            raise Exception("Orderly volume not initialised")
+
+
 def orderly_write_env(env, container):
     if not env:
         return
@@ -69,6 +80,12 @@ def orderly_write_env(env, container):
 def orderly_init_demo(container):
     print("Initialising orderly with demo data")
     args = ["Rscript", "-e", "orderly:::create_orderly_demo('/orderly')"]
+    exec_safely(container, args)
+
+
+def orderly_init_clone(container, url):
+    print("Initialising orderly by cloning")
+    args = ["git", "clone", url, "/orderly"]
     exec_safely(container, args)
 
 

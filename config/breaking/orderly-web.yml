@@ -11,6 +11,8 @@ orderly:
     repo: vimc
     name: orderly.server
     tag: master
+  initial:
+    source: demo
 
 web:
   image:

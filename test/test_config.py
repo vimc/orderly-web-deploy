@@ -1,3 +1,5 @@
+import io
+from contextlib import redirect_stdout
 import pytest
 import shutil
 import tempfile
@@ -69,6 +71,17 @@ def test_config_dict_strict_raises_if_not_strings():
         config_dict_strict(dat, ["a", "b"], "c")
 
 
+def test_config_enum_returns_string():
+    assert config_enum(sample_data, ["b", "x"], ["value1", "value2"]) == \
+        "value2"
+
+
+def test_config_enum_raises_if_invalid():
+    with pytest.raises(ValueError,
+                       match=r"Expected one of \[enum1, enum2\] for b:x"):
+        config_enum(sample_data, ["b", "x"], ["enum1", "enum2"])
+
+
 def test_example_config():
     cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
@@ -100,6 +113,10 @@ def test_example_config():
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
+
+    assert cfg.orderly_initial_source == "clone"
+    assert cfg.orderly_initial_url == \
+        "https://github.com/reside-ic/orderly-example"
 
 
 def test_config_custom_styles():
@@ -199,6 +216,13 @@ def test_combine():
         {"a": {"x": 3, "y": 4}, "b": 2}
     assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
         {"a": {"x": 3}, "b": 2}
+
+
+def combine_can_replace_dict():
+    base = {"a": {"c": {"d": "x"}}, "b": "y"}
+    options = {"a": {"c": None}}
+    combine(base, options)
+    assert base["a"]["c"] is None
 
 
 def test_read_and_extra():
@@ -307,6 +331,30 @@ def test_github_auth_ignored_if_using_montagu():
     assert cfg.web_auth_github_app is None
     assert cfg.web_auth_github_org is None
     assert cfg.web_auth_github_team is None
+
+
+def test_can_use_url_for_initial_source():
+    url = "https://github.com/reside-ic/orderly-example"
+    options = {"orderly": {"initial": {"source": "clone", "url": url}}}
+    cfg = build_config("config/basic", options=options)
+    assert cfg.orderly_initial_source == "clone"
+    assert cfg.orderly_initial_url == url
+
+
+def test_initial_clone_requires_url():
+    options = {"orderly": {"initial": {"source": "clone"}}}
+    with pytest.raises(KeyError, match="orderly:initial:url"):
+        cfg = build_config("config/montagu", options=options)
+
+
+def test_initial_demo_ignores_url():
+    url = "https://github.com/reside-ic/orderly-example"
+    options = {"orderly": {"initial": {"source": "demo", "url": url}}}
+    f = io.StringIO()
+    with redirect_stdout(f):
+        cfg = build_config("config/basic", options=options)
+    out = f.getvalue()
+    assert "NOTE: Ignoring orderly:initial:url" in out
 
 
 def read_file(path):

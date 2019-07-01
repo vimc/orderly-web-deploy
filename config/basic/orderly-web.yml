@@ -27,6 +27,18 @@ orderly:
     repo: vimc
     name: orderly.server
     tag: master
+  ## Initial data source for the orderly reports.  This section is
+  ## optional - if not present, it is up to you to initialise the
+  ## orderly volume (in the volumes section above) with appropriate
+  ## data (if data is not present, orderly will not start).  This
+  ## section only has an effect if the volume is empty.
+  initial:
+    ## Source must be one of "clone" or "demo"
+    source: clone
+    ## If source is "clone", then "url" must be given.  If using a
+    ## private repo, then use an ssh url and provide ssh keys in the
+    ## "ssh" section.
+    url: https://github.com/reside-ic/orderly-example
 
 ## Api and Website configuration
 web:

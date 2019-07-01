@@ -50,6 +50,8 @@ orderly:
     ORDERLY_DB_HOST: db_host
     ORDERLY_DB_USER: db_user
     ORDERLY_DB_PASS: VAULT:secret/db/password:value
+  initial:
+    source: demo
 
 ## Api and Website configuration
 web:
