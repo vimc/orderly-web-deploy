@@ -118,6 +118,9 @@ def test_example_config():
     assert cfg.orderly_initial_url == \
         "https://github.com/reside-ic/orderly-example"
 
+    assert cfg.slack_webhook_url == \
+        "https://hooks.slack.com/services/T000/B000/XXXX"
+
 
 def test_config_custom_styles():
     path = "config/customcss"

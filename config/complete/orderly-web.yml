@@ -162,6 +162,12 @@ web:
   ## file path relative to the config file.
   logo: my-test-logo.png
 
+# To notify a Slack channel during deployment, provide both a webhook url
+# and a channel. Otherwise this section can be omitted.
+slack:
+  webhook_url: VAULT:secret/slack/webhook:value
+  channel: deploy
+
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
 ## network

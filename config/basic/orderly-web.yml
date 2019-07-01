@@ -91,6 +91,10 @@ web:
     ## Enable montagu authentication provider
     montagu: false
 
+# Optional: to notify a Slack channel during deployment, provide a webhook url
+slack:
+  webhook_url: https://hooks.slack.com/services/T000/B000/XXXX
+
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
 ## network

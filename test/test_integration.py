@@ -7,6 +7,7 @@ import json
 import ssl
 from unittest import mock
 from urllib import request
+from unittest.mock import patch, call
 
 import requests
 import vault_dev
@@ -15,6 +16,7 @@ from orderly_web.config import fetch_config, build_config
 from orderly_web.docker_helpers import *
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
+from orderly_web.notify import Notifier
 
 
 def test_status_when_not_running():
@@ -101,6 +103,7 @@ def test_start_and_stop():
             assert not container_exists(cl, cfg.containers["proxy"])
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
+
 
 
 def test_start_with_custom_styles():
@@ -482,6 +485,32 @@ def test_can_start_with_prepared_volume():
         assert expected in out.splitlines()
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_notifies_slack_on_success():
+    with patch.object(Notifier, 'post',
+                      return_value=None) as mock_notify:
+        path = "config/basic"
+        try:
+            orderly_web.start(path)
+        finally:
+            orderly_web.stop(path, kill=True, volumes=True, network=True)
+    calls = [call("*Starting* deploy to https://localhost"),
+             call("*Completed* deploy to https://localhost :shipit:")]
+    mock_notify.assert_has_calls(calls)
+
+
+def test_notifies_slack_on_fail():
+    with patch.object(Notifier, 'post',
+                      return_value=None) as mock_notify:
+        path = "config/breaking"
+        try:
+            orderly_web.start(path)
+        finally:
+            orderly_web.stop(path, force=True, network=True, volumes=True)
+    calls = [call("*Starting* deploy to https://localhost"),
+             call("*Failed* deploy to https://localhost :bomb:")]
+    mock_notify.assert_has_calls(calls)
 
 
 def enable_github_login(cl):
