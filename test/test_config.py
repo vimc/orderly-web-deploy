@@ -187,6 +187,7 @@ def test_can_substitute_secrets():
         cl.write("secret/github/secret", value="ghs3cret")
         cl.write("secret/ssh", public="public-key-data",
                  private="private-key-data")
+        cl.write("secret/slack/webhook", value="http://webhook")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection

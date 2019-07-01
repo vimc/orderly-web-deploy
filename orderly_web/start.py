@@ -39,10 +39,10 @@ def start(path, extra=None, options=None, pull_images=False):
             config_save(cfg)
             notifier.post("*Completed* deploy to {} :shipit:"
                           .format(cfg.web_url))
-        except:
-            notifier.post("*Failed* deploy to {} :bomb:".format(cfg.web_url))
-        finally:
             return True
+        except Exception:
+            notifier.post("*Failed* deploy to {} :bomb:".format(cfg.web_url))
+            raise
 
 
 def orderly_init(cfg, docker_client):

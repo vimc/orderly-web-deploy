@@ -105,7 +105,6 @@ def test_start_and_stop():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
-
 def test_start_with_custom_styles():
     path = "config/customcss"
     try:
@@ -336,6 +335,7 @@ def test_vault_ssl():
         cl.write("secret/github/secret", value="ghs3cret")
         cl.write("secret/ssh", public="public-key-data",
                  private="private-key-data")
+        cl.write("secret/slack/webhook", value="http://webhook")
 
         path = "config/complete"
 
@@ -506,6 +506,8 @@ def test_notifies_slack_on_fail():
         path = "config/breaking"
         try:
             orderly_web.start(path)
+        except docker.errors.APIError:
+            start_failed = True
         finally:
             orderly_web.stop(path, force=True, network=True, volumes=True)
     calls = [call("*Starting* deploy to https://localhost"),

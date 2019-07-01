@@ -227,7 +227,8 @@ class OrderlyWebConfig:
                 # I think an error is a bit harsh
                 print("NOTE: Ignoring orderly:initial:url")
 
-        self.slack_webhook_url = config_string(dat,["slack", "webhook_url"],
+        self.slack_webhook_url = config_string(dat,
+                                               ["slack", "webhook_url"],
                                                True)
 
     def save(self):
