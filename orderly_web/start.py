@@ -30,19 +30,23 @@ def start(path, extra=None, options=None, pull_images=False):
     with docker_client() as cl:
         notifier.post("*Starting* deploy to {}".format(cfg.web_url))
         try:
-            ensure_network(cl, cfg.network)
-            for v in cfg.volumes.values():
-                ensure_volume(cl, v)
-            orderly_init(cfg, cl)
-            web_init(cfg, cl)
-            proxy_init(cfg, cl)
-            config_save(cfg)
+            init_all(cl, cfg)
             notifier.post("*Completed* deploy to {} :shipit:"
                           .format(cfg.web_url))
             return True
         except Exception:
             notifier.post("*Failed* deploy to {} :bomb:".format(cfg.web_url))
             raise
+
+
+def init_all(cl, cfg):
+    ensure_network(cl, cfg.network)
+    for v in cfg.volumes.values():
+        ensure_volume(cl, v)
+    orderly_init(cfg, cl)
+    web_init(cfg, cl)
+    proxy_init(cfg, cl)
+    config_save(cfg)
 
 
 def orderly_init(cfg, docker_client):
