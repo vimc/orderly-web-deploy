@@ -118,6 +118,9 @@ def test_example_config():
     assert cfg.orderly_initial_url == \
         "https://github.com/reside-ic/orderly-example"
 
+    assert cfg.slack_webhook_url == \
+        "https://hooks.slack.com/services/T000/B000/XXXX"
+
 
 def test_config_custom_styles():
     path = "config/customcss"
@@ -184,6 +187,7 @@ def test_can_substitute_secrets():
         cl.write("secret/github/secret", value="ghs3cret")
         cl.write("secret/ssh", public="public-key-data",
                  private="private-key-data")
+        cl.write("secret/slack/webhook", value="http://webhook")
 
         # When reading the configuration we have to interpolate in the
         # correct values here for the vault connection

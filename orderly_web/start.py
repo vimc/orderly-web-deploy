@@ -5,6 +5,7 @@ import docker
 from PIL import Image
 
 from orderly_web.config import build_config
+from orderly_web.notify import Notifier
 from orderly_web.status import status
 from orderly_web.pull import pull
 from orderly_web.docker_helpers import docker_client, \
@@ -24,15 +25,28 @@ def start(path, extra=None, options=None, pull_images=False):
     cfg.resolve_secrets()
     if pull_images:
         pull(cfg)
+
+    notifier = Notifier(cfg.slack_webhook_url)
     with docker_client() as cl:
-        ensure_network(cl, cfg.network)
-        for v in cfg.volumes.values():
-            ensure_volume(cl, v)
-        orderly_init(cfg, cl)
-        web_init(cfg, cl)
-        proxy_init(cfg, cl)
-        config_save(cfg)
-        return True
+        notifier.post("*Starting* deploy to {}".format(cfg.web_url))
+        try:
+            init_all(cl, cfg)
+            notifier.post("*Completed* deploy to {} :shipit:"
+                          .format(cfg.web_url))
+            return True
+        except Exception:
+            notifier.post("*Failed* deploy to {} :bomb:".format(cfg.web_url))
+            raise
+
+
+def init_all(cl, cfg):
+    ensure_network(cl, cfg.network)
+    for v in cfg.volumes.values():
+        ensure_volume(cl, v)
+    orderly_init(cfg, cl)
+    web_init(cfg, cl)
+    proxy_init(cfg, cl)
+    config_save(cfg)
 
 
 def orderly_init(cfg, docker_client):
