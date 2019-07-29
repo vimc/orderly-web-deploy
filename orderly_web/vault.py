@@ -69,8 +69,11 @@ class vault_config:
             print("Authenticating with the vault using '{}'".format(
                 self.auth_method))
 
-            if not self.auth_args and self.auth_method == "github":
-                self.auth_args = {"token": get_github_token()}
+            if self.auth_method == "github":
+                if not self.auth_args:
+                    self.auth_args = {}
+                if "token" not in self.auth_args:
+                    self.auth_args["token"] = get_github_token()
 
             getattr(cl.auth, self.auth_method).login(**self.auth_args)
         return cl

@@ -445,6 +445,37 @@ def test_vault_github_login_from_env():
                          network=True)
 
 
+# To run this test you will need a token for the vimc robot user -
+# this can be found in the montagu vault as
+# /secret/vimc-robot/vault-token
+# This environment variable is configured on travis
+def test_vault_github_login_with_mount_path():
+    os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
+    with vault_dev.server() as s:
+        cl = s.client()
+        enable_github_login(cl, path="github-custom")
+        cl.write("secret/db/password", value="s3cret")
+
+        path = "config/vault"
+        vault_addr = "http://localhost:{}".format(s.port)
+        options = {"vault":
+                   {"addr": vault_addr,
+                    "auth":
+                    {"method": "github",
+                     "args": {"mount_point": "github-custom"}}}}
+
+        orderly_web.start(path, options=options)
+
+        cfg = fetch_config(path)
+        container = cfg.get_container("orderly")
+        res = string_from_container(container,
+                                    "/orderly/orderly_envir.yml")
+        assert "ORDERLY_DB_PASS: s3cret" in res
+
+        orderly_web.stop(path, kill=True, volumes=True,
+                         network=True)
+
+
 def test_error_if_orderly_not_initialised():
     path = "config/basic"
     options = {"orderly": {"initial": None}}
@@ -515,8 +546,8 @@ def test_notifies_slack_on_fail():
     mock_notify.assert_has_calls(calls)
 
 
-def enable_github_login(cl):
-    cl.sys.enable_auth_method(method_type="github")
+def enable_github_login(cl, path="github"):
+    cl.sys.enable_auth_method(method_type="github", path=path)
     policy = """
            path "secret/*" {
              capabilities = ["read", "list"]
@@ -531,9 +562,10 @@ def enable_github_login(cl):
     cl.auth.github.map_team(
         team_name="robots",
         policies=["secret-reader"],
+        mount_point=path
     )
 
-    cl.write("auth/github/config", organization="vimc")
+    cl.auth.github.configure(organization="vimc", mount_point=path)
 
 
 # Because we wait for a go signal to come up, we might not be able to
