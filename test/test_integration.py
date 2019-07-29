@@ -462,7 +462,7 @@ def test_vault_github_login_with_mount_path():
                    {"addr": vault_addr,
                     "auth":
                     {"method": "github",
-                     "args": "mount_point": "github-custom"}}}
+                     "args": {"mount_point": "github-custom"}}}}
 
         orderly_web.start(path, options=options)
 
