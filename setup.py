@@ -3,8 +3,11 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as f:
     long_description = f.read()
 
+with open("requirements.txt") as requirements_txt:
+    requirements = [line for line in requirements_txt]
+
 setup(name="orderly_web",
-      version="0.0.1",
+      version="0.0.2",
       description="Deploy scripts for OrderlyWeb",
       long_description=long_description,
       classifiers=[
@@ -29,10 +32,4 @@ setup(name="orderly_web",
           "vault_dev",
           "pytest"
       ],
-      requires=[
-          "docker",
-          "docopt",
-          "hvac",
-          "yaml",
-          "Pillow"
-      ])
+      install_requires = requirements)
