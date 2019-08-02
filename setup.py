@@ -3,8 +3,14 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as f:
     long_description = f.read()
 
-with open("requirements.txt") as requirements_txt:
-    requirements = [line for line in requirements_txt]
+requirements = [
+    "docker",
+    "docopt",
+    "hvac",
+    "pytest",
+    "pyyaml",
+    "vault_dev",
+    "Pillow"]
 
 setup(name="orderly_web",
       version="0.0.2",
