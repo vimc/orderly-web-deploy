@@ -18,6 +18,8 @@ To testing
 twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ```
 
+To do this, the version number **must** be incremented over the published versions ([testing](https://test.pypi.org/project/orderly-web/), [main index](https://pypi.org/project/orderly-web/)) - if you forget to increment it the server will reject the upload.
+
 Test the installation
 
 ```
