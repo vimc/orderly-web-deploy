@@ -187,3 +187,6 @@ class docker_client():
     def __enter__(self):
         self.client = docker.client.from_env()
         return self.client
+
+    def __exit__(self, type, value, traceback):
+        pass
