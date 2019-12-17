@@ -349,8 +349,8 @@ def test_vault_ssl():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = string_from_container(container, "/orderly/orderly_envir.yml")
-        assert "ORDERLY_DB_PASS: s3cret" in res
+        res = string_from_container(container, "/root/.Renviron")
+        assert "ORDERLY_DB_PASS=s3cret" in res
 
         private = string_from_container(container, "/root/.ssh/id_rsa")
         assert private == "private-key-data"
@@ -412,8 +412,8 @@ def test_vault_github_login_with_prompt():
             cfg = fetch_config(path)
             container = cfg.get_container("orderly")
             res = string_from_container(container,
-                                        "/orderly/orderly_envir.yml")
-            assert "ORDERLY_DB_PASS: s3cret" in res
+                                        "/root/.Renviron")
+            assert "ORDERLY_DB_PASS=s3cret" in res
 
             orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -438,8 +438,8 @@ def test_vault_github_login_from_env():
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
         res = string_from_container(container,
-                                    "/orderly/orderly_envir.yml")
-        assert "ORDERLY_DB_PASS: s3cret" in res
+                                    "/root/.Renviron")
+        assert "ORDERLY_DB_PASS=s3cret" in res
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
@@ -469,8 +469,8 @@ def test_vault_github_login_with_mount_path():
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
         res = string_from_container(container,
-                                    "/orderly/orderly_envir.yml")
-        assert "ORDERLY_DB_PASS: s3cret" in res
+                                    "/root/.Renviron")
+        assert "ORDERLY_DB_PASS=s3cret" in res
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
