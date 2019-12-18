@@ -86,8 +86,8 @@ def orderly_write_env(env, container):
     if not env:
         return
     print("Writing orderly environment")
-    dest = "/orderly/orderly_envir.yml"
-    txt = "".join(["{}: {}\n".format(str(k), str(v)) for k, v in env.items()])
+    dest = "/root/.Renviron"
+    txt = "".join(["{}={}\n".format(str(k), str(v)) for k, v in env.items()])
     string_into_container(txt, container, dest)
 
 
