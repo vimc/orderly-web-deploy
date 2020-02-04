@@ -106,7 +106,6 @@ def test_example_config():
     assert cfg.sass_variables is None
     assert "css-generator" not in cfg.images
     assert "css" not in cfg.volumes
-    assert "documents" in cfg.volumes
     assert cfg.logo_name is None
     assert cfg.logo_path is None
     assert cfg.favicon_path is None
@@ -121,6 +120,13 @@ def test_example_config():
 
     assert cfg.slack_webhook_url == \
         "https://hooks.slack.com/services/T000/B000/XXXX"
+
+
+def test_documents_volume_inclusion():
+    cfg = build_config("config/basic")
+    assert "documents" in cfg.volumes
+    cfg = build_config("config/customcss")
+    assert "documents" not in cfg.volumes
 
 
 def test_config_custom_styles():
