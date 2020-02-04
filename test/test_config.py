@@ -106,6 +106,7 @@ def test_example_config():
     assert cfg.sass_variables is None
     assert "css-generator" not in cfg.images
     assert "css" not in cfg.volumes
+    assert "documents" in cfg.volumes
     assert cfg.logo_name is None
     assert cfg.logo_path is None
     assert cfg.favicon_path is None

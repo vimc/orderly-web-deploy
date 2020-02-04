@@ -156,6 +156,9 @@ def web_container(cfg, docker_client):
         mounts.append(docker.types.Mount(logo_in_container,
                                          cfg.logo_path,
                                          type="bind"))
+    if "documents" in cfg.volumes:
+        mounts.append(docker.types.Mount("/documents",
+                                         cfg.volumes["documents"]))
     if cfg.web_dev_mode:
         port = cfg.web_port
         # NOTE: different format to proxy below because we only

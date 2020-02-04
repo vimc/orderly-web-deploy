@@ -55,12 +55,14 @@ network: orderly_web_network
 ## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
 ## css: stores compiled css for the web app (only needed if custom sass variables
 ## are given as sass_variables in web section below)
+## documents: stores static documentation available through the web app
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
   css: orderly_web_css
+  documents: orderly_web_documents
 
 ## Orderly configuration
 orderly:

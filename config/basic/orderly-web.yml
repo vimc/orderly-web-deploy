@@ -11,11 +11,13 @@ network: orderly_web_network
 ##
 ## orderly: stores the orderly archive
 ## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
+## documents: stores static documentation available through the web app
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
+  documents: orderly_web_documents
 
 ## Orderly configuration
 orderly:
