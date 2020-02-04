@@ -175,7 +175,7 @@ class OrderlyWebConfig:
                                                    "css-generator")
             self.images["css-generator"] = css_generator
 
-        static_documents = config_string(dat, ["volumes", "documents"])
+        static_documents = config_string(dat, ["volumes", "documents"], True)
         if static_documents is not None:
             self.volumes["documents"] = static_documents
 
