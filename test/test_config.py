@@ -122,6 +122,13 @@ def test_example_config():
         "https://hooks.slack.com/services/T000/B000/XXXX"
 
 
+def test_documents_volume_inclusion():
+    cfg = build_config("config/basic")
+    assert "documents" in cfg.volumes
+    cfg = build_config("config/customcss")
+    assert "documents" not in cfg.volumes
+
+
 def test_config_custom_styles():
     path = "config/customcss"
     cfg = build_config(path)

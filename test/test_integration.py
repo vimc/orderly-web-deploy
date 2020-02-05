@@ -48,6 +48,7 @@ def test_start_and_stop():
         assert st.containers["orderly"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
+        assert st.volumes["documents"] == "orderly_web_documents"
         assert st.network == "orderly_web_network"
 
         f = io.StringIO()
@@ -115,6 +116,7 @@ def test_start_with_custom_styles():
         assert st.containers["orderly"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
         assert st.volumes["css"] == "orderly_web_css"
+        assert "documents" not in st.volumes
         assert st.network == "orderly_web_network"
 
         cfg = fetch_config(path)
