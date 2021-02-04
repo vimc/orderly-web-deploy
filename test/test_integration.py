@@ -46,9 +46,11 @@ def test_start_and_stop():
         assert res
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["redis"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
         assert st.volumes["documents"] == "orderly_web_documents"
+        assert st.volumes["redis"] == "orderly_web_redis_data"
         assert st.network == "orderly_web_network"
 
         f = io.StringIO()
@@ -94,6 +96,7 @@ def test_start_and_stop():
         st = orderly_web.status(path)
         assert not st.is_running
         assert st.containers["orderly"]["status"] == "missing"
+        assert st.containers["redis"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
         assert st.volumes == {}
         assert st.network is None

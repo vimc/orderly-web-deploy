@@ -16,6 +16,14 @@ network: orderly_web_network
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
+  redis: orderly_web_redis_data
+
+## Redis configuration
+redis:
+  image:
+    name: redis
+    tag: "5.0"
+  volume: orderly_web_redis_data
 
 ## Orderly configuration
 orderly:

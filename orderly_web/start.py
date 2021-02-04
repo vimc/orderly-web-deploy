@@ -43,14 +43,26 @@ def init_all(cl, cfg):
     ensure_network(cl, cfg.network)
     for v in cfg.volumes.values():
         ensure_volume(cl, v)
-    orderly_init(cfg, cl)
+    redis = redis_init(cfg, cl)
+    orderly_init(cfg, cl, redis)
     web_init(cfg, cl)
     proxy_init(cfg, cl)
     config_save(cfg)
 
 
-def orderly_init(cfg, docker_client):
-    container = orderly_container(cfg, docker_client)
+def redis_init(cfg, docker_client):
+    print("Creating redis container")
+    args = ["--appendonly", "yes"]
+    image = str(cfg.images["redis"])
+    mounts = [docker.types.Mount("/redis-data", cfg.volumes["redis"])]
+    container = docker_client.containers.run(
+        image, args, mounts=mounts, name=cfg.containers["redis"],
+        detach=True)
+    return container
+
+
+def orderly_init(cfg, docker_client, redis):
+    container = orderly_container(cfg, docker_client, redis)
     orderly_write_ssh_keys(cfg.orderly_ssh, container)
     orderly_initial_data(cfg, container)
     orderly_check_schema(container)
@@ -59,14 +71,16 @@ def orderly_init(cfg, docker_client):
     return container
 
 
-def orderly_container(cfg, docker_client):
+def orderly_container(cfg, docker_client, redis):
     print("Creating orderly container")
     args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     image = str(cfg.images["orderly"])
     mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    orderly_env = {"REDIS_URL": "redis://{}:6379".format(redis.name)}
     container = docker_client.containers.run(
         image, args, mounts=mounts, network=cfg.network,
-        name=cfg.containers["orderly"], working_dir="/orderly", detach=True)
+        name=cfg.containers["orderly"], working_dir="/orderly", detach=True,
+        environment = orderly_env)
     return container
 
 

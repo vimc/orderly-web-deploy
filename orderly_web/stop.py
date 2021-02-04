@@ -27,6 +27,7 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
                                           kill)
             stop_and_remove_container(client, cfg.containers["web"], kill)
             stop_and_remove_container(client, cfg.containers["orderly"], kill)
+            stop_and_remove_container(client, cfg.containers["redis"], kill)
             if network:
                 remove_network(client, cfg.network)
             if volumes:

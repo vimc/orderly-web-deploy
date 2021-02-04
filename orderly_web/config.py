@@ -70,6 +70,7 @@ class OrderlyWebConfigBase:
         self.data = read_yaml("{}/orderly-web.yml".format(path))
         self.container_prefix = config_string(self.data, ["container_prefix"])
         self.containers = {
+            "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
@@ -103,16 +104,19 @@ class OrderlyWebConfig:
         self.vault = config_vault(dat, ["vault"])
         self.network = config_string(dat, ["network"])
         self.volumes = {
+            "redis": config_string(dat, ["volumes", "redis"]),
             "orderly": config_string(dat, ["volumes", "orderly"])
         }
 
         self.container_prefix = config_string(dat, ["container_prefix"])
         self.containers = {
+            "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
 
         self.images = {
+            "redis": config_image_reference(dat, ["redis", "image"]),
             "orderly": config_image_reference(dat, ["orderly", "image"]),
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["web", "image"], "admin"),
@@ -231,6 +235,12 @@ class OrderlyWebConfig:
                 # I think an error is a bit harsh
                 print("NOTE: Ignoring orderly:initial:url")
 
+        if "workers" not in dat["orderly"]:
+          self.orderly_workers = 1
+        else:
+          self.orderly_workers = config_integer(
+              dat, ["orderly", "workers"])
+
         self.slack_webhook_url = config_string(dat,
                                                ["slack", "webhook_url"],
                                                True)
@@ -264,7 +274,10 @@ class DockerImageReference:
         self.tag = tag
 
     def __str__(self):
-        return "{}/{}:{}".format(self.repo, self.name, self.tag)
+        if self.repo is None:
+          return "{}:{}".format(self.name, self.tag)
+        else:
+          return "{}/{}:{}".format(self.repo, self.name, self.tag)
 
 
 def config_data_update(path, data, extra=None, options=None):
@@ -363,7 +376,7 @@ def config_enum(data, path, values, is_optional=False):
 def config_image_reference(dat, path, name="name"):
     if type(path) is str:
         path = [path]
-    repo = config_string(dat, path + ["repo"])
+    repo = config_string(dat, path + ["repo"], is_optional=True)
     name = config_string(dat, path + [name])
     tag = config_string(dat, path + ["tag"])
     return DockerImageReference(repo, name, tag)
