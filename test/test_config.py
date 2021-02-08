@@ -396,6 +396,15 @@ def test_initial_demo_ignores_url():
     assert "NOTE: Ignoring orderly:initial:url" in out
 
 
+def test_multiple_workers_config():
+    cfg = build_config("config/multiple-workers")
+
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 2
+
+
 def read_file(path):
     with open(path, "r") as f:
         return f.read()

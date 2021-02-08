@@ -69,6 +69,12 @@ class OrderlyWebConfigBase:
         self.path = path
         self.data = read_yaml("{}/orderly-web.yml".format(path))
         self.container_prefix = config_string(self.data, ["container_prefix"])
+
+        if "workers" not in self.data["orderly"]:
+          workers = 1
+        else:
+          workers = config_integer(self.data, ["orderly", "workers"])
+
         self.containers = {
             "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
@@ -77,7 +83,7 @@ class OrderlyWebConfigBase:
         self.container_groups = {
             "orderly_worker": {
                 "name": "{}_orderly_worker".format(self.container_prefix),
-                "scale": 1
+                "scale": workers
             }
         }
 

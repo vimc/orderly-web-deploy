@@ -563,6 +563,41 @@ def test_notifies_slack_on_fail():
     mock_notify.assert_has_calls(calls)
 
 
+def test_start_and_stop_multiple_workers():
+    path = "config/multiple-workers"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["redis"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert len(st.container_groups) == 1
+        assert "orderly_worker" in st.container_groups
+        assert st.container_groups["orderly_worker"]["scale"] == 2
+        assert st.container_groups["orderly_worker"]["count"] == 2
+        assert len(st.container_groups["orderly_worker"]["status"]) == 2
+        assert re.match("orderly_web_orderly_worker_\w+", 
+            st.container_groups["orderly_worker"]["status"][0]["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] == "running"
+        assert re.match("orderly_web_orderly_worker_\w+", 
+            st.container_groups["orderly_worker"]["status"][1]["name"])
+        assert st.container_groups["orderly_worker"]["status"][1]["status"] == "running"
+
+        # Bring the whole lot down:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+        st = orderly_web.status(path)
+        assert not st.is_running
+        assert st.containers["orderly"]["status"] == "missing"
+        assert st.containers["redis"]["status"] == "missing"
+        assert st.containers["web"]["status"] == "missing"
+        assert st.container_groups["orderly_worker"]["scale"] == 2
+        assert st.container_groups["orderly_worker"]["count"] == 0
+        assert len(st.container_groups["orderly_worker"]["status"]) == 0
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def enable_github_login(cl, path="github"):
     cl.sys.enable_auth_method(method_type="github", path=path)
     policy = """
