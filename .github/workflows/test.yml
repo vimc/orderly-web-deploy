@@ -35,6 +35,8 @@ jobs:
       - name: Tests
         run: |
           pytest --cov=src
+        env: 
+          VAULT_TEST_GITHUB_PAT: ${{ secrets.VAULT_TEST_GITHUB_PAT }}
 
       - name: Lint
         run: |
