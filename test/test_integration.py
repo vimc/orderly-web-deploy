@@ -5,6 +5,7 @@ import urllib
 import time
 import json
 import ssl
+import re
 from unittest import mock
 from urllib import request
 from unittest.mock import patch, call
@@ -48,6 +49,14 @@ def test_start_and_stop():
         assert st.containers["orderly"]["status"] == "running"
         assert st.containers["redis"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
+        assert len(st.container_groups) == 1
+        assert "orderly_worker" in st.container_groups
+        assert st.container_groups["orderly_worker"]["scale"] == 1
+        assert st.container_groups["orderly_worker"]["count"] == 1
+        assert len(st.container_groups["orderly_worker"]["status"]) == 1
+        assert re.match("orderly_web_orderly_worker_\w+", 
+            st.container_groups["orderly_worker"]["status"][0]["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] == "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
         assert st.volumes["documents"] == "orderly_web_documents"
         assert st.volumes["redis"] == "orderly_web_redis_data"
@@ -98,6 +107,9 @@ def test_start_and_stop():
         assert st.containers["orderly"]["status"] == "missing"
         assert st.containers["redis"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
+        assert st.container_groups["orderly_worker"]["scale"] == 1
+        assert st.container_groups["orderly_worker"]["count"] == 0
+        assert len(st.container_groups["orderly_worker"]["status"]) == 0
         assert st.volumes == {}
         assert st.network is None
         # really removed?

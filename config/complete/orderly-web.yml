@@ -81,7 +81,8 @@ orderly:
   image:
     repo: vimc
     name: orderly.server
-    tag: master
+    tag: vimc-4192
+    worker_name: orderly.server-worker
   ## Environment variables that will be made available to orderly.
   ## Typically these will be in SHOUTY_SNAKE_CASE.  To pull values
   ## from the vault, use the format VAULT:<path>:<key>

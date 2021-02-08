@@ -91,13 +91,23 @@ def test_example_config():
     assert cfg.containers["orderly"] == "orderly_web_orderly"
     assert cfg.containers["web"] == "orderly_web_web"
 
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 1
+
     assert cfg.images["redis"].name == "redis"
     assert cfg.images["redis"].tag == "5.0"
     assert str(cfg.images["redis"]) == "redis:5.0"
     assert cfg.images["orderly"].repo == "vimc"
     assert cfg.images["orderly"].name == "orderly.server"
-    assert cfg.images["orderly"].tag == "master"
-    assert str(cfg.images["orderly"]) == "vimc/orderly.server:master"
+    ## TODO: Revert to master branch in tests after merge
+    assert cfg.images["orderly"].tag == "vimc-4192"
+    assert str(cfg.images["orderly"]) == "vimc/orderly.server:vimc-4192"
+    assert cfg.images["orderly_worker"].repo == "vimc"
+    assert cfg.images["orderly_worker"].name == "orderly.server-worker"
+    assert cfg.images["orderly_worker"].tag == "vimc-4192"
+    assert str(cfg.images["orderly_worker"]) == "vimc/orderly.server-worker:vimc-4192"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"
@@ -122,8 +132,6 @@ def test_example_config():
     assert cfg.orderly_initial_source == "clone"
     assert cfg.orderly_initial_url == \
         "https://github.com/reside-ic/orderly-example"
-
-    assert cfg.orderly_workers == 1
 
     assert cfg.slack_webhook_url == \
         "https://hooks.slack.com/services/T000/B000/XXXX"
@@ -159,10 +167,14 @@ def test_config_montagu():
     assert cfg.montagu_url == "http://montagu"
     assert cfg.montagu_api_url == "http://montagu/api"
 
+
 def test_default_workers():
     path = "config/montagu"
     cfg = build_config(path)
-    assert cfg.orderly_workers == 1
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 1
 
 
 def test_string_representation():

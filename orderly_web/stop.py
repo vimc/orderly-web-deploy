@@ -26,6 +26,9 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
                 stop_and_remove_container(client, cfg.containers["proxy"],
                                           kill)
             stop_and_remove_container(client, cfg.containers["web"], kill)
+            workers = list_containers(client, cfg.container_groups["orderly_worker"]["name"])
+            for worker in workers:
+                stop_and_remove_container(client, worker.name, kill)
             stop_and_remove_container(client, cfg.containers["orderly"], kill)
             stop_and_remove_container(client, cfg.containers["redis"], kill)
             if network:

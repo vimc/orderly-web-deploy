@@ -17,7 +17,8 @@ orderly:
   image:
     repo: vimc
     name: orderly.server
-    tag: master
+    tag: vimc-4192
+    worker_name: orderly.server-worker
   initial:
     source: demo
 

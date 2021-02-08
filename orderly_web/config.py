@@ -74,6 +74,12 @@ class OrderlyWebConfigBase:
             "orderly": "{}_orderly".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
+        self.container_groups = {
+            "orderly_worker": {
+                "name": "{}_orderly_worker".format(self.container_prefix),
+                "scale": 1
+            }
+        }
 
     def build(self, extra=None, options=None):
         data = config_data_update(self.path, self.data, extra, options)
@@ -115,9 +121,22 @@ class OrderlyWebConfig:
             "web": "{}_web".format(self.container_prefix)
         }
 
+        if "workers" not in dat["orderly"]:
+          workers = 1
+        else:
+          workers = config_integer(dat, ["orderly", "workers"])
+
+        self.container_groups = {
+            "orderly_worker": {
+                "name": "{}_orderly_worker".format(self.container_prefix),
+                "scale": workers
+            }
+        }
+
         self.images = {
             "redis": config_image_reference(dat, ["redis", "image"]),
             "orderly": config_image_reference(dat, ["orderly", "image"]),
+            "orderly_worker": config_image_reference(dat, ["orderly", "image"], "worker_name"),
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["web", "image"], "admin"),
             "migrate": config_image_reference(dat, ["web", "image"],
@@ -234,12 +253,6 @@ class OrderlyWebConfig:
             elif "url" in dat["orderly"]["initial"]:
                 # I think an error is a bit harsh
                 print("NOTE: Ignoring orderly:initial:url")
-
-        if "workers" not in dat["orderly"]:
-          self.orderly_workers = 1
-        else:
-          self.orderly_workers = config_integer(
-              dat, ["orderly", "workers"])
 
         self.slack_webhook_url = config_string(dat,
                                                ["slack", "webhook_url"],
