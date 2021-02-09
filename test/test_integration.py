@@ -57,8 +57,8 @@ def test_start_and_stop():
         assert re.match(r"orderly_web_orderly_worker_\w+",
                         st.container_groups["orderly_worker"]["status"][0]
                                            ["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==
-        "running"
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
+            "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
         assert st.volumes["documents"] == "orderly_web_documents"
         assert st.volumes["redis"] == "orderly_web_redis_data"
@@ -586,8 +586,8 @@ def test_start_and_stop_multiple_workers():
         assert re.match(r"orderly_web_orderly_worker_\w+",
                         st.container_groups["orderly_worker"]["status"][0]
                                            ["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==
-        "running"
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
+            "running"
         assert re.match(r"orderly_web_orderly_worker_\w+",
                         st.container_groups["orderly_worker"]["status"][1]
                                            ["name"])
