@@ -108,8 +108,8 @@ def test_example_config():
     assert cfg.images["orderly_worker"].repo == "vimc"
     assert cfg.images["orderly_worker"].name == "orderly.server-worker"
     assert cfg.images["orderly_worker"].tag == "vimc-4192"
-    assert str(cfg.images["orderly_worker"]) ==
-    "vimc/orderly.server-worker:vimc-4192"
+    assert str(cfg.images["orderly_worker"]) == \
+        "vimc/orderly.server-worker:vimc-4192"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"
