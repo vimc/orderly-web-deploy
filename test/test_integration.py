@@ -399,6 +399,10 @@ def test_without_github_app_for_montagu():
     res = orderly_web.start(path, options=options)
     assert res
     st = orderly_web.status(path)
+    with docker_client() as client:
+        ct = client.containers.get("orderly_web_orderly")
+    print(ct.status)
+    print(ct.logs())
     assert st.containers["orderly"]["status"] == "running"
     assert st.containers["web"]["status"] == "running"
     assert st.network == "orderly_web_network"
