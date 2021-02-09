@@ -38,4 +38,4 @@ setup(name="orderly_web",
           "vault_dev",
           "pytest"
       ],
-      install_requires = requirements)
+      install_requires=requirements)
