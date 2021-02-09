@@ -93,8 +93,8 @@ def test_example_config():
 
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==
-    "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 1
 
     assert cfg.images["redis"].name == "redis"
@@ -175,8 +175,8 @@ def test_default_workers():
     cfg = build_config(path)
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==
-    "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 1
 
 
@@ -404,8 +404,8 @@ def test_multiple_workers_config():
 
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==
-    "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 2
 
 

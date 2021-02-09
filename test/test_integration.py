@@ -591,8 +591,8 @@ def test_start_and_stop_multiple_workers():
         assert re.match(r"orderly_web_orderly_worker_\w+",
                         st.container_groups["orderly_worker"]["status"][1]
                                            ["name"])
-        assert st.container_groups["orderly_worker"]["status"][1]["status"] ==
-        "running"
+        assert st.container_groups["orderly_worker"]["status"][1]["status"] ==\
+            "running"
 
         # Bring the whole lot down:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
