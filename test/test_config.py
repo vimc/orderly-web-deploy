@@ -400,7 +400,8 @@ def test_initial_demo_ignores_url():
 
 
 def test_multiple_workers_config():
-    cfg = build_config("config/multiple-workers")
+    options = {"orderly": {"workers": 2}}
+    cfg = build_config("config/basic", options=options)
 
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups

@@ -566,9 +566,10 @@ def test_notifies_slack_on_fail():
 
 
 def test_start_and_stop_multiple_workers():
-    path = "config/multiple-workers"
+    options = {"orderly": {"workers": 2}}
+    path = "config/basic"
     try:
-        res = orderly_web.start(path)
+        res = orderly_web.start(path, options=options)
         assert res
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
@@ -576,7 +577,6 @@ def test_start_and_stop_multiple_workers():
         assert st.containers["web"]["status"] == "running"
         assert len(st.container_groups) == 1
         assert "orderly_worker" in st.container_groups
-        assert st.container_groups["orderly_worker"]["scale"] == 2
         assert st.container_groups["orderly_worker"]["count"] == 2
         assert len(st.container_groups["orderly_worker"]["status"]) == 2
         assert re.match(r"orderly_web_orderly_worker_\w+",
@@ -597,7 +597,6 @@ def test_start_and_stop_multiple_workers():
         assert st.containers["orderly"]["status"] == "missing"
         assert st.containers["redis"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
-        assert st.container_groups["orderly_worker"]["scale"] == 2
         assert st.container_groups["orderly_worker"]["count"] == 0
         assert len(st.container_groups["orderly_worker"]["status"]) == 0
     finally:
