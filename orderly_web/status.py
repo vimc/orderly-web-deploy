@@ -51,10 +51,14 @@ class OrderlyWebStatus:
 
         self.is_running = bool(cfg_running)
         with docker_client() as client:
-            self.containers = {k: container_status(client, v)
-                               for k, v in cfg_base.containers.items()}
-            self.container_groups = {k: container_group_status(client, v)
-                                    for k, v in cfg_base.container_groups.items()}
+            self.containers = {
+                k: container_status(client, v)
+                for k, v in cfg_base.containers.items()
+            }
+            self.container_groups = {
+                k: container_group_status(client, v)
+                for k, v in cfg_base.container_groups.items()
+            }
             if cfg_running:
                 self.volumes = cfg_running.volumes
                 self.network = cfg_running.network
@@ -68,9 +72,11 @@ def format_container(role, status):
 
 
 def format_container_group(role, status):
-    group_status = ["  {} ({}/{}):".format(role, status["count"], status["scale"])]
+    group_status = ["  {} ({}/{}):".format(role, status["count"],
+                                           status["scale"])]
     for container in status["status"]:
-        group_status.append("    - {} ({})".format(container["status"], container["name"]))
+        group_status.append("    - {} ({})".format(container["status"],
+                                                   container["name"]))
     return "\n".join(group_status)
 
 
@@ -84,6 +90,7 @@ def container_status(client, name):
     except docker.errors.NotFound:
         status = "missing"
     return {"name": name, "status": status}
+
 
 def container_group_status(client, group):
     containers = list_containers(client, group["name"])

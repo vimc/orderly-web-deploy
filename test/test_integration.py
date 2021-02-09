@@ -54,9 +54,11 @@ def test_start_and_stop():
         assert st.container_groups["orderly_worker"]["scale"] == 1
         assert st.container_groups["orderly_worker"]["count"] == 1
         assert len(st.container_groups["orderly_worker"]["status"]) == 1
-        assert re.match("orderly_web_orderly_worker_\w+", 
-            st.container_groups["orderly_worker"]["status"][0]["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] == "running"
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][0]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==
+        "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
         assert st.volumes["documents"] == "orderly_web_documents"
         assert st.volumes["redis"] == "orderly_web_redis_data"
@@ -581,12 +583,16 @@ def test_start_and_stop_multiple_workers():
         assert st.container_groups["orderly_worker"]["scale"] == 2
         assert st.container_groups["orderly_worker"]["count"] == 2
         assert len(st.container_groups["orderly_worker"]["status"]) == 2
-        assert re.match("orderly_web_orderly_worker_\w+", 
-            st.container_groups["orderly_worker"]["status"][0]["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] == "running"
-        assert re.match("orderly_web_orderly_worker_\w+", 
-            st.container_groups["orderly_worker"]["status"][1]["name"])
-        assert st.container_groups["orderly_worker"]["status"][1]["status"] == "running"
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][0]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==
+        "running"
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][1]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][1]["status"] ==
+        "running"
 
         # Bring the whole lot down:
         orderly_web.stop(path, kill=True, volumes=True, network=True)

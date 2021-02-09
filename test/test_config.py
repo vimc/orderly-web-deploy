@@ -93,7 +93,8 @@ def test_example_config():
 
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==
+    "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 1
 
     assert cfg.images["redis"].name == "redis"
@@ -101,13 +102,14 @@ def test_example_config():
     assert str(cfg.images["redis"]) == "redis:5.0"
     assert cfg.images["orderly"].repo == "vimc"
     assert cfg.images["orderly"].name == "orderly.server"
-    ## TODO: Revert to master branch in tests after merge
+    # TODO: Revert to master branch in tests after merge
     assert cfg.images["orderly"].tag == "vimc-4192"
     assert str(cfg.images["orderly"]) == "vimc/orderly.server:vimc-4192"
     assert cfg.images["orderly_worker"].repo == "vimc"
     assert cfg.images["orderly_worker"].name == "orderly.server-worker"
     assert cfg.images["orderly_worker"].tag == "vimc-4192"
-    assert str(cfg.images["orderly_worker"]) == "vimc/orderly.server-worker:vimc-4192"
+    assert str(cfg.images["orderly_worker"]) ==
+    "vimc/orderly.server-worker:vimc-4192"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"
@@ -173,7 +175,8 @@ def test_default_workers():
     cfg = build_config(path)
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==
+    "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 1
 
 
@@ -185,9 +188,9 @@ def test_string_representation():
 def test_config_image_reference():
     data = {"foo": {
         "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1},
-            "bar": {
+        "bar": {
         "name": "e", "tag": "f"
-            }}
+    }}
     assert str(config_image_reference(data, "foo")) == "a/b:c"
     assert str(config_image_reference(data, ["foo"], "other")) == "a/d:c"
     assert str(config_image_reference(data, "bar")) == "e:f"
@@ -401,7 +404,8 @@ def test_multiple_workers_config():
 
     assert len(cfg.container_groups) == 1
     assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] == "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["name"] ==
+    "orderly_web_orderly_worker"
     assert cfg.container_groups["orderly_worker"]["scale"] == 2
 
 

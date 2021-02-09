@@ -71,9 +71,9 @@ class OrderlyWebConfigBase:
         self.container_prefix = config_string(self.data, ["container_prefix"])
 
         if "workers" not in self.data["orderly"]:
-          workers = 1
+            workers = 1
         else:
-          workers = config_integer(self.data, ["orderly", "workers"])
+            workers = config_integer(self.data, ["orderly", "workers"])
 
         self.containers = {
             "redis": "{}_redis".format(self.container_prefix),
@@ -128,9 +128,9 @@ class OrderlyWebConfig:
         }
 
         if "workers" not in dat["orderly"]:
-          workers = 1
+            workers = 1
         else:
-          workers = config_integer(dat, ["orderly", "workers"])
+            workers = config_integer(dat, ["orderly", "workers"])
 
         self.container_groups = {
             "orderly_worker": {
@@ -142,7 +142,8 @@ class OrderlyWebConfig:
         self.images = {
             "redis": config_image_reference(dat, ["redis", "image"]),
             "orderly": config_image_reference(dat, ["orderly", "image"]),
-            "orderly_worker": config_image_reference(dat, ["orderly", "image"], "worker_name"),
+            "orderly_worker": config_image_reference(dat, ["orderly", "image"],
+                                                     "worker_name"),
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["web", "image"], "admin"),
             "migrate": config_image_reference(dat, ["web", "image"],
@@ -294,9 +295,9 @@ class DockerImageReference:
 
     def __str__(self):
         if self.repo is None:
-          return "{}:{}".format(self.name, self.tag)
+            return "{}:{}".format(self.name, self.tag)
         else:
-          return "{}/{}:{}".format(self.repo, self.name, self.tag)
+            return "{}/{}:{}".format(self.repo, self.name, self.tag)
 
 
 def config_data_update(path, data, extra=None, options=None):

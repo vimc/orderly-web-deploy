@@ -166,8 +166,9 @@ def string_from_container(container, path):
     finally:
         os.remove(tmp)
 
+
 def list_containers(client, name):
-    return client.containers.list(filters = {"name": name})
+    return client.containers.list(filters={"name": name})
 
 
 # There is an annoyance with docker and the requests library, where

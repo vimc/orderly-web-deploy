@@ -52,6 +52,7 @@ def init_all(cl, cfg):
     proxy_init(cfg, cl)
     config_save(cfg)
 
+
 def worker_init(cfg, docker_client):
     scale = cfg.container_groups["orderly_worker"]["scale"]
     print("Starting {} orderly workers".format(scale))
@@ -60,17 +61,20 @@ def worker_init(cfg, docker_client):
     worker_env = {"REDIS_URL": "redis://redis:6379"}
     workers = []
     for i in range(scale):
-        name = "{}_{}".format(cfg.container_groups["orderly_worker"]["name"], rand_str(8))
+        name = "{}_{}".format(cfg.container_groups["orderly_worker"]["name"],
+                              rand_str(8))
         container = docker_client.containers.run(
-          image, mounts=mounts, network=cfg.network,
-          name=name, working_dir="/orderly", detach=True,
-          environment=worker_env)
+            image, mounts=mounts, network=cfg.network,
+            name=name, working_dir="/orderly", detach=True,
+            environment=worker_env)
         workers.append(container)
     return workers
+
 
 def rand_str(n, prefix=""):
     s = "".join(random.choice(string.ascii_lowercase) for i in range(n))
     return prefix + s
+
 
 def redis_init(cfg, docker_client):
     print("Creating redis container")
@@ -81,7 +85,8 @@ def redis_init(cfg, docker_client):
         image, args, mounts=mounts, network="none",
         name=cfg.containers["redis"], detach=True)
     docker_client.networks.get("none").disconnect(container)
-    docker_client.networks.get(cfg.network).connect(container, aliases=["redis"])
+    docker_client.networks.get(cfg.network).connect(container,
+                                                    aliases=["redis"])
     return container
 
 
