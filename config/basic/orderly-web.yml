@@ -37,7 +37,7 @@ orderly:
     repo: vimc
     name: orderly.server
     tag: vimc-4192
-    worker_name: orderly.server-worker
+    worker_name: orderly.server
   ## Initial data source for the orderly reports.  This section is
   ## optional - if not present, it is up to you to initialise the
   ## orderly volume (in the volumes section above) with appropriate

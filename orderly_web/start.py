@@ -53,24 +53,6 @@ def init_all(cl, cfg):
     config_save(cfg)
 
 
-def worker_init(cfg, docker_client):
-    scale = cfg.container_groups["orderly_worker"]["scale"]
-    print("Starting {} orderly workers".format(scale))
-    image = str(cfg.images["orderly_worker"])
-    mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
-    worker_env = {"REDIS_URL": "redis://redis:6379"}
-    workers = []
-    for i in range(scale):
-        name = "{}_{}".format(cfg.container_groups["orderly_worker"]["name"],
-                              rand_str(8))
-        container = docker_client.containers.run(
-            image, mounts=mounts, network=cfg.network,
-            name=name, working_dir="/orderly", detach=True,
-            environment=worker_env)
-        workers.append(container)
-    return workers
-
-
 def rand_str(n, prefix=""):
     s = "".join(random.choice(string.ascii_lowercase) for i in range(n))
     return prefix + s
@@ -174,6 +156,40 @@ def orderly_write_ssh_keys(orderly_ssh, container):
 
 def orderly_start(container):
     print("Starting orderly server")
+    exec_safely(container, ["touch", "/go_signal"])
+
+
+def worker_init(cfg, docker_client):
+    workers = worker_container(cfg, docker_client)
+    for worker in workers:
+      orderly_write_ssh_keys(cfg.orderly_ssh, worker)
+      orderly_write_env(cfg.orderly_env, worker)
+      worker_start(worker)
+    return workers
+
+
+def worker_container(cfg, docker_client):
+    scale = cfg.container_groups["orderly_worker"]["scale"]
+    print("Starting {} orderly workers".format(scale))
+    image = str(cfg.images["orderly_worker"])
+    args = ["--go-signal", "/go_signal"]
+    mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
+    worker_env = {"REDIS_URL": "redis://redis:6379"}
+    worker_entrypoint = "/usr/local/bin/orderly_worker"
+    workers = []
+    for i in range(scale):
+        name = "{}_{}".format(cfg.container_groups["orderly_worker"]["name"],
+                              rand_str(8))
+        container = docker_client.containers.run(
+            image, args, mounts=mounts, network=cfg.network,
+            name=name, working_dir="/orderly", detach=True,
+            environment=worker_env, entrypoint=worker_entrypoint)
+        workers.append(container)
+    return workers
+
+
+def worker_start(container):
+    print("Starting worker {}".format(container["name"]))
     exec_safely(container, ["touch", "/go_signal"])
 
 
