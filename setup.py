@@ -10,7 +10,11 @@ requirements = [
     "pytest",
     "pyyaml",
     "vault_dev",
-    "Pillow"]
+    # TODO: Unpin pillow branch
+    # Pillow v >7.2 requires python >= 3.6 which we don't currently
+    # have available on vagrant VMs
+    # see https://mrc-ide.myjetbrains.com/youtrack/issue/VIMC-4586
+    "Pillow==7.2"]
 
 setup(name="orderly_web",
       version="0.0.7",
