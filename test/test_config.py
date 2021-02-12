@@ -102,14 +102,13 @@ def test_example_config():
     assert str(cfg.images["redis"]) == "redis:5.0"
     assert cfg.images["orderly"].repo == "vimc"
     assert cfg.images["orderly"].name == "orderly.server"
-    # TODO: Revert to master branch in tests after merge
-    assert cfg.images["orderly"].tag == "vimc-4192"
-    assert str(cfg.images["orderly"]) == "vimc/orderly.server:vimc-4192"
+    assert cfg.images["orderly"].tag == "master"
+    assert str(cfg.images["orderly"]) == "vimc/orderly.server:master"
     assert cfg.images["orderly_worker"].repo == "vimc"
     assert cfg.images["orderly_worker"].name == "orderly.server"
-    assert cfg.images["orderly_worker"].tag == "vimc-4192"
+    assert cfg.images["orderly_worker"].tag == "master"
     assert str(cfg.images["orderly_worker"]) == \
-        "vimc/orderly.server:vimc-4192"
+        "vimc/orderly.server:master"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"

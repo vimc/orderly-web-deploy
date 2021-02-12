@@ -50,7 +50,7 @@ orderly:
   image:
     repo: vimc
     name: orderly.server
-    tag: vimc-4192
+    tag: master
     worker_name: orderly.server
   ## Environment variables that will be made available to orderly.
   ## Typically these will be in SHOUTY_SNAKE_CASE.  To pull values

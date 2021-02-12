@@ -36,7 +36,7 @@ orderly:
   image:
     repo: vimc
     name: orderly.server
-    tag: vimc-4192
+    tag: master
     worker_name: orderly.server
   ## Initial data source for the orderly reports.  This section is
   ## optional - if not present, it is up to you to initialise the
