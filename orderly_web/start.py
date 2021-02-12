@@ -162,9 +162,9 @@ def orderly_start(container):
 def worker_init(cfg, docker_client):
     workers = worker_container(cfg, docker_client)
     for worker in workers:
-      orderly_write_ssh_keys(cfg.orderly_ssh, worker)
-      orderly_write_env(cfg.orderly_env, worker)
-      worker_start(worker)
+        orderly_write_ssh_keys(cfg.orderly_ssh, worker)
+        orderly_write_env(cfg.orderly_env, worker)
+        worker_start(worker)
     return workers
 
 
