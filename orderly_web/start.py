@@ -189,7 +189,7 @@ def worker_container(cfg, docker_client):
 
 
 def worker_start(container):
-    print("Starting worker {}".format(container["name"]))
+    print("Starting worker {}".format(container.name))
     exec_safely(container, ["touch", "/go_signal"])
 
 
