@@ -5,6 +5,7 @@ import urllib
 import time
 import json
 import ssl
+import re
 from unittest import mock
 from urllib import request
 from unittest.mock import patch, call
@@ -46,9 +47,21 @@ def test_start_and_stop():
         assert res
         st = orderly_web.status(path)
         assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["redis"]["status"] == "running"
         assert st.containers["web"]["status"] == "running"
+        assert len(st.container_groups) == 1
+        assert "orderly_worker" in st.container_groups
+        assert st.container_groups["orderly_worker"]["scale"] == 1
+        assert st.container_groups["orderly_worker"]["count"] == 1
+        assert len(st.container_groups["orderly_worker"]["status"]) == 1
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][0]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
+            "running"
         assert st.volumes["orderly"] == "orderly_web_volume"
         assert st.volumes["documents"] == "orderly_web_documents"
+        assert st.volumes["redis"] == "orderly_web_redis_data"
         assert st.network == "orderly_web_network"
 
         f = io.StringIO()
@@ -94,7 +107,11 @@ def test_start_and_stop():
         st = orderly_web.status(path)
         assert not st.is_running
         assert st.containers["orderly"]["status"] == "missing"
+        assert st.containers["redis"]["status"] == "missing"
         assert st.containers["web"]["status"] == "missing"
+        assert st.container_groups["orderly_worker"]["scale"] == 1
+        assert st.container_groups["orderly_worker"]["count"] == 0
+        assert len(st.container_groups["orderly_worker"]["status"]) == 0
         assert st.volumes == {}
         assert st.network is None
         # really removed?
@@ -546,6 +563,44 @@ def test_notifies_slack_on_fail():
     calls = [call("*Starting* deploy to https://localhost"),
              call("*Failed* deploy to https://localhost :bomb:")]
     mock_notify.assert_has_calls(calls)
+
+
+def test_start_and_stop_multiple_workers():
+    options = {"orderly": {"workers": 2}}
+    path = "config/basic"
+    try:
+        res = orderly_web.start(path, options=options)
+        assert res
+        st = orderly_web.status(path)
+        assert st.containers["orderly"]["status"] == "running"
+        assert st.containers["redis"]["status"] == "running"
+        assert st.containers["web"]["status"] == "running"
+        assert len(st.container_groups) == 1
+        assert "orderly_worker" in st.container_groups
+        assert st.container_groups["orderly_worker"]["count"] == 2
+        assert len(st.container_groups["orderly_worker"]["status"]) == 2
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][0]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
+            "running"
+        assert re.match(r"orderly_web_orderly_worker_\w+",
+                        st.container_groups["orderly_worker"]["status"][1]
+                                           ["name"])
+        assert st.container_groups["orderly_worker"]["status"][1]["status"] ==\
+            "running"
+
+        # Bring the whole lot down:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+        st = orderly_web.status(path)
+        assert not st.is_running
+        assert st.containers["orderly"]["status"] == "missing"
+        assert st.containers["redis"]["status"] == "missing"
+        assert st.containers["web"]["status"] == "missing"
+        assert st.container_groups["orderly_worker"]["count"] == 0
+        assert len(st.container_groups["orderly_worker"]["status"]) == 0
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def enable_github_login(cl, path="github"):

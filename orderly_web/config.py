@@ -69,9 +69,22 @@ class OrderlyWebConfigBase:
         self.path = path
         self.data = read_yaml("{}/orderly-web.yml".format(path))
         self.container_prefix = config_string(self.data, ["container_prefix"])
+
+        if "workers" not in self.data["orderly"]:
+            workers = 1
+        else:
+            workers = config_integer(self.data, ["orderly", "workers"])
+
         self.containers = {
+            "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
+        }
+        self.container_groups = {
+            "orderly_worker": {
+                "name": "{}_orderly_worker".format(self.container_prefix),
+                "scale": workers
+            }
         }
 
     def build(self, extra=None, options=None):
@@ -103,17 +116,34 @@ class OrderlyWebConfig:
         self.vault = config_vault(dat, ["vault"])
         self.network = config_string(dat, ["network"])
         self.volumes = {
+            "redis": config_string(dat, ["volumes", "redis"]),
             "orderly": config_string(dat, ["volumes", "orderly"])
         }
 
         self.container_prefix = config_string(dat, ["container_prefix"])
         self.containers = {
+            "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
 
+        if "workers" not in dat["orderly"]:
+            workers = 1
+        else:
+            workers = config_integer(dat, ["orderly", "workers"])
+
+        self.container_groups = {
+            "orderly_worker": {
+                "name": "{}_orderly_worker".format(self.container_prefix),
+                "scale": workers
+            }
+        }
+
         self.images = {
+            "redis": config_image_reference(dat, ["redis", "image"]),
             "orderly": config_image_reference(dat, ["orderly", "image"]),
+            "orderly_worker": config_image_reference(dat, ["orderly", "image"],
+                                                     "worker_name"),
             "web": config_image_reference(dat, ["web", "image"]),
             "admin": config_image_reference(dat, ["web", "image"], "admin"),
             "migrate": config_image_reference(dat, ["web", "image"],
@@ -264,7 +294,10 @@ class DockerImageReference:
         self.tag = tag
 
     def __str__(self):
-        return "{}/{}:{}".format(self.repo, self.name, self.tag)
+        if self.repo is None:
+            return "{}:{}".format(self.name, self.tag)
+        else:
+            return "{}/{}:{}".format(self.repo, self.name, self.tag)
 
 
 def config_data_update(path, data, extra=None, options=None):
@@ -363,7 +396,7 @@ def config_enum(data, path, values, is_optional=False):
 def config_image_reference(dat, path, name="name"):
     if type(path) is str:
         path = [path]
-    repo = config_string(dat, path + ["repo"])
+    repo = config_string(dat, path + ["repo"], is_optional=True)
     name = config_string(dat, path + [name])
     tag = config_string(dat, path + ["tag"])
     return DockerImageReference(repo, name, tag)

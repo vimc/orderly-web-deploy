@@ -167,6 +167,10 @@ def string_from_container(container, path):
         os.remove(tmp)
 
 
+def list_containers(client, name):
+    return client.containers.list(filters={"name": name})
+
+
 # There is an annoyance with docker and the requests library, where
 # when the http handle is reclaimed a warning is printed.  It makes
 # the test log almost impossible to read.

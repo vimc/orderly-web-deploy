@@ -86,13 +86,29 @@ def test_example_config():
     cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
+    assert cfg.volumes["redis"] == "orderly_web_redis_data"
+    assert cfg.containers["redis"] == "orderly_web_redis"
     assert cfg.containers["orderly"] == "orderly_web_orderly"
     assert cfg.containers["web"] == "orderly_web_web"
 
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 1
+
+    assert cfg.images["redis"].name == "redis"
+    assert cfg.images["redis"].tag == "5.0"
+    assert str(cfg.images["redis"]) == "redis:5.0"
     assert cfg.images["orderly"].repo == "vimc"
     assert cfg.images["orderly"].name == "orderly.server"
     assert cfg.images["orderly"].tag == "master"
     assert str(cfg.images["orderly"]) == "vimc/orderly.server:master"
+    assert cfg.images["orderly_worker"].repo == "vimc"
+    assert cfg.images["orderly_worker"].name == "orderly.server"
+    assert cfg.images["orderly_worker"].tag == "master"
+    assert str(cfg.images["orderly_worker"]) == \
+        "vimc/orderly.server:master"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"
@@ -153,6 +169,16 @@ def test_config_montagu():
     assert cfg.montagu_api_url == "http://montagu/api"
 
 
+def test_default_workers():
+    path = "config/montagu"
+    cfg = build_config(path)
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 1
+
+
 def test_string_representation():
     img = DockerImageReference("a", "b", "c")
     assert str(img) == "a/b:c"
@@ -160,9 +186,13 @@ def test_string_representation():
 
 def test_config_image_reference():
     data = {"foo": {
-        "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1}}
+        "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1},
+        "bar": {
+        "name": "e", "tag": "f"
+    }}
     assert str(config_image_reference(data, "foo")) == "a/b:c"
     assert str(config_image_reference(data, ["foo"], "other")) == "a/d:c"
+    assert str(config_image_reference(data, "bar")) == "e:f"
     with pytest.raises(KeyError):
         config_image_reference(data, ["foo"], "missing")
     with pytest.raises(ValueError):
@@ -366,6 +396,17 @@ def test_initial_demo_ignores_url():
         cfg = build_config("config/basic", options=options)
     out = f.getvalue()
     assert "NOTE: Ignoring orderly:initial:url" in out
+
+
+def test_multiple_workers_config():
+    options = {"orderly": {"workers": 2}}
+    cfg = build_config("config/basic", options=options)
+
+    assert len(cfg.container_groups) == 1
+    assert "orderly_worker" in cfg.container_groups
+    assert cfg.container_groups["orderly_worker"]["name"] ==\
+        "orderly_web_orderly_worker"
+    assert cfg.container_groups["orderly_worker"]["scale"] == 2
 
 
 def read_file(path):

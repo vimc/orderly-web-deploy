@@ -18,6 +18,14 @@ volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
   documents: orderly_web_documents
+  redis: orderly_web_redis_data
+
+## Redis configuration
+redis:
+  image:
+    name: redis
+    tag: "5.0"
+  volume: orderly_web_redis_data
 
 ## Orderly configuration
 orderly:
@@ -29,6 +37,7 @@ orderly:
     repo: vimc
     name: orderly.server
     tag: master
+    worker_name: orderly.server
   ## Initial data source for the orderly reports.  This section is
   ## optional - if not present, it is up to you to initialise the
   ## orderly volume (in the volumes section above) with appropriate
@@ -41,6 +50,8 @@ orderly:
     ## private repo, then use an ssh url and provide ssh keys in the
     ## "ssh" section.
     url: https://github.com/reside-ic/orderly-example
+  ## Number of workers to create to run orderly jobs
+  workers: 1
 
 ## Api and Website configuration
 web:
