@@ -119,7 +119,7 @@ def orderly_write_env(env, container):
 def orderly_init_demo(container):
     print("Initialising orderly with demo data")
     args = ["Rscript", "-e",
-        "orderly:::create_orderly_demo('/orderly', git = TRUE)"]
+            "orderly:::create_orderly_demo('/orderly', git = TRUE)"]
     exec_safely(container, args)
 
 
