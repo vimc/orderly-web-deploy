@@ -10,7 +10,7 @@ else
     GIT_BRANCH=$(git symbolic-ref --short HEAD)
 fi
 
-REGISTRY=docker.montagu.dide.ic.ac.uk:5000
+REGISTRY=vimc
 NAME=orderly-web-proxy
 PUBLIC_REGISTRY=vimc
 
