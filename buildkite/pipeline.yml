@@ -5,3 +5,4 @@ steps:
   - wait
 
   - label: ":shipit: Push images"
+    command: docker/push
