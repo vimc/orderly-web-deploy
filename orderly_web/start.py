@@ -294,7 +294,7 @@ def web_generate_css(cfg, docker_client):
 
 
 def web_start(container):
-    print("Starting orderly server")
+    print("Starting OrderlyWeb")
     exec_safely(container, ["touch", "/etc/orderly/web/go_signal"])
 
 
