@@ -70,6 +70,10 @@ orderly-web admin ./config/basic add-members funders test.user@example.com
 orderly-web admin ./config/basic add-members admin admin.user@example.com
 ```
 
+## Development
+
+To test changes during development often the best way is to try and run a deployment. To do this you will need to install the development version of `orderly-web` on a server. The best way to do this is to clone the repo, set the branch to your development branch and follow instructions above for installation.
+ 
 ## Testing
 
 Run
