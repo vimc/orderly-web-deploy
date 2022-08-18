@@ -62,7 +62,7 @@ def redis_init(cfg, docker_client):
     print("Creating redis container")
     args = ["--appendonly", "yes"]
     image = str(cfg.images["redis"])
-    mounts = [docker.types.Mount("/redis-data", cfg.volumes["redis"])]
+    mounts = [docker.types.Mount("/data", cfg.volumes["redis"])]
     container = docker_client.containers.run(
         image, args, mounts=mounts, network="none",
         name=cfg.containers["redis"], detach=True)
