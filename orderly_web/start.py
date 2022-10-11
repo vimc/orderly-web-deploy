@@ -24,7 +24,6 @@ def start(path, extra=None, options=None, pull_images=False):
             print(msg)
             return False
     cfg = build_config(path, extra, options)
-    cfg.resolve_secrets()
     if pull_images:
         pull(cfg)
 
@@ -171,7 +170,7 @@ def worker_init(cfg, docker_client):
 
 
 def worker_container(cfg, docker_client):
-    scale = cfg.container_groups["orderly_worker"]["scale"]
+    scale = cfg.workers
     print("Starting {} orderly workers".format(scale))
     image = str(cfg.images["orderly_worker"])
     args = ["--go-signal", "/go_signal"]
@@ -180,8 +179,7 @@ def worker_container(cfg, docker_client):
     worker_entrypoint = "/usr/local/bin/orderly_worker"
     workers = []
     for i in range(scale):
-        name = "{}_{}".format(cfg.container_groups["orderly_worker"]["name"],
-                              rand_str(8))
+        name = "{}_{}".format(cfg.containers["orderly_worker"], rand_str(8))
         container = docker_client.containers.run(
             image, args, mounts=mounts, network=cfg.network,
             name=name, working_dir="/orderly", detach=True,

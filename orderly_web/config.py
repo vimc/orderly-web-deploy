@@ -10,7 +10,6 @@ import constellation.config as config
 
 from orderly_web.docker_helpers import docker_client, string_from_container, \
     string_into_container
-import orderly_web.vault as vault
 
 # There are two types of configuration objects and three ways that
 # they turn up.  These are:
@@ -70,6 +69,7 @@ class OrderlyWebConfigBase:
         self.containers = {
             "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
+            "orderly_worker": "{}_orderly_worker".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
 
@@ -114,6 +114,7 @@ class OrderlyWebConfig:
         self.containers = {
             "redis": "{}_redis".format(self.container_prefix),
             "orderly": "{}_orderly".format(self.container_prefix),
+            "orderly_worker": "{}_orderly_worker".format(self.container_prefix),
             "web": "{}_web".format(self.container_prefix)
         }
 
@@ -309,13 +310,6 @@ class OrderlyWebConfig:
     def get_container(self, name):
         with docker_client() as cl:
             return cl.containers.get(name)
-
-    def resolve_secrets(self):
-        vault_client = self.vault.client()
-        vault.resolve_secrets(self, vault_client)
-        vault.resolve_secrets(self.orderly_env, vault_client)
-        vault.resolve_secrets(self.web_auth_github_app, vault_client)
-        vault.resolve_secrets(self.orderly_ssh, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))

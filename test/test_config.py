@@ -120,39 +120,6 @@ def test_config_proxy_not_enabled():
     assert not cfg.proxy_enabled
 
 
-def test_can_substitute_secrets():
-    with vault_dev.server() as s:
-        cl = s.client()
-        # Copy the certificates into the vault where we will later on
-        # pull from from.
-        cert = read_file("proxy/ssl/certificate.pem")
-        key = read_file("proxy/ssl/key.pem")
-        cl.write("secret/ssl/certificate", value=cert)
-        cl.write("secret/ssl/key", value=key)
-        cl.write("secret/db/password", value="s3cret")
-        cl.write("secret/github/id", value="ghkey")
-        cl.write("secret/github/secret", value="ghs3cret")
-        cl.write("secret/ssh", public="public-key-data",
-                 private="private-key-data")
-        cl.write("secret/slack/webhook", value="http://webhook")
-
-        # When reading the configuration we have to interpolate in the
-        # correct values here for the vault connection
-        cfg = build_config("config/complete")
-        cfg.vault.url = "http://localhost:{}".format(s.port)
-        cfg.vault.auth_args["token"] = s.token
-
-        cfg.resolve_secrets()
-        assert not cfg.proxy_ssl_self_signed
-        assert cfg.proxy_ssl_certificate == cert
-        assert cfg.proxy_ssl_key == key
-        assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
-        assert cfg.web_auth_github_app["id"] == "ghkey"
-        assert cfg.web_auth_github_app["secret"] == "ghs3cret"
-        assert cfg.orderly_ssh["private"] == "private-key-data"
-        assert cfg.orderly_ssh["public"] == "public-key-data"
-
-
 def test_read_and_extra():
     with tempfile.TemporaryDirectory() as p:
         shutil.copy("config/basic/orderly-web.yml", p)
