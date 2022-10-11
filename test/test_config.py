@@ -19,9 +19,10 @@ def test_example_config():
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.volumes["redis"] == "orderly_web_redis_data"
     assert cfg.container_prefix == "orderly_web"
-    assert cfg.containers["redis"] == "orderly_web_redis"
-    assert cfg.containers["orderly"] == "orderly_web_orderly"
-    assert cfg.containers["web"] == "orderly_web_web"
+    assert cfg.containers["redis"] == "redis"
+    assert cfg.containers["orderly"] == "orderly"
+    assert cfg.containers["orderly_worker"] == "orderly_worker"
+    assert cfg.containers["web"] == "web"
 
     assert cfg.workers == 1
     assert cfg.images["redis"].name == "redis"

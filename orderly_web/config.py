@@ -1,15 +1,15 @@
 import base64
-import copy
 import os
 
 import docker
 import pickle
 
 import constellation
+import constellation.docker_util as docker_util
 import constellation.config as config
+import constellation.vault as vault
 
-from orderly_web.docker_helpers import docker_client, string_from_container, \
-    string_into_container
+from orderly_web.docker_helpers import docker_client
 
 # There are two types of configuration objects and three ways that
 # they turn up.  These are:
@@ -67,10 +67,10 @@ class OrderlyWebConfigBase:
             self.data, ["container_prefix"])
 
         self.containers = {
-            "redis": "{}_redis".format(self.container_prefix),
-            "orderly": "{}_orderly".format(self.container_prefix),
-            "orderly_worker": "{}_orderly_worker".format(self.container_prefix),
-            "web": "{}_web".format(self.container_prefix)
+            "redis": "redis",
+            "orderly": "orderly",
+            "orderly_worker": "orderly_worker",
+            "web": "web"
         }
 
         self.workers = config.config_integer(
@@ -84,11 +84,12 @@ class OrderlyWebConfigBase:
         try:
             with docker_client() as cl:
                 name = self.containers[PATH_CONFIG["container"]]
-                container = cl.containers.get(name)
+                container = cl.containers.get(
+                    "{}_{}".format(self.container_prefix, name))
         except docker.errors.NotFound:
             return None
         path = PATH_CONFIG["path"]
-        txt = string_from_container(container, path)
+        txt = docker_util.string_from_container(container, path)
         cfg = pickle.loads(base64.b64decode(txt))
         # We have to set the path because the relative path (or even
         # absolute path) might be different between different users of
@@ -112,10 +113,10 @@ class OrderlyWebConfig:
         self.container_prefix = config.config_string(dat, ["container_prefix"])
 
         self.containers = {
-            "redis": "{}_redis".format(self.container_prefix),
-            "orderly": "{}_orderly".format(self.container_prefix),
-            "orderly_worker": "{}_orderly_worker".format(self.container_prefix),
-            "web": "{}_web".format(self.container_prefix)
+            "redis": "redis",
+            "orderly": "orderly",
+            "orderly_worker": "orderly_worker",
+            "web": "web"
         }
 
         self.workers = config.config_integer(
@@ -171,6 +172,11 @@ class OrderlyWebConfig:
             "orderly": self.orderly_ref,
             "orderly_worker": self.orderly_worker_ref,
             "web": self.web_ref,
+            "admin": self.admin_ref,
+            "migrate": self.migrate_ref
+        }
+
+        self.non_constellation_images = {
             "admin": self.admin_ref,
             "migrate": self.migrate_ref
         }
@@ -231,6 +237,7 @@ class OrderlyWebConfig:
             self.css_generator_ref = config.ImageReference(
                 self.web_repo, self.css_generator_name, self.web_tag)
             self.images["css-generator"] = self.css_generator_ref
+            self.non_constellation_images["css-generator"] = self.css_generator_ref
 
         static_documents = config.config_string(
             dat, ["volumes", "documents"], True)
@@ -264,8 +271,7 @@ class OrderlyWebConfig:
                     dat, ["proxy", "image", "tag"])
                 self.proxy_ref = constellation.ImageReference(
                     self.proxy_repo, self.proxy_name, self.proxy_tag)
-                self.containers["proxy"] = "{}_proxy".format(
-                    self.container_prefix)
+                self.containers["proxy"] = "proxy"
                 self.images["proxy"] = self.proxy_ref
                 self.volumes["proxy_logs"] = config.config_string(
                     dat, ["volumes", "proxy_logs"])
@@ -305,11 +311,17 @@ class OrderlyWebConfig:
         txt = base64.b64encode(pickle.dumps(self)).decode("utf8")
         container = self.get_container(PATH_CONFIG["container"])
         path = PATH_CONFIG["path"]
-        string_into_container(txt, container, path)
+        docker_util.string_into_container(txt, container, path)
 
     def get_container(self, name):
         with docker_client() as cl:
-            return cl.containers.get(name)
+            return cl.containers.get("{}_{}".format(self.container_prefix, self.containers[name]))
+
+    def resolve_secrets(self):
+        vault_client = self.vault.client()
+        vault.resolve_secrets(self.orderly_env, vault_client)
+        vault.resolve_secrets(self.web_auth_github_app, vault_client)
+        vault.resolve_secrets(self.orderly_ssh, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))

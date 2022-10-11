@@ -1,4 +1,5 @@
 import io
+import os
 from contextlib import redirect_stdout
 import pytest
 import urllib
@@ -6,6 +7,7 @@ import time
 import json
 import ssl
 import re
+import docker
 from unittest import mock
 from urllib import request
 from unittest.mock import patch, call
@@ -13,31 +15,13 @@ from unittest.mock import patch, call
 import requests
 import vault_dev
 
+import constellation.docker_util as docker_util
+
 from orderly_web.config import fetch_config, build_config
-from orderly_web.docker_helpers import *
+from orderly_web.docker_helpers import docker_client
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
 from orderly_web.notify import Notifier
-
-
-def test_status_when_not_running():
-    st = orderly_web.status("config/basic")
-    assert not st.is_running
-    assert st.containers["orderly"]["status"] == "missing"
-    assert st.containers["web"]["status"] == "missing"
-    assert st.volumes == {}
-    assert st.network is None
-
-
-def test_status_representation_is_str():
-    st = orderly_web.status("config/basic")
-    f = io.StringIO()
-    with redirect_stdout(f):
-        print(st)
-    out = f.getvalue()
-    assert str(st).strip() == out.strip()
-    # __repr__ is called when the object is printed
-    assert st.__repr__() == str(st)
 
 
 def test_start_and_stop():
@@ -45,40 +29,28 @@ def test_start_and_stop():
     try:
         res = orderly_web.start(path)
         assert res
-        st = orderly_web.status(path)
-        assert st.containers["orderly"]["status"] == "running"
-        assert st.containers["redis"]["status"] == "running"
-        assert st.containers["web"]["status"] == "running"
-        assert len(st.container_groups) == 1
-        assert "orderly_worker" in st.container_groups
-        assert st.container_groups["orderly_worker"]["scale"] == 1
-        assert st.container_groups["orderly_worker"]["count"] == 1
-        assert len(st.container_groups["orderly_worker"]["status"]) == 1
-        assert re.match(r"orderly_web_orderly_worker_\w+",
-                        st.container_groups["orderly_worker"]["status"][0]
-                                           ["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
-            "running"
-        assert st.volumes["orderly"] == "orderly_web_volume"
-        assert st.volumes["documents"] == "orderly_web_documents"
-        assert st.volumes["redis"] == "orderly_web_redis_data"
-        assert st.network == "orderly_web_network"
 
-        f = io.StringIO()
-        with redirect_stdout(f):
-            res = orderly_web.start(path)
-            msg = f.getvalue().strip()
-        assert not res
-        assert msg.endswith("please run orderly-web stop")
-
+        cl = docker.client.from_env()
+        containers = cl.containers.list()
+        assert len(containers) == 5
         cfg = fetch_config(path)
-        web = cfg.get_container("web")
-        ports = web.attrs["HostConfig"]["PortBindings"]
-        assert list(ports.keys()) == ["8888/tcp"]
-        dat = json.loads(http_get("http://localhost:8888/api/v1"))
-        assert dat["status"] == "success"
+        assert docker_util.network_exists(cfg.network)
+        assert docker_util.volume_exists(cfg.volumes["orderly"])
+        assert docker_util.volume_exists(cfg.volumes["documents"])
+        assert docker_util.volume_exists(cfg.volumes["redis"])
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly_web_proxy")
+        assert docker_util.container_exists("orderly_web_redis")
 
-        web_config = string_from_container(
+        names = []
+        for container in containers:
+            names.append(container.name)
+        assert any(re.match(r"orderly_web_orderly_worker_\w+", name)
+                   for name in names)
+
+        web = cfg.get_container("web")
+        web_config = docker_util.string_from_container(
             web, "/etc/orderly/web/config.properties").split("\n")
 
         assert "app.url=https://localhost" in web_config
@@ -98,27 +70,22 @@ def test_start_and_stop():
         # Orderly volume contains only the stripped down example from
         # the URL, not the whole demo:
         orderly = cfg.get_container("orderly")
-        src = exec_safely(orderly, ["ls", "/orderly/src"])[1]
+        src = docker_util.exec_safely(orderly, ["ls", "/orderly/src"])[1]
         src_contents = src.decode("UTF-8").strip().split("\n")
         assert set(src_contents) == set(["README.md", "example"])
 
         # Bring the whole lot down:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
-        st = orderly_web.status(path)
-        assert not st.is_running
-        assert st.containers["orderly"]["status"] == "missing"
-        assert st.containers["redis"]["status"] == "missing"
-        assert st.containers["web"]["status"] == "missing"
-        assert st.container_groups["orderly_worker"]["scale"] == 1
-        assert st.container_groups["orderly_worker"]["count"] == 0
-        assert len(st.container_groups["orderly_worker"]["status"]) == 0
-        assert st.volumes == {}
-        assert st.network is None
-        # really removed?
-        with docker_client() as cl:
-            assert not network_exists(cl, cfg.network)
-            assert not volume_exists(cl, cfg.volumes["orderly"])
-            assert not container_exists(cl, cfg.containers["proxy"])
+        containers = cl.containers.list()
+        assert len(containers) == 0
+        assert not docker_util.network_exists(cfg.network)
+        assert not docker_util.volume_exists(cfg.volumes["orderly"])
+        assert not docker_util.volume_exists(cfg.volumes["documents"])
+        assert not docker_util.volume_exists(cfg.volumes["redis"])
+        assert not docker_util.container_exists("orderly_web_web")
+        assert not docker_util.container_exists("orderly_web_orderly")
+        assert not docker_util.container_exists("orderly_web_proxy")
+        assert not docker_util.container_exists("orderly_web_redis")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -129,19 +96,20 @@ def test_start_with_custom_styles():
         options = {"web": {"url": "http://localhost:8888"}}
         res = orderly_web.start(path, options=options)
         assert res
-        st = orderly_web.status(path)
-        assert st.containers["orderly"]["status"] == "running"
-        assert st.containers["web"]["status"] == "running"
-        assert st.volumes["css"] == "orderly_web_css"
-        assert "documents" not in st.volumes
-        assert st.network == "orderly_web_network"
 
         cfg = fetch_config(path)
 
+        assert docker_util.network_exists(cfg.network)
+        assert docker_util.volume_exists(cfg.volumes["css"])
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert not docker_util.volume_exists("documents")
+
         # check that the style volume is really mounted
-        api_client = docker.client.from_env().api
-        details = api_client.inspect_container(cfg.containers["web"])
-        assert len(details['Mounts']) == 3
+        cl = docker.client.from_env()
+        api_client = cl.api
+        details = api_client.inspect_container("orderly_web_web")
+        assert len(details['Mounts']) == 2
         css_volume = [v for v in details['Mounts']
                       if v['Type'] == "volume" and
                       v['Name'] == "orderly_web_css"][0]
@@ -150,19 +118,19 @@ def test_start_with_custom_styles():
 
         # check that the style files have been compiled with the custom vars
         web_container = cfg.get_container("web")
-        style = string_from_container(web_container,
-                                      "/static/public/css/style.css")
+        style = docker_util.string_from_container(web_container,
+                                                  "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
         # check that js files are there also
         res = requests.get("http://localhost:8888/js/index.bundle.js")
         assert res.status_code == 200
 
-        # check that the custom logo is mounted and appears on the page
-        logo_mount = [v for v in details['Mounts']
-                      if v['Type'] == "bind"][0]
+        # check that the custom logo exists in container and appears on the page
+        web = cfg.get_container("web")
         expected_destination = "/static/public/img/logo/my-test-logo.png"
-        assert logo_mount['Destination'] == expected_destination
+        logo = docker_util.bytes_from_container(web, expected_destination)
+        assert len(logo) > 0
         res = requests.get("http://localhost:8888")
         assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
                in res.text
@@ -191,12 +159,10 @@ def test_stop_broken_orderly_web():
 
         assert stop_failed
 
-        with docker_client() as cl:
-            assert container_exists(cl, "orderly_web_orderly")
+        assert docker_util.container_exists("orderly_web_orderly")
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True)
-        with docker_client() as cl:
-            assert not container_exists(cl, "orderly_web_orderly")
+        assert not docker_util.container_exists("orderly_web_orderly")
 
 
 def test_stop_broken_orderly_web_with_option():
@@ -211,15 +177,14 @@ def test_stop_broken_orderly_web_with_option():
 
         assert start_failed
 
-        with docker_client() as cl:
-            assert container_exists(cl, "orderly_web_orderly")
-            assert network_exists(cl, "ow_broken_test")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.network_exists("ow_broken_test")
+
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True,
                          options=options)
-        with docker_client() as cl:
-            assert not container_exists(cl, "orderly_web_orderly")
-            assert not network_exists(cl, "ow_broken_test")
+    assert not docker_util.container_exists("orderly_web_orderly")
+    assert not docker_util.network_exists("ow_broken_test")
 
 
 def test_stop_broken_orderly_web_with_extra():
@@ -233,34 +198,13 @@ def test_stop_broken_orderly_web_with_extra():
             start_failed = True
 
         assert start_failed
-
-        with docker_client() as cl:
-            assert container_exists(cl, "orderly_web_orderly")
-            assert network_exists(cl, "ow_broken_extra_test")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.network_exists("ow_broken_extra_test")
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True,
                          extra=extra)
-        with docker_client() as cl:
-            assert not container_exists(cl, "orderly_web_orderly")
-            assert not network_exists(cl, "ow_broken_extra_test")
-
-
-def test_status_from_broken_orderly_web():
-    path = "config/breaking"
-    try:
-        start_failed = False
-        try:
-            orderly_web.start(path)
-        except docker.errors.APIError:
-            start_failed = True
-
-        assert start_failed
-
-        status = orderly_web.status(path)
-        assert str(status) == "Cannot read status from orderly-web because " \
-            "it has not started successfully or is in an error state."
-    finally:
-        orderly_web.stop(path, force=True, network=True, volumes=True)
+        assert not docker_util.container_exists("orderly_web_orderly")
+        assert not docker_util.network_exists("ow_broken_extra_test")
 
 
 def test_start_with_montagu_config():
@@ -268,14 +212,15 @@ def test_start_with_montagu_config():
     try:
         res = orderly_web.start(path)
         assert res
-        st = orderly_web.status(path)
-        assert st.containers["orderly"]["status"] == "running"
-        assert st.containers["web"]["status"] == "running"
-        assert st.network == "orderly_web_network"
 
         cfg = fetch_config(path)
+
+        assert docker_util.network_exists(cfg.network)
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+
         web = cfg.get_container("web")
-        web_config = string_from_container(
+        web_config = docker_util.string_from_container(
             web, "/etc/orderly/web/config.properties").split("\n")
 
         assert "montagu.url=http://montagu" in web_config
@@ -340,57 +285,6 @@ def test_can_pull_on_deploy():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
-def test_vault_ssl():
-    with vault_dev.server() as s:
-        cl = s.client()
-        # Copy the certificates into the vault where we will later on
-        # pull from from.
-        cert = read_file("proxy/ssl/certificate.pem")
-        key = read_file("proxy/ssl/key.pem")
-        cl.write("secret/ssl/certificate", value=cert)
-        cl.write("secret/ssl/key", value=key)
-        cl.write("secret/db/password", value="s3cret")
-        cl.write("secret/github/id", value="ghid")
-        cl.write("secret/github/secret", value="ghs3cret")
-        cl.write("secret/ssh", public="public-key-data",
-                 private="private-key-data")
-        cl.write("secret/slack/webhook", value="http://webhook")
-
-        path = "config/complete"
-
-        vault_addr = "http://localhost:{}".format(s.port)
-        vault_auth = {"args": {"token": s.token}}
-        options = {"vault": {"addr": vault_addr, "auth": vault_auth}}
-
-        res = orderly_web.start(path, options=options)
-        dat = json.loads(http_get("https://localhost/api/v1"))
-        assert dat["status"] == "success"
-
-        cfg = fetch_config(path)
-        container = cfg.get_container("orderly")
-        res = string_from_container(container, "/root/.Renviron")
-        assert "ORDERLY_DB_PASS=s3cret" in res
-
-        private = string_from_container(container, "/root/.ssh/id_rsa")
-        assert private == "private-key-data"
-        public = string_from_container(container, "/root/.ssh/id_rsa.pub")
-        assert public == "public-key-data"
-
-        known_hosts = string_from_container(container,
-                                            "/root/.ssh/known_hosts")
-        assert "github.com" in known_hosts
-
-        web_container = cfg.get_container("web")
-        web_config = string_from_container(
-            web_container,
-            "/etc/orderly/web/config.properties").split("\n")
-
-        assert "auth.github_key=ghid" in web_config
-        assert "auth.github_secret=ghs3cret" in web_config
-
-        orderly_web.stop(path, kill=True, volumes=True, network=True)
-
-
 def test_without_github_app_for_montagu():
     path = "config/basic"
     options = {"web": {"auth": {"montagu": True,
@@ -400,10 +294,10 @@ def test_without_github_app_for_montagu():
                                 "github_secret": None}}}
     res = orderly_web.start(path, options=options)
     assert res
-    st = orderly_web.status(path)
-    assert st.containers["orderly"]["status"] == "running"
-    assert st.containers["web"]["status"] == "running"
-    assert st.network == "orderly_web_network"
+    cfg = fetch_config(path)
+    assert docker_util.network_exists(cfg.network)
+    assert docker_util.container_exists("orderly_web_web")
+    assert docker_util.container_exists("orderly_web_orderly")
 
     orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -430,8 +324,8 @@ def test_vault_github_login_with_prompt():
 
             cfg = fetch_config(path)
             container = cfg.get_container("orderly")
-            res = string_from_container(container,
-                                        "/root/.Renviron")
+            res = docker_util.string_from_container(container,
+                                                    "/root/.Renviron")
             assert "ORDERLY_DB_PASS=s3cret" in res
 
             orderly_web.stop(path, kill=True, volumes=True, network=True)
@@ -456,8 +350,8 @@ def test_vault_github_login_from_env():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = string_from_container(container,
-                                    "/root/.Renviron")
+        res = docker_util.string_from_container(container,
+                                                "/root/.Renviron")
         assert "ORDERLY_DB_PASS=s3cret" in res
 
         orderly_web.stop(path, kill=True, volumes=True,
@@ -487,8 +381,8 @@ def test_vault_github_login_with_mount_path():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = string_from_container(container,
-                                    "/root/.Renviron")
+        res = docker_util.string_from_container(container,
+                                                "/root/.Renviron")
         assert "ORDERLY_DB_PASS=s3cret" in res
 
         orderly_web.stop(path, kill=True, volumes=True,
@@ -501,7 +395,7 @@ def test_error_if_orderly_not_initialised():
     cfg = build_config(path, options=options)
     # ensure this test behaves sensibly if state is a bit messy:
     with docker_client() as cl:
-        remove_volume(cl, cfg.volumes["orderly"])
+        docker_util.remove_volume(cfg.volumes["orderly"])
     try:
         with pytest.raises(Exception,
                            match="Orderly volume not initialised"):
@@ -518,7 +412,7 @@ def test_can_start_with_prepared_volume():
 
     # ensure this test behaves sensibly if state is a bit messy:
     with docker_client() as cl:
-        remove_volume(cl, cfg.volumes["orderly"])
+        docker_util.remove_volume(cfg.volumes["orderly"])
         image = str(cfg.images["orderly"])
         mounts = [docker.types.Mount("/orderly", cfg.volumes["orderly"])]
         args = ["Rscript", "-e", "orderly:::create_orderly_demo('/orderly')"]
@@ -531,7 +425,7 @@ def test_can_start_with_prepared_volume():
             res = orderly_web.start(path, options=options)
         assert res
         out = f.getvalue()
-        expected = 'orderly volume already contains data - not initialising'
+        expected = '[orderly] orderly volume already contains data - not initialising'
         assert expected in out.splitlines()
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
@@ -571,34 +465,25 @@ def test_start_and_stop_multiple_workers():
     try:
         res = orderly_web.start(path, options=options)
         assert res
-        st = orderly_web.status(path)
-        assert st.containers["orderly"]["status"] == "running"
-        assert st.containers["redis"]["status"] == "running"
-        assert st.containers["web"]["status"] == "running"
-        assert len(st.container_groups) == 1
-        assert "orderly_worker" in st.container_groups
-        assert st.container_groups["orderly_worker"]["count"] == 2
-        assert len(st.container_groups["orderly_worker"]["status"]) == 2
-        assert re.match(r"orderly_web_orderly_worker_\w+",
-                        st.container_groups["orderly_worker"]["status"][0]
-                                           ["name"])
-        assert st.container_groups["orderly_worker"]["status"][0]["status"] ==\
-            "running"
-        assert re.match(r"orderly_web_orderly_worker_\w+",
-                        st.container_groups["orderly_worker"]["status"][1]
-                                           ["name"])
-        assert st.container_groups["orderly_worker"]["status"][1]["status"] ==\
-            "running"
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly_web_proxy")
+        assert docker_util.container_exists("orderly_web_redis")
+
+        cl = docker.client.from_env()
+        containers = cl.containers.list()
+        assert len(containers) == 6
+        names = []
+        for container in containers:
+            names.append(container.name)
+        workers = list(filter(lambda name: re.match(
+            r"orderly_web_orderly_worker_\w+", name), names))
+        assert len(workers) == 2
 
         # Bring the whole lot down:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
-        st = orderly_web.status(path)
-        assert not st.is_running
-        assert st.containers["orderly"]["status"] == "missing"
-        assert st.containers["redis"]["status"] == "missing"
-        assert st.containers["web"]["status"] == "missing"
-        assert st.container_groups["orderly_worker"]["count"] == 0
-        assert len(st.container_groups["orderly_worker"]["status"]) == 0
+        containers = cl.containers.list()
+        assert len(containers) == 0
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 

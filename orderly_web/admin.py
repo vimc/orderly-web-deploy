@@ -1,7 +1,7 @@
 import docker
 
 from orderly_web.config import fetch_config
-from orderly_web.docker_helpers import docker_client, return_logs_and_remove
+from orderly_web.docker_helpers import docker_client
 
 
 def add_users(path, emails):
@@ -32,3 +32,13 @@ def run(path, args):
         result = return_logs_and_remove(cl, image, args, mounts)
         print(result)
         return result
+
+
+def return_logs_and_remove(client, image, args=None, mounts=None):
+    try:
+        container = client.containers.run(image, args, mounts=mounts,
+                                          detach=True)
+        container.wait()
+        return container.logs().decode("UTF-8")
+    finally:
+        container.remove()
