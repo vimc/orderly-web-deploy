@@ -16,15 +16,6 @@ import docker
 # at than endless try/finally blocks everywhere.
 
 
-class docker_client():
-    def __enter__(self):
-        self.client = docker.client.from_env()
-        return self.client
-
-    def __exit__(self, type, value, traceback):
-        pass
-
-
 def return_logs_and_remove(client, image, args=None, mounts=None):
     try:
         container = client.containers.run(image, args, mounts=mounts,
@@ -33,3 +24,12 @@ def return_logs_and_remove(client, image, args=None, mounts=None):
         return container.logs().decode("UTF-8")
     finally:
         container.remove()
+
+
+class docker_client():
+    def __enter__(self):
+        self.client = docker.client.from_env()
+        return self.client
+
+    def __exit__(self, type, value, traceback):
+        pass
