@@ -118,15 +118,16 @@ def test_start_with_custom_styles():
 
         # check that the style files have been compiled with the custom vars
         web_container = cfg.get_container("web")
-        style = docker_util.string_from_container(web_container,
-                                                  "/static/public/css/style.css")
+        style = docker_util.string_from_container(
+            web_container, "/static/public/css/style.css")
         assert "/* Example custom config */" in style
 
         # check that js files are there also
         res = requests.get("http://localhost:8888/js/index.bundle.js")
         assert res.status_code == 200
 
-        # check that the custom logo exists in container and appears on the page
+        # check that the custom logo exists in container and appears
+        # on the page
         web = cfg.get_container("web")
         expected_destination = "/static/public/img/logo/my-test-logo.png"
         logo = docker_util.bytes_from_container(web, expected_destination)
@@ -425,7 +426,8 @@ def test_can_start_with_prepared_volume():
             res = orderly_web.start(path, options=options)
         assert res
         out = f.getvalue()
-        expected = '[orderly] orderly volume already contains data - not initialising'
+        expected = '[orderly] orderly volume already contains data - not '\
+            'initialising'
         assert expected in out.splitlines()
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)

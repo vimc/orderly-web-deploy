@@ -207,12 +207,10 @@ class OrderlyWebConfig:
             self.web_auth_github_team = None
 
         if self.web_auth_montagu:
-            self.montagu_url = config.config_string(dat,
-                                                    ["web", "auth", "montagu_url"])
-            self.montagu_api_url = config.config_string(dat,
-                                                        ["web",
-                                                         "auth",
-                                                         "montagu_api_url"])
+            self.montagu_url = config.config_string(
+                dat, ["web", "auth", "montagu_url"])
+            self.montagu_api_url = config.config_string(
+                dat, ["web", "auth", "montagu_api_url"])
 
         self.sass_variables = config.config_string(dat,
                                                    ["web", "sass_variables"],
@@ -237,7 +235,8 @@ class OrderlyWebConfig:
             self.css_generator_ref = config.ImageReference(
                 self.web_repo, self.css_generator_name, self.web_tag)
             self.images["css-generator"] = self.css_generator_ref
-            self.non_constellation_images["css-generator"] = self.css_generator_ref
+            self.non_constellation_images["css-generator"] = \
+                self.css_generator_ref
 
         static_documents = config.config_string(
             dat, ["volumes", "documents"], True)
@@ -315,7 +314,8 @@ class OrderlyWebConfig:
 
     def get_container(self, name):
         with docker_client() as cl:
-            return cl.containers.get("{}_{}".format(self.container_prefix, self.containers[name]))
+            return cl.containers.get("{}_{}".format(self.container_prefix,
+                                                    self.containers[name]))
 
     def resolve_secrets(self):
         vault_client = self.vault.client()

@@ -21,8 +21,8 @@ def orderly_constellation(cfg):
         proxy = proxy_container(cfg, web)
         containers.append(proxy)
 
-    obj = constellation.Constellation("orderly-web", cfg.container_prefix, containers,
-                                      cfg.network, cfg.volumes,
+    obj = constellation.Constellation("orderly-web", cfg.container_prefix,
+                                      containers, cfg.network, cfg.volumes,
                                       data=cfg, vault_config=cfg.vault)
     return obj
 
@@ -67,7 +67,8 @@ def orderly_configure(container, cfg):
 
 def orderly_initial_data(cfg, container):
     if orderly_is_initialised(container):
-        print("[orderly] orderly volume already contains data - not initialising")
+        print("[orderly] orderly volume already contains data - "
+              "not initialising")
     else:
         if cfg.orderly_initial_source == "demo":
             orderly_init_demo(container)
@@ -233,7 +234,8 @@ def web_container_config(container, cfg):
             "auth.github_team": cfg.web_auth_github_team or "",
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
-            "orderly.server": "http://{}_{}:8321".format(cfg.container_prefix, orderly_container)}
+            "orderly.server": "http://{}_{}:8321".format(cfg.container_prefix,
+                                                         orderly_container)}
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
     if cfg.web_auth_montagu:
