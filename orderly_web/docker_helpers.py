@@ -23,3 +23,13 @@ class docker_client():
 
     def __exit__(self, type, value, traceback):
         pass
+
+
+def return_logs_and_remove(client, image, args=None, mounts=None):
+    try:
+        container = client.containers.run(image, args, mounts=mounts,
+                                          detach=True)
+        container.wait()
+        return container.logs().decode("UTF-8")
+    finally:
+        container.remove()

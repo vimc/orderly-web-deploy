@@ -1,4 +1,3 @@
-
 import os
 import tempfile
 import docker
@@ -18,7 +17,6 @@ def orderly_constellation(cfg):
     web = web_container(cfg)
     containers = [redis, orderly, worker, web]
 
-    # 6. proxy
     if cfg.proxy_enabled:
         proxy = proxy_container(cfg, web)
         containers.append(proxy)
