@@ -1,5 +1,3 @@
-from PIL import Image
-
 from constellation.notifier import Notifier
 
 from orderly_web.config import build_config
