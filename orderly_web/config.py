@@ -322,7 +322,8 @@ class OrderlyWebConfig:
         vault.resolve_secrets(self.orderly_env, vault_client)
         vault.resolve_secrets(self.web_auth_github_app, vault_client)
         vault.resolve_secrets(self.orderly_ssh, vault_client)
-        vault.resolve_secrets(self.slack_webhook_url, vault_client)
+        self.slack_webhook_url = vault.resolve_secret(
+            self.slack_webhook_url, vault_client)
 
     def get_abs_path(self, relative_path):
         return os.path.abspath(os.path.join(self.path, relative_path))
