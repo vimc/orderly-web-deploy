@@ -1,8 +1,9 @@
 from PIL import Image
 
+from constellation.notifier import Notifier
+
 from orderly_web.config import build_config
 from orderly_web.constellation import orderly_constellation
-from orderly_web.notify import Notifier
 from orderly_web.pull import pull
 
 

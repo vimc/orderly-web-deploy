@@ -16,12 +16,12 @@ import requests
 import vault_dev
 
 import constellation.docker_util as docker_util
+from constellation.notifier import Notifier
 
 from orderly_web.config import fetch_config, build_config
 from orderly_web.docker_helpers import docker_client
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
-from orderly_web.notify import Notifier
 
 
 def test_start_and_stop():
