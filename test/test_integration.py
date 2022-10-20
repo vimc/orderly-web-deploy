@@ -490,6 +490,25 @@ def test_start_and_stop_multiple_workers():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_wait_for_redis_exists():
+    path = "config/basic"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly_web_proxy")
+        assert docker_util.container_exists("orderly_web_redis")
+
+        cfg = fetch_config(path)
+        container = cfg.get_container("redis")
+        res = docker_util.string_from_container(container,
+                                                "/wait_for_redis")
+        assert re.match(r'#!/usr/bin/env bash', res)
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def enable_github_login(cl, path="github"):
     cl.sys.enable_auth_method(method_type="github", path=path)
     policy = """

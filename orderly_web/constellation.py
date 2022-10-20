@@ -37,10 +37,16 @@ def redis_container(cfg):
     return redis
 
 
+def get_static_file(filename):
+    package_directory = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(package_directory, "static", filename)
+
+
 def redis_configure(container, cfg):
     print("[redis] Waiting for redis to come up")
+    redis_script = get_static_file("wait_for_redis")
     docker_util.file_into_container(
-        "scripts/wait_for_redis", container, ".", "wait_for_redis")
+        redis_script, container, ".", "wait_for_redis")
     docker_util.exec_safely(container, ["bash", "/wait_for_redis"])
 
 
