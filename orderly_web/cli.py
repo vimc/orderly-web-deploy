@@ -1,6 +1,6 @@
 """Usage:
   orderly-web start <path> [--extra=PATH] [--option=OPTION]... [--pull]
-  orderly-web status [--extra=PATH] <path>
+  orderly-web status <path>
   orderly-web stop <path> [--volumes] [--network] [--kill] [--force]
     [--extra=PATH] [--option=OPTION]...
   orderly-web admin <path> add-users <email>...
@@ -44,9 +44,8 @@ def parse_args(argv):
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
-        extra = args["--extra"]
         target = orderly_web.status
-        args = (path, extra)
+        args = (path, )
     elif args["stop"]:
         kill = args["--kill"]
         network = args["--network"]
