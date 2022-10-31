@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -exo pipefail
+
+if [[ "$RESIDE_ALLOW_CLEAR_DOCKER" == "true" ]]; then
+    set -u
+    docker rm --force $(docker ps --all --quiet) || true
+    docker network prune --force
+    docker volume prune --force
+else
+    echo "Clear docker not allowed on this machine set RESIDE_ALLOW_CLEAR_DOCKER=true"
+fi

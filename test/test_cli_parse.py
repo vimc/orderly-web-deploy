@@ -3,7 +3,6 @@ import pytest
 import orderly_web
 import orderly_web.cli
 from orderly_web.cli import string_to_dict
-from orderly_web.status import print_status
 
 
 def test_cli_parse_start():
@@ -29,7 +28,7 @@ def test_cli_parse_start_with_options():
 
 def test_cli_parse_status():
     target, args = orderly_web.cli.parse_args(["status", "path"])
-    assert target == print_status
+    assert target == orderly_web.status
     assert args == ("path",)
 
 

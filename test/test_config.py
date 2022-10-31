@@ -13,93 +13,21 @@ sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
                "e": None}
 
 
-def test_config_string_reads_simple_values():
-    assert config_string(sample_data, "a") == "value1"
-    assert config_string(sample_data, ["a"]) == "value1"
-
-
-def test_config_string_reads_nested_values():
-    assert config_string(sample_data, ["b", "x"]) == "value2"
-
-
-def test_config_string_throws_on_missing_keys():
-    with pytest.raises(KeyError):
-        config_string(sample_data, "x")
-    with pytest.raises(KeyError):
-        config_string(sample_data, ["b", "y"])
-
-
-def test_config_none_is_missing():
-    with pytest.raises(KeyError):
-        config_string(sample_data, ["e"], False)
-    assert config_string(sample_data, ["e"], True) is None
-
-
-def test_config_string_validates_types():
-    with pytest.raises(ValueError):
-        config_string(sample_data, "c")
-
-
-def test_config_string_default():
-    assert config_string(sample_data, "x", True) is None
-
-
-def test_config_integer():
-    assert config_integer(sample_data, "c") == 1
-
-
-def test_config_boolean():
-    assert config_boolean(sample_data, "d")
-
-
-def test_config_dict_returns_dict():
-    assert config_dict(sample_data, ["b"]) == sample_data["b"]
-
-
-def test_config_dict_strict_returns_dict():
-    assert config_dict_strict(sample_data, ["b"], ["x"]) == sample_data["b"]
-
-
-def test_config_dict_strict_raises_if_keys_missing():
-    with pytest.raises(ValueError, match="Expected keys x, y for b"):
-        config_dict_strict(sample_data, ["b"], ["x", "y"])
-
-
-def test_config_dict_strict_raises_if_not_strings():
-    dat = {"a": {"b": {"c": 1}}}
-    with pytest.raises(ValueError, match="Expected a string for a:b:c"):
-        config_dict_strict(dat, ["a", "b"], "c")
-
-
-def test_config_enum_returns_string():
-    assert config_enum(sample_data, ["b", "x"], ["value1", "value2"]) == \
-        "value2"
-
-
-def test_config_enum_raises_if_invalid():
-    with pytest.raises(ValueError,
-                       match=r"Expected one of \[enum1, enum2\] for b:x"):
-        config_enum(sample_data, ["b", "x"], ["enum1", "enum2"])
-
-
 def test_example_config():
     cfg = build_config("config/basic")
     assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.volumes["redis"] == "orderly_web_redis_data"
-    assert cfg.containers["redis"] == "orderly_web_redis"
-    assert cfg.containers["orderly"] == "orderly_web_orderly"
-    assert cfg.containers["web"] == "orderly_web_web"
+    assert cfg.container_prefix == "orderly_web"
+    assert cfg.containers["redis"] == "redis"
+    assert cfg.containers["orderly"] == "orderly"
+    assert cfg.containers["orderly_worker"] == "orderly_worker"
+    assert cfg.containers["web"] == "web"
 
-    assert len(cfg.container_groups) == 1
-    assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==\
-        "orderly_web_orderly_worker"
-    assert cfg.container_groups["orderly_worker"]["scale"] == 1
-
+    assert cfg.workers == 1
     assert cfg.images["redis"].name == "redis"
     assert cfg.images["redis"].tag == "5.0"
-    assert str(cfg.images["redis"]) == "redis:5.0"
+    assert str(cfg.images["redis"]) == "library/redis:5.0"
     assert cfg.images["orderly"].repo == "vimc"
     assert cfg.images["orderly"].name == "orderly.server"
     assert cfg.images["orderly"].tag == "master"
@@ -172,31 +100,14 @@ def test_config_montagu():
 def test_default_workers():
     path = "config/montagu"
     cfg = build_config(path)
-    assert len(cfg.container_groups) == 1
-    assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==\
-        "orderly_web_orderly_worker"
-    assert cfg.container_groups["orderly_worker"]["scale"] == 1
+    assert cfg.workers == 1
 
 
-def test_string_representation():
-    img = DockerImageReference("a", "b", "c")
-    assert str(img) == "a/b:c"
+def test_multiple_workers_config():
+    options = {"orderly": {"workers": 2}}
+    cfg = build_config("config/basic", options=options)
 
-
-def test_config_image_reference():
-    data = {"foo": {
-        "repo": "a", "name": "b", "tag": "c", "other": "d", "num": 1},
-        "bar": {
-        "name": "e", "tag": "f"
-    }}
-    assert str(config_image_reference(data, "foo")) == "a/b:c"
-    assert str(config_image_reference(data, ["foo"], "other")) == "a/d:c"
-    assert str(config_image_reference(data, "bar")) == "e:f"
-    with pytest.raises(KeyError):
-        config_image_reference(data, ["foo"], "missing")
-    with pytest.raises(ValueError):
-        config_image_reference(data, ["foo"], "num")
+    assert cfg.workers == 2
 
 
 def test_config_no_proxy():
@@ -208,62 +119,6 @@ def test_config_proxy_not_enabled():
     options = {"proxy": {"enabled": False}}
     cfg = build_config("config/noproxy", options=options)
     assert not cfg.proxy_enabled
-
-
-def test_can_substitute_secrets():
-    with vault_dev.server() as s:
-        cl = s.client()
-        # Copy the certificates into the vault where we will later on
-        # pull from from.
-        cert = read_file("proxy/ssl/certificate.pem")
-        key = read_file("proxy/ssl/key.pem")
-        cl.write("secret/ssl/certificate", value=cert)
-        cl.write("secret/ssl/key", value=key)
-        cl.write("secret/db/password", value="s3cret")
-        cl.write("secret/github/id", value="ghkey")
-        cl.write("secret/github/secret", value="ghs3cret")
-        cl.write("secret/ssh", public="public-key-data",
-                 private="private-key-data")
-        cl.write("secret/slack/webhook", value="http://webhook")
-
-        # When reading the configuration we have to interpolate in the
-        # correct values here for the vault connection
-        cfg = build_config("config/complete")
-        cfg.vault.url = "http://localhost:{}".format(s.port)
-        cfg.vault.auth_args["token"] = s.token
-
-        cfg.resolve_secrets()
-        assert not cfg.proxy_ssl_self_signed
-        assert cfg.proxy_ssl_certificate == cert
-        assert cfg.proxy_ssl_key == key
-        assert cfg.orderly_env["ORDERLY_DB_PASS"] == "s3cret"
-        assert cfg.web_auth_github_app["id"] == "ghkey"
-        assert cfg.web_auth_github_app["secret"] == "ghs3cret"
-        assert cfg.orderly_ssh["private"] == "private-key-data"
-        assert cfg.orderly_ssh["public"] == "public-key-data"
-
-
-def test_combine():
-    def do_combine(a, b):
-        """lets us use combine with unnamed data"""
-        combine(a, b)
-        return a
-
-    assert do_combine({"a": 1}, {"b": 2}) == \
-        {"a": 1, "b": 2}
-    assert do_combine({"a": {"x": 1}, "b": 2}, {"a": {"x": 3}}) == \
-        {"a": {"x": 3}, "b": 2}
-    assert do_combine({"a": {"x": 1, "y": 4}, "b": 2}, {"a": {"x": 3}}) == \
-        {"a": {"x": 3, "y": 4}, "b": 2}
-    assert do_combine({"a": None, "b": 2}, {"a": {"x": 3}}) == \
-        {"a": {"x": 3}, "b": 2}
-
-
-def combine_can_replace_dict():
-    base = {"a": {"c": {"d": "x"}}, "b": "y"}
-    options = {"a": {"c": None}}
-    combine(base, options)
-    assert base["a"]["c"] is None
 
 
 def test_read_and_extra():
@@ -396,17 +251,6 @@ def test_initial_demo_ignores_url():
         cfg = build_config("config/basic", options=options)
     out = f.getvalue()
     assert "NOTE: Ignoring orderly:initial:url" in out
-
-
-def test_multiple_workers_config():
-    options = {"orderly": {"workers": 2}}
-    cfg = build_config("config/basic", options=options)
-
-    assert len(cfg.container_groups) == 1
-    assert "orderly_worker" in cfg.container_groups
-    assert cfg.container_groups["orderly_worker"]["name"] ==\
-        "orderly_web_orderly_worker"
-    assert cfg.container_groups["orderly_worker"]["scale"] == 2
 
 
 def read_file(path):

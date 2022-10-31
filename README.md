@@ -76,6 +76,8 @@ To test changes during development often the best way is to try and run a deploy
  
 ## Testing
 
+Running integration tests requires an environment variable `VAULT_TEST_GITHUB_PAT` to be available. This needs to be a github pat for a user who is a member of the [robots team in the VIMC org](https://github.com/orgs/vimc/teams/robots). This can be read from the vault `vault read secret/vimc-robot/github-pat`. Save it into an environment variable through e.g. your `~/.bashrc` file so it is available to the tests.
+
 Run
 
 ```
