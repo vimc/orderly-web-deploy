@@ -214,7 +214,7 @@ def web_generate_css(cfg):
     compiled_css_mount = \
         docker.types.Mount("/static/public/css", cfg.volumes["css"])
     variable_mount = \
-        docker.types.Mount("/static/src/scss/partials/user-variables.scss",
+        docker.types.Mount("/static/src/scss/partials/_user-variables.scss",
                            cfg.sass_variables, type="bind")
 
     mounts = [compiled_css_mount, variable_mount]
