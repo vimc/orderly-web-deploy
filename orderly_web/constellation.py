@@ -54,8 +54,10 @@ def orderly_container(cfg, redis_container):
     orderly_name = cfg.containers["orderly"]
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
-    orderly_env = {"REDIS_URL": "redis://{}:6379".format(
-        redis_container.name_external(cfg.container_prefix))}
+
+    redis_url = "redis://{}:6379".format(
+        redis_container.name_external(cfg.container_prefix)
+    orderly_env = {**cfg.orderly_env, "REDIS_URL": redis_url}
     orderly = constellation.ConstellationContainer(
         orderly_name, cfg.orderly_ref, args=orderly_args,
         mounts=orderly_mounts, environment=orderly_env,
@@ -67,7 +69,6 @@ def orderly_configure(container, cfg):
     orderly_write_ssh_keys(cfg.orderly_ssh, container)
     orderly_initial_data(cfg, container)
     orderly_check_schema(container)
-    orderly_write_env(cfg.orderly_env, container)
     orderly_start(container)
 
 
@@ -82,15 +83,6 @@ def orderly_initial_data(cfg, container):
             orderly_init_clone(container, cfg.orderly_initial_url)
         else:
             raise Exception("Orderly volume not initialised")
-
-
-def orderly_write_env(env, container):
-    if not env:
-        return
-    print("[orderly] Writing orderly environment")
-    dest = "/root/.Renviron"
-    txt = "".join(["{}={}\n".format(str(k), str(v)) for k, v in env.items()])
-    docker_util.string_into_container(txt, container, dest)
 
 
 def orderly_init_demo(container):
