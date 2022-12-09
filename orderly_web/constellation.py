@@ -54,12 +54,9 @@ def orderly_container(cfg, redis_container):
     orderly_name = cfg.containers["orderly"]
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
-
-    redis_url = "redis://{}:6379".format(redis_container.name_external(cfg.container_prefix))
-    orderly_env = {**cfg.orderly_env, "REDIS_URL": redis_url}
     orderly = constellation.ConstellationContainer(
         orderly_name, cfg.orderly_ref, args=orderly_args,
-        mounts=orderly_mounts, environment=orderly_env,
+        mounts=orderly_mounts, environment=orderly_env(cfg),
         configure=orderly_configure, working_dir="/orderly")
     return orderly
 
@@ -135,12 +132,10 @@ def worker_container(cfg, redis_container):
     worker_name = cfg.containers["orderly_worker"]
     worker_args = ["--go-signal", "/go_signal"]
     worker_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
-    worker_env = {"REDIS_URL": "redis://{}:6379".format(
-        redis_container.name_external(cfg.container_prefix))}
     worker_entrypoint = "/usr/local/bin/orderly_worker"
     worker = constellation.ConstellationService(
         worker_name, cfg.orderly_worker_ref, cfg.workers,
-        args=worker_args, mounts=worker_mounts, environment=worker_env,
+        args=worker_args, mounts=worker_mounts, environment=orderly_env(cfg),
         entrypoint=worker_entrypoint, configure=worker_configure,
         working_dir="/orderly")
     return worker
@@ -148,7 +143,6 @@ def worker_container(cfg, redis_container):
 
 def worker_configure(container, cfg):
     orderly_write_ssh_keys(cfg.orderly_ssh, container)
-    orderly_write_env(cfg.orderly_env, container)
     worker_start(container)
 
 
@@ -288,3 +282,9 @@ def proxy_configure(container, cfg):
                                           "/run/proxy/certificate.pem")
         docker_util.string_into_container(cfg.proxy_ssl_key, container,
                                           "/run/proxy/key.pem")
+
+
+def orderly_env(cfg):
+    redis_url = "redis://{}:6379".format(redis_container.name_external(
+        cfg.container_prefix))
+    return {**cfg.orderly_env, "REDIS_URL": redis_url}
