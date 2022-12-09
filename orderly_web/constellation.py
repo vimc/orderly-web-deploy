@@ -55,8 +55,7 @@ def orderly_container(cfg, redis_container):
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
 
-    redis_url = "redis://{}:6379".format(
-        redis_container.name_external(cfg.container_prefix))
+    redis_url = "redis://{}:6379".format(redis_container.name_external(cfg.container_prefix))
     orderly_env = {**cfg.orderly_env, "REDIS_URL": redis_url}
     orderly = constellation.ConstellationContainer(
         orderly_name, cfg.orderly_ref, args=orderly_args,
