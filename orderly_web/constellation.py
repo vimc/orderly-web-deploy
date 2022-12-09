@@ -289,4 +289,4 @@ def proxy_configure(container, cfg):
 def orderly_env(cfg, redis_container):
     redis_url = "redis://{}:6379".format(redis_container.name_external(
         cfg.container_prefix))
-    return {**cfg.orderly_env, "REDIS_URL": redis_url}
+    return {**(cfg.orderly_env or {}), "REDIS_URL": redis_url}
