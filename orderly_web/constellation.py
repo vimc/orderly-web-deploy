@@ -54,9 +54,10 @@ def orderly_container(cfg, redis_container):
     orderly_name = cfg.containers["orderly"]
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
+    environment = orderly_env(cfg, redis_container)
     orderly = constellation.ConstellationContainer(
         orderly_name, cfg.orderly_ref, args=orderly_args,
-        mounts=orderly_mounts, environment=orderly_env(cfg),
+        mounts=orderly_mounts, environment=environment,
         configure=orderly_configure, working_dir="/orderly")
     return orderly
 
@@ -133,9 +134,10 @@ def worker_container(cfg, redis_container):
     worker_args = ["--go-signal", "/go_signal"]
     worker_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
     worker_entrypoint = "/usr/local/bin/orderly_worker"
+    environment = orderly_env(cfg, redis_container)
     worker = constellation.ConstellationService(
         worker_name, cfg.orderly_worker_ref, cfg.workers,
-        args=worker_args, mounts=worker_mounts, environment=orderly_env(cfg),
+        args=worker_args, mounts=worker_mounts, environment=environment,
         entrypoint=worker_entrypoint, configure=worker_configure,
         working_dir="/orderly")
     return worker
@@ -284,7 +286,7 @@ def proxy_configure(container, cfg):
                                           "/run/proxy/key.pem")
 
 
-def orderly_env(cfg):
+def orderly_env(cfg, redis_container):
     redis_url = "redis://{}:6379".format(redis_container.name_external(
         cfg.container_prefix))
     return {**cfg.orderly_env, "REDIS_URL": redis_url}
