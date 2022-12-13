@@ -120,7 +120,7 @@ def test_start_with_custom_styles():
         web_container = cfg.get_container("web")
         style = docker_util.string_from_container(
             web_container, "/static/public/css/style.css")
-        assert "/* Example custom config */" in style
+        assert "/*! Example custom config */" in style
 
         # check that js files are there also
         res = requests.get("http://localhost:8888/js/index.bundle.js")
