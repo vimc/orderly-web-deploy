@@ -433,6 +433,21 @@ def test_can_start_with_prepared_volume():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+def test_can_start_with_outpack():
+    path = "config/basic"
+    options = {"outpack": {"migrate": {"repo": "mrcide",
+                                "name": "outpack.orderly",
+                                "tag": "main"}},
+               "volumes": {"outpack": "outpack_vol"}}
+    cfg = build_config(path, options=options)
+    try:
+        orderly_web.start(path, options=options)
+        assert docker_util.container_exists("orderly_web_outpack_migrate")
+        assert docker_util.volume_exists("outpack")
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
 def test_notifies_slack_on_success():
     with patch.object(Notifier, 'post',
                       return_value=None) as mock_notify:

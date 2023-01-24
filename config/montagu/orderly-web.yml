@@ -17,6 +17,14 @@ volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
   redis: orderly_web_redis_data
+  outpack: orderly_web_outpack
+
+# Optional: to migrate the underlying orderly metadata to outpack metadata
+outpack:
+  migrate:
+    repo: mrcide
+    name: outpack.orderly
+    tag: main
 
 ## Redis configuration
 redis:

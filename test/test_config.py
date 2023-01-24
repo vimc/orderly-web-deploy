@@ -253,6 +253,31 @@ def test_initial_demo_ignores_url():
     assert "NOTE: Ignoring orderly:initial:url" in out
 
 
+def test_outpack_volume_required_if_enabled():
+    options = {"outpack": {"migrate": {"repo": "mrcide",
+                                "name": "outpack.orderly",
+                                "tag": "main"}}}
+    with pytest.raises(KeyError, match="volumes:outpack"):
+        cfg = build_config("config/basic", options=options)
+
+
+def test_outpack_config():
+    options = {"outpack": {"migrate": {"repo": "mrcide",
+                                "name": "outpack.orderly",
+                                "tag": "main"}},
+               "volumes": {"outpack": "outpack_vol"}}
+    cfg = build_config("config/basic", options=options)
+    assert cfg.outpack_migrate_ref is not None
+    assert cfg.containers["outpack_migrate"] == "outpack_migrate"
+    assert cfg.volumes["outpack"] == "outpack_vol"
+    assert cfg.outpack_enabled is True
+
+
+def test_outpack_disabled_if_no_config():
+    cfg = build_config("config/basic")
+    assert cfg.outpack_enabled is False
+
+
 def read_file(path):
     with open(path, "r") as f:
         return f.read()
