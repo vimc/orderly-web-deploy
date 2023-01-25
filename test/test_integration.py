@@ -133,7 +133,7 @@ def test_start_with_custom_styles():
         logo = docker_util.bytes_from_container(web, expected_destination)
         assert len(logo) > 0
         res = requests.get("http://localhost:8888")
-        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
+        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png""" \
                in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
@@ -373,10 +373,10 @@ def test_vault_github_login_with_mount_path():
         path = "config/vault"
         vault_addr = "http://localhost:{}".format(s.port)
         options = {"vault":
-                   {"addr": vault_addr,
-                    "auth":
-                    {"method": "github",
-                     "args": {"mount_point": "github-custom"}}}}
+                       {"addr": vault_addr,
+                        "auth":
+                            {"method": "github",
+                             "args": {"mount_point": "github-custom"}}}}
 
         orderly_web.start(path, options=options)
 
@@ -426,8 +426,8 @@ def test_can_start_with_prepared_volume():
             res = orderly_web.start(path, options=options)
         assert res
         out = f.getvalue()
-        expected = '[orderly] orderly volume already contains data - not '\
-            'initialising'
+        expected = '[orderly] orderly volume already contains data - not ' \
+                   'initialising'
         assert expected in out.splitlines()
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
@@ -436,8 +436,8 @@ def test_can_start_with_prepared_volume():
 def test_can_start_with_outpack():
     path = "config/basic"
     options = {"outpack": {"migrate": {"repo": "mrcide",
-                                "name": "outpack.orderly",
-                                "tag": "main"}},
+                                       "name": "outpack.orderly",
+                                       "tag": "main"}},
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config(path, options=options)
     try:

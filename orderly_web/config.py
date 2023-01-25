@@ -180,7 +180,7 @@ class OrderlyWebConfig:
         self.outpack_enabled = "outpack" in dat
         if self.outpack_enabled:
             self.volumes["outpack"] = config.config_string(dat, ["volumes",
-                                                             "outpack"])
+                                                                 "outpack"])
             self.outpack_repo = config.config_string(
                 dat, ["outpack", "migrate", "repo"])
             self.outpack_migrate_name = config.config_string(
