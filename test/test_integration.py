@@ -372,11 +372,10 @@ def test_vault_github_login_with_mount_path():
 
         path = "config/vault"
         vault_addr = "http://localhost:{}".format(s.port)
-        options = {"vault":
-                   {"addr": vault_addr,
-                    "auth":
-                    {"method": "github",
-                     "args": {"mount_point": "github-custom"}}}}
+        options = {"vault": {"addr": vault_addr,
+                             "auth":
+                                 {"method": "github",
+                                  "args": {"mount_point": "github-custom"}}}}
 
         orderly_web.start(path, options=options)
 
@@ -426,8 +425,8 @@ def test_can_start_with_prepared_volume():
             res = orderly_web.start(path, options=options)
         assert res
         out = f.getvalue()
-        expected = '[orderly] orderly volume already contains data - not '\
-            'initialising'
+        expected = '[orderly] orderly volume already contains data - not ' \
+                   'initialising'
         assert expected in out.splitlines()
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
@@ -436,13 +435,18 @@ def test_can_start_with_prepared_volume():
 def test_can_start_with_outpack():
     path = "config/basic"
     options = {"outpack": {"migrate": {"repo": "mrcide",
-                                "name": "outpack.orderly",
-                                "tag": "main"}},
+                                       "name": "outpack.orderly",
+                                       "tag": "main"},
+                           "server": {"repo": "mrcide",
+                                      "name": "outpack_server",
+                                      "tag": "main"}
+                           },
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config(path, options=options)
     try:
         orderly_web.start(path, options=options)
         assert docker_util.container_exists("orderly_web_outpack_migrate")
+        assert docker_util.container_exists("orderly_web_outpack_server")
         assert docker_util.volume_exists("outpack_vol")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)

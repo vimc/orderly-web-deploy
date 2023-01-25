@@ -37,7 +37,7 @@ def outpack_server_container(cfg):
     name = cfg.containers["outpack_server"]
     mounts = [constellation.ConstellationMount("outpack", "/outpack")]
     outpack_server = constellation.ConstellationContainer(
-        name, cfg.outpack_server_ref, mounts=mounts)
+        name, cfg.outpack_ref, mounts=mounts)
     return outpack_server
 
 
@@ -277,8 +277,9 @@ def web_container_config(container, cfg):
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
     if cfg.outpack_enabled:
         outpack_container = cfg.containers["outpack_server"]
-        opts["outpack.server"] = "http://{}_{}:8000".format(cfg.container_prefix,
-                                                            outpack_container)
+        opts["outpack.server"] = \
+            "http://{}_{}:8000".format(cfg.container_prefix,
+                                       outpack_container)
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     docker_util.exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     docker_util.string_into_container(
