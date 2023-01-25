@@ -36,7 +36,7 @@ def test_example_config():
     assert cfg.images["orderly_worker"].name == "orderly.server"
     assert cfg.images["orderly_worker"].tag == "master"
     assert str(cfg.images["orderly_worker"]) == \
-        "vimc/orderly.server:master"
+           "vimc/orderly.server:master"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
     assert cfg.web_name == "OrderlyWeb"
@@ -60,10 +60,10 @@ def test_example_config():
 
     assert cfg.orderly_initial_source == "clone"
     assert cfg.orderly_initial_url == \
-        "https://github.com/reside-ic/orderly-example"
+           "https://github.com/reside-ic/orderly-example"
 
     assert cfg.slack_webhook_url == \
-        "https://hooks.slack.com/services/T000/B000/XXXX"
+           "https://hooks.slack.com/services/T000/B000/XXXX"
 
 
 def test_documents_volume_inclusion():
@@ -255,16 +255,16 @@ def test_initial_demo_ignores_url():
 
 def test_outpack_volume_required_if_enabled():
     options = {"outpack": {"migrate": {"repo": "mrcide",
-                                "name": "outpack.orderly",
-                                "tag": "main"}}}
+                                       "name": "outpack.orderly",
+                                       "tag": "main"}}}
     with pytest.raises(KeyError, match="volumes:outpack"):
         cfg = build_config("config/basic", options=options)
 
 
 def test_outpack_config():
     options = {"outpack": {"migrate": {"repo": "mrcide",
-                                "name": "outpack.orderly",
-                                "tag": "main"}},
+                                       "name": "outpack.orderly",
+                                       "tag": "main"}},
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config("config/basic", options=options)
     assert cfg.outpack_migrate_ref is not None

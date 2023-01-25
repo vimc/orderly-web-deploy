@@ -133,7 +133,7 @@ def test_start_with_custom_styles():
         logo = docker_util.bytes_from_container(web, expected_destination)
         assert len(logo) > 0
         res = requests.get("http://localhost:8888")
-        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png""" \
+        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
                in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
@@ -372,11 +372,10 @@ def test_vault_github_login_with_mount_path():
 
         path = "config/vault"
         vault_addr = "http://localhost:{}".format(s.port)
-        options = {"vault":
-                       {"addr": vault_addr,
-                        "auth":
-                            {"method": "github",
-                             "args": {"mount_point": "github-custom"}}}}
+        options = {"vault": {"addr": vault_addr,
+                             "auth":
+                                 {"method": "github",
+                                  "args": {"mount_point": "github-custom"}}}}
 
         orderly_web.start(path, options=options)
 
