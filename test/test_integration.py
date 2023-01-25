@@ -443,7 +443,7 @@ def test_can_start_with_outpack():
     try:
         orderly_web.start(path, options=options)
         assert docker_util.container_exists("orderly_web_outpack_migrate")
-        assert docker_util.volume_exists("outpack")
+        assert docker_util.volume_exists("outpack_vol")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
