@@ -21,10 +21,24 @@ def orderly_constellation(cfg):
         proxy = proxy_container(cfg, web)
         containers.append(proxy)
 
+    if cfg.outpack_enabled:
+        outpack_migrate = outpack_migrate_container(cfg)
+        containers.append(outpack_migrate)
+
     obj = constellation.Constellation("orderly-web", cfg.container_prefix,
                                       containers, cfg.network, cfg.volumes,
                                       data=cfg, vault_config=cfg.vault)
     return obj
+
+
+def outpack_migrate_container(cfg):
+    name = cfg.containers["outpack_migrate"]
+    mounts = [constellation.ConstellationMount("outpack", "/outpack"),
+              constellation.ConstellationMount("orderly", "/orderly")]
+    args = ["/orderly", "/outpack", "--minutes=5"]
+    outpack_migrate = constellation.ConstellationContainer(
+        name, cfg.outpack_migrate_ref, mounts=mounts, args=args)
+    return outpack_migrate
 
 
 def redis_container(cfg):

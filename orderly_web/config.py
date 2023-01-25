@@ -112,13 +112,6 @@ class OrderlyWebConfig:
 
         self.container_prefix = config.config_string(dat, ["container_prefix"])
 
-        self.containers = {
-            "redis": "redis",
-            "orderly": "orderly",
-            "orderly_worker": "orderly_worker",
-            "web": "web"
-        }
-
         self.workers = config.config_integer(
             self.data, ["orderly", "workers"], is_optional=True, default=1)
 
@@ -167,6 +160,13 @@ class OrderlyWebConfig:
         self.migrate_ref = constellation.ImageReference(
             self.web_repo, self.migrate_name, self.web_tag)
 
+        self.containers = {
+            "redis": "redis",
+            "orderly": "orderly",
+            "orderly_worker": "orderly_worker",
+            "web": "web"
+        }
+
         self.images = {
             "redis": self.redis_ref,
             "orderly": self.orderly_ref,
@@ -175,6 +175,23 @@ class OrderlyWebConfig:
             "admin": self.admin_ref,
             "migrate": self.migrate_ref
         }
+
+        # 7. Outpack
+        self.outpack_enabled = "outpack" in dat
+        if self.outpack_enabled:
+            self.volumes["outpack"] = config.config_string(dat, ["volumes",
+                                                                 "outpack"])
+            self.outpack_repo = config.config_string(
+                dat, ["outpack", "migrate", "repo"])
+            self.outpack_migrate_name = config.config_string(
+                dat, ["outpack", "migrate", "name"])
+            self.outpack_migrate_tag = config.config_string(
+                dat, ["outpack", "migrate", "tag"])
+            self.outpack_migrate_ref = constellation.ImageReference(
+                self.outpack_repo, self.outpack_migrate_name,
+                self.outpack_migrate_tag)
+            self.containers["outpack_migrate"] = "outpack_migrate"
+            self.images["outpack_migrate"] = self.outpack_migrate_ref
 
         self.non_constellation_images = {
             "admin": self.admin_ref,
