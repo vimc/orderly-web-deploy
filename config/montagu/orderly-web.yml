@@ -21,6 +21,10 @@ volumes:
 
 # Optional: to migrate the underlying orderly metadata to outpack metadata
 outpack:
+  server:
+    repo: mrcide
+    name: outpack_server
+    tag: main
   migrate:
     repo: mrcide
     name: outpack.orderly

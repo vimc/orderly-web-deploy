@@ -436,13 +436,22 @@ def test_can_start_with_outpack():
     path = "config/basic"
     options = {"outpack": {"migrate": {"repo": "mrcide",
                                        "name": "outpack.orderly",
-                                       "tag": "main"}},
+                                       "tag": "main"},
+                           "server": {"repo": "mrcide",
+                                      "name": "outpack_server",
+                                      "tag": "main"}
+                           },
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config(path, options=options)
     try:
         orderly_web.start(path, options=options)
         assert docker_util.container_exists("orderly_web_outpack_migrate")
+        assert docker_util.container_exists("orderly_web_outpack_server")
         assert docker_util.volume_exists("outpack_vol")
+        web = cfg.get_container("web")
+        web_config = docker_util.string_from_container(
+            web, "/etc/orderly/web/config.properties").split("\n")
+        assert "outpack.server=http://orderly_web_outpack_server:8000" in web_config
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 

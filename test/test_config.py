@@ -264,11 +264,17 @@ def test_outpack_volume_required_if_enabled():
 def test_outpack_config():
     options = {"outpack": {"migrate": {"repo": "mrcide",
                                        "name": "outpack.orderly",
-                                       "tag": "main"}},
+                                       "tag": "main"},
+                           "server": {"repo": "mrcide",
+                                      "name": "outpack_server",
+                                      "tag": "main"}
+                           },
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config("config/basic", options=options)
     assert cfg.outpack_migrate_ref is not None
     assert cfg.containers["outpack_migrate"] == "outpack_migrate"
+    assert cfg.outpack_ref is not None
+    assert cfg.containers["outpack_server"] == "outpack_server"
     assert cfg.volumes["outpack"] == "outpack_vol"
     assert cfg.outpack_enabled is True
 
