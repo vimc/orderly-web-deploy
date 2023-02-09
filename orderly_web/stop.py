@@ -20,7 +20,16 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
             raise OrderlyWebConfigError(msg) from e
 
     if cfg:
-        obj = orderly_constellation(cfg)
+        try:
+            obj = orderly_constellation(cfg)
+        except AttributeError as e:
+            if force:
+                print("Unable to manage constellation from existing config, forcing stop.")
+            else:
+                msg = ("Unable to manage constellation from existing config. To force stop, "
+                       "provide --force option and any configuration options in "
+                       "--extra and --options.")
+                raise OrderlyWebConfigError(msg) from e
         obj.stop(kill, remove_network=network, remove_volumes=volumes)
     else:
         print("OrderlyWeb not running from '{}'".format(path))

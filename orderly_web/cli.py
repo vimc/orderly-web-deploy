@@ -44,8 +44,9 @@ def parse_args(argv):
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
+        force = args["--force"]
         target = orderly_web.status
-        args = (path, )
+        args = (path, force)
     elif args["stop"]:
         kill = args["--kill"]
         network = args["--network"]
