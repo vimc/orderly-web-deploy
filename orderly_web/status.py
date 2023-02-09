@@ -5,7 +5,7 @@ from orderly_web.constellation import orderly_constellation
 from orderly_web.errors import OrderlyWebConfigError
 
 
-def status(path, force=False):
+def status(path):
     try:
         cfg = fetch_config(path)
     except docker.errors.NotFound as e:
@@ -13,15 +13,10 @@ def status(path, force=False):
     if cfg:
         try:
             obj = orderly_constellation(cfg)
+            obj.status()
         except AttributeError as e:
-            if force:
-                print("Unable to manage constellation from existing config, building new config.")
-                cfg = build_config(path)
-                obj = orderly_constellation(cfg)
-            else:
-                msg = ("Unable to manage constellation from existing config, "
-                       "provide --force option to build new config.")
-                raise OrderlyWebConfigError(msg) from e
-        obj.status()
+            msg = ("Unable to manage constellation from existing config. The format of the config may"
+                   "have changed. You should force a stop and restart.")
+            raise OrderlyWebConfigError(msg) from e
     else:
         print("OrderlyWeb not running from '{}'".format(path))

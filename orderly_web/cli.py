@@ -19,8 +19,8 @@ Options:
   --network        Remove network
   --kill           Kill the containers (faster, but possible db corruption)
   --force          Force stop even if containers are corrupted and cannot
-                   signal their running configuration. Use with extra and/or
-                   option to force stop with configuration options.
+                   signal their running configuration, or if config cannot be parsed.
+                   Use with extra and/or option to force stop with configuration options.
 """
 
 import docopt
@@ -44,9 +44,8 @@ def parse_args(argv):
         target = orderly_web.start
         args = (path, extra, options, pull_images)
     elif args["status"]:
-        force = args["--force"]
         target = orderly_web.status
-        args = (path, force)
+        args = (path, )
     elif args["stop"]:
         kill = args["--kill"]
         network = args["--network"]

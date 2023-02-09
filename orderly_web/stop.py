@@ -25,6 +25,8 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
         except AttributeError as e:
             if force:
                 print("Unable to manage constellation from existing config, forcing stop.")
+                cfg = build_config(path, extra, options)
+                obj = orderly_constellation(cfg)
             else:
                 msg = ("Unable to manage constellation from existing config. To force stop, "
                        "provide --force option and any configuration options in "
