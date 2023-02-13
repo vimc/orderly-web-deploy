@@ -23,7 +23,6 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
         try:
             obj = orderly_constellation(cfg)
         except AttributeError as e:
-            print("CATCHING --------------")
             if force:
                 print("Unable to manage constellation from existing config, "
                       "forcing stop.")
