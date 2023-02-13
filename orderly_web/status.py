@@ -15,8 +15,9 @@ def status(path):
             obj = orderly_constellation(cfg)
             obj.status()
         except AttributeError as e:
-            msg = ("Unable to manage constellation from existing config. The format of the config may"
-                   "have changed. You should force a stop and restart.")
+            msg = ("Unable to manage constellation from existing config."
+                   " The format of the config may have changed. You should"
+                   " force a stop and restart.")
             raise OrderlyWebConfigError(msg) from e
     else:
         print("OrderlyWeb not running from '{}'".format(path))

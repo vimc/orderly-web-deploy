@@ -23,14 +23,16 @@ def stop(path, kill=False, network=False, volumes=False, force=False,
         try:
             obj = orderly_constellation(cfg)
         except AttributeError as e:
+            print("CATCHING --------------")
             if force:
-                print("Unable to manage constellation from existing config, forcing stop.")
+                print("Unable to manage constellation from existing config, "
+                      "forcing stop.")
                 cfg = build_config(path, extra, options)
                 obj = orderly_constellation(cfg)
             else:
-                msg = ("Unable to manage constellation from existing config. To force stop, "
-                       "provide --force option and any configuration options in "
-                       "--extra and --options.")
+                msg = ("Unable to manage constellation from existing config. "
+                       "To force stop, provide --force option and any "
+                       "configuration options in --extra and --options.")
                 raise OrderlyWebConfigError(msg) from e
         obj.stop(kill, remove_network=network, remove_volumes=volumes)
     else:

@@ -62,9 +62,9 @@ def test_start_and_stop():
         proxy = cfg.get_container("proxy")
         ports = proxy.attrs["HostConfig"]["PortBindings"]
         assert set(ports.keys()) == set(["443/tcp", "80/tcp"])
-        dat = json.loads(http_get("http://localhost/api/v1"))
+        dat = json.loads(http_get("http://localhost/api/v2"))
         assert dat["status"] == "success"
-        dat = json.loads(http_get("https://localhost/api/v1"))
+        dat = json.loads(http_get("https://localhost/api/v2"))
         assert dat["status"] == "success"
 
         # Orderly volume contains only the stripped down example from
