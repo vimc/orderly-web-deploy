@@ -41,7 +41,8 @@ Options:
   --volumes        Remove volumes (WARNING: irreversible data loss)
   --network        Remove network
   --kill           Kill the containers (faster, but possible db corruption)
-  --force          Force stop even if containers are corrupted and cannot signal their running configuration.
+  --force          Force stop even if containers are corrupted and cannot 
+                   signal their running configuration, or if config cannot be parsed.
                    Use with extra and/or option to force stop with configuration options.
 ```
 
