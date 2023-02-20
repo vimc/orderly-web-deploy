@@ -450,7 +450,8 @@ def test_can_start_with_outpack():
         web = cfg.get_container("web")
         web_config = docker_util.string_from_container(
             web, "/etc/orderly/web/config.properties").split("\n")
-        assert "outpack.server=http://orderly_web_outpack_server:8000" in web_config
+        expected = "outpack.server=http://orderly_web_outpack_server:8000"
+        assert expected in web_config
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
