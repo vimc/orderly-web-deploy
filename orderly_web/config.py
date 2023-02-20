@@ -182,14 +182,27 @@ class OrderlyWebConfig:
             self.volumes["outpack"] = config.config_string(dat, ["volumes",
                                                                  "outpack"])
             self.outpack_repo = config.config_string(
+                dat, ["outpack", "server", "repo"])
+            self.outpack_name = config.config_string(
+                dat, ["outpack", "server", "name"])
+            self.outpack_tag = config.config_string(
+                dat, ["outpack", "server", "tag"])
+            self.outpack_ref = constellation.ImageReference(
+                self.outpack_repo, self.outpack_name,
+                self.outpack_tag)
+
+            self.outpack_migrate_repo = config.config_string(
                 dat, ["outpack", "migrate", "repo"])
             self.outpack_migrate_name = config.config_string(
                 dat, ["outpack", "migrate", "name"])
             self.outpack_migrate_tag = config.config_string(
                 dat, ["outpack", "migrate", "tag"])
             self.outpack_migrate_ref = constellation.ImageReference(
-                self.outpack_repo, self.outpack_migrate_name,
+                self.outpack_migrate_repo, self.outpack_migrate_name,
                 self.outpack_migrate_tag)
+
+            self.containers["outpack_server"] = "outpack_server"
+            self.images["outpack_server"] = self.outpack_ref
             self.containers["outpack_migrate"] = "outpack_migrate"
             self.images["outpack_migrate"] = self.outpack_migrate_ref
 
