@@ -123,8 +123,7 @@ def test_start_with_custom_styles():
         assert "/*! Example custom config */" in style
 
         # check that js files are there also
-        res = requests.get("http://localhost:8888/js/index.bundle.js")
-        assert res.status_code == 200
+        http_get("http://localhost:8888/js/index.bundle.js")
 
         # check that the custom logo exists in container and appears
         # on the page
