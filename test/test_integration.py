@@ -19,7 +19,7 @@ import constellation.docker_util as docker_util
 from constellation.notifier import Notifier
 
 from orderly_web.config import fetch_config, build_config
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, read_env
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
 
@@ -306,7 +306,7 @@ def test_without_github_app_for_montagu():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_with_prompt():
     if "VAULT_AUTH_GITHUB_TOKEN" in os.environ:
         del os.environ["VAULT_AUTH_GITHUB_TOKEN"]
@@ -325,9 +325,8 @@ def test_vault_github_login_with_prompt():
 
             cfg = fetch_config(path)
             container = cfg.get_container("orderly")
-            res = docker_util.string_from_container(container,
-                                                    "/root/.Renviron")
-            assert "ORDERLY_DB_PASS=s3cret" in res
+            env = read_env(container)
+            assert "ORDERLY_DB_PASS=s3cret" in env
 
             orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -351,9 +350,8 @@ def test_vault_github_login_from_env():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = docker_util.string_from_container(container,
-                                                "/root/.Renviron")
-        assert "ORDERLY_DB_PASS=s3cret" in res
+        env = read_env(container)
+        assert "ORDERLY_DB_PASS=s3cret" in env
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
@@ -382,9 +380,8 @@ def test_vault_github_login_with_mount_path():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = docker_util.string_from_container(container,
-                                                "/root/.Renviron")
-        assert "ORDERLY_DB_PASS=s3cret" in res
+        env = read_env(container)
+        assert "ORDERLY_DB_PASS=s3cret" in env
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
