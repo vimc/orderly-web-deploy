@@ -56,6 +56,7 @@ network: orderly_web_network
 ## css: stores compiled css for the web app (only needed if custom sass variables
 ## are given as sass_variables in web section below)
 ## documents: stores static documentation available through the web app
+## outpack (optional): stores migrated outpack metadata. must exist if outpack config is set below.
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
@@ -64,6 +65,18 @@ volumes:
   css: orderly_web_css
   documents: orderly_web_documents
   redis: orderly_web_redis_data
+  outpack: orderly_web_outpack
+
+# Optional: to migrate the underlying orderly metadata to outpack metadata
+outpack:
+  server:
+    repo: mrcide
+    name: outpack_server
+    tag: main
+  migrate:
+    repo: mrcide
+    name: outpack.orderly
+    tag: main
 
 ## Redis configuration
 redis:
@@ -173,6 +186,7 @@ web:
   ## Optional custom logo image, any valid image format. Should be a
   ## file path relative to the config file.
   logo: my-test-logo.png
+
 
 # Optional: to notify a Slack channel during deployment, provide a webhook url
 slack:

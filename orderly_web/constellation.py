@@ -21,10 +21,34 @@ def orderly_constellation(cfg):
         proxy = proxy_container(cfg, web)
         containers.append(proxy)
 
+    if cfg.outpack_enabled:
+        outpack_migrate = outpack_migrate_container(cfg)
+        containers.append(outpack_migrate)
+        outpack_server = outpack_server_container(cfg)
+        containers.append(outpack_server)
+
     obj = constellation.Constellation("orderly-web", cfg.container_prefix,
                                       containers, cfg.network, cfg.volumes,
                                       data=cfg, vault_config=cfg.vault)
     return obj
+
+
+def outpack_server_container(cfg):
+    name = cfg.containers["outpack_server"]
+    mounts = [constellation.ConstellationMount("outpack", "/outpack")]
+    outpack_server = constellation.ConstellationContainer(
+        name, cfg.outpack_ref, mounts=mounts)
+    return outpack_server
+
+
+def outpack_migrate_container(cfg):
+    name = cfg.containers["outpack_migrate"]
+    mounts = [constellation.ConstellationMount("outpack", "/outpack"),
+              constellation.ConstellationMount("orderly", "/orderly")]
+    args = ["/orderly", "/outpack", "--minutes=5"]
+    outpack_migrate = constellation.ConstellationContainer(
+        name, cfg.outpack_migrate_ref, mounts=mounts, args=args)
+    return outpack_migrate
 
 
 def redis_container(cfg):
@@ -228,7 +252,8 @@ def web_container_config(container, cfg):
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
             "orderly.server": "http://{}_{}:8321".format(cfg.container_prefix,
-                                                         orderly_container)}
+                                                         orderly_container)
+            }
     if cfg.logo_name is not None:
         opts["app.logo"] = cfg.logo_name
     if cfg.web_auth_montagu:
@@ -237,7 +262,11 @@ def web_container_config(container, cfg):
     if cfg.web_auth_github_app:
         opts["auth.github_key"] = cfg.web_auth_github_app["id"]
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
-
+    if cfg.outpack_enabled:
+        outpack_container = cfg.containers["outpack_server"]
+        opts["outpack.server"] = \
+            "http://{}_{}:8000".format(cfg.container_prefix,
+                                       outpack_container)
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     docker_util.exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
     docker_util.string_into_container(
