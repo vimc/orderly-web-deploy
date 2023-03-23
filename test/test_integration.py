@@ -333,7 +333,7 @@ def test_vault_github_login_with_prompt():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_from_env():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
     with vault_dev.server() as s:
@@ -359,7 +359,7 @@ def test_vault_github_login_from_env():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_with_mount_path():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
     with vault_dev.server() as s:
@@ -529,10 +529,6 @@ def test_wait_for_redis_exists():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
-# To run this test you will need a token for the vimc robot user -
-# this can be found in the montagu vault as
-# /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
 def test_remote_identity_set():
     path = "config/basic"
     try:
@@ -551,10 +547,6 @@ def test_remote_identity_set():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
-# To run this test you will need a token for the vimc robot user -
-# this can be found in the montagu vault as
-# /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
 def test_orderly_server_not_exposed_to_host():
     path = "config/montagu"
     try:
