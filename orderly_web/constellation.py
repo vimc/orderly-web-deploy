@@ -78,11 +78,13 @@ def orderly_container(cfg, redis_container):
     orderly_name = cfg.containers["orderly"]
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
     orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
+    ports = [8321] if cfg.orderly_expose else None
     environment = orderly_env(cfg, redis_container)
     orderly = constellation.ConstellationContainer(
         orderly_name, cfg.orderly_ref, args=orderly_args,
         mounts=orderly_mounts, environment=environment,
-        configure=orderly_configure, working_dir="/orderly")
+        configure=orderly_configure, working_dir="/orderly",
+        ports=ports)
     return orderly
 
 
@@ -115,8 +117,7 @@ def orderly_init_demo(container):
 
 def orderly_init_clone(container, url):
     print("[orderly] Initialising orderly by cloning")
-    args = ["git", "clone", "--single-branch", "--branch", "add-remote", "url",
-            "/orderly"]
+    args = ["git", "clone", url, "/orderly"]
     docker_util.exec_safely(container, args)
 
 

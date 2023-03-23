@@ -52,6 +52,9 @@ orderly:
     url: https://github.com/reside-ic/orderly-example
   ## Number of workers to create to run orderly jobs
   workers: 1
+  expose: true
+  env:
+    ORDERLY_API_SERVER_IDENTITY: production
 
 ## Api and Website configuration
 web:

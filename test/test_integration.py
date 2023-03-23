@@ -534,25 +534,41 @@ def test_wait_for_redis_exists():
 # /secret/vimc-robot/vault-token
 # This environment variable is configured on travis
 def test_remote_identity_set():
+    path = "config/basic"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        assert docker_util.container_exists("orderly_web_orderly")
+
+        # Remote identity is set via env var in config ORDERLY_API_SERVER_IDENTITY
+        # This matches config from ordrly_config.yml which sets
+        # default_branch_only: true. If that is true then orderly.server
+        # sets git_supported to FALSE so we check run-metadata to see that
+        # is reflected in orderly.server and so the server identity has been set correctly
+        dat = json.loads(http_get("http://localhost:8321/run-metadata"))
+        assert not dat["data"]["git_supported"]
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+# To run this test you will need a token for the vimc robot user -
+# this can be found in the montagu vault as
+# /secret/vimc-robot/vault-token
+# This environment variable is configured on travis
+def test_orderly_server_not_exposed_to_host():
     path = "config/montagu"
     try:
         res = orderly_web.start(path)
         assert res
-
-        cl = docker.client.from_env()
-        containers = cl.containers.list()
-        assert len(containers) == 5
-        cfg = fetch_config(path)
-        assert docker_util.network_exists(cfg.network)
-        assert docker_util.volume_exists(cfg.volumes["orderly"])
-        assert docker_util.volume_exists(cfg.volumes["documents"])
-        assert docker_util.volume_exists(cfg.volumes["redis"])
-        assert docker_util.container_exists("orderly_web_web")
         assert docker_util.container_exists("orderly_web_orderly")
-        assert docker_util.container_exists("orderly_web_proxy")
-        assert docker_util.container_exists("orderly_web_redis")
 
-        orderly = cfg.get_container("orderly")
+        try:
+            json.loads(http_get("http://localhost:8321/run-metadata"))
+        except (urllib.error.URLError, ConnectionResetError):
+            request_failed = True
+        assert request_failed
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
 def enable_github_login(cl, path="github"):

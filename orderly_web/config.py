@@ -212,6 +212,7 @@ class OrderlyWebConfig:
         }
 
         self.orderly_env = config.config_dict(dat, ["orderly", "env"], True)
+        self.orderly_expose = config.config_boolean(dat, ["orderly", "expose"], True, False)
 
         self.web_dev_mode = config.config_boolean(
             dat, ["web", "dev_mode"], True)

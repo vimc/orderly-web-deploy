@@ -50,8 +50,6 @@ orderly:
     worker_name: orderly.server
   initial:
     source: demo
-  env:
-    ORDERLY_API_SERVER_IDENTITY: production
 
 ## Api and Website configuration
 web:
