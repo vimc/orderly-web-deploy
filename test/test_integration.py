@@ -506,6 +506,32 @@ def test_wait_for_redis_exists():
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
 
+# To run this test you will need a token for the vimc robot user -
+# this can be found in the montagu vault as
+# /secret/vimc-robot/vault-token
+# This environment variable is configured on travis
+def test_remote_identity_set():
+    path = "config/montagu"
+    try:
+        res = orderly_web.start(path)
+        assert res
+
+        cl = docker.client.from_env()
+        containers = cl.containers.list()
+        assert len(containers) == 5
+        cfg = fetch_config(path)
+        assert docker_util.network_exists(cfg.network)
+        assert docker_util.volume_exists(cfg.volumes["orderly"])
+        assert docker_util.volume_exists(cfg.volumes["documents"])
+        assert docker_util.volume_exists(cfg.volumes["redis"])
+        assert docker_util.container_exists("orderly_web_web")
+        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly_web_proxy")
+        assert docker_util.container_exists("orderly_web_redis")
+
+        orderly = cfg.get_container("orderly")
+
+
 def enable_github_login(cl, path="github"):
     cl.sys.enable_auth_method(method_type="github", path=path)
     policy = """

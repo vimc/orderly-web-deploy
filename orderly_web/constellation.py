@@ -91,7 +91,8 @@ def orderly_init_demo(container):
 
 def orderly_init_clone(container, url):
     print("[orderly] Initialising orderly by cloning")
-    args = ["git", "clone", url, "/orderly"]
+    args = ["git", "clone", "--single-branch", "--branch", "add-remote", "url",
+            "/orderly"]
     docker_util.exec_safely(container, args)
 
 
