@@ -14,6 +14,7 @@ def return_logs_and_remove(client, image, args=None, mounts=None):
 def read_env(container):
     return container.attrs["Config"]["Env"]
 
+
 # There is an annoyance with docker and the requests library, where
 # when the http handle is reclaimed a warning is printed.  It makes
 # the test log almost impossible to read.
