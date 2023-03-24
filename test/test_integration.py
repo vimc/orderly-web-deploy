@@ -536,11 +536,12 @@ def test_remote_identity_set():
         assert res
         assert docker_util.container_exists("orderly_web_orderly")
 
-        # Remote identity is set via env var in config ORDERLY_API_SERVER_IDENTITY
-        # This matches config from ordrly_config.yml which sets
+        # Remote identity is set via env var ORDERLY_API_SERVER_IDENTITY
+        # This matches config from orderly_config.yml which sets
         # default_branch_only: true. If that is true then orderly.server
         # sets git_supported to FALSE so we check run-metadata to see that
-        # is reflected in orderly.server and so the server identity has been set correctly
+        # is reflected in orderly.server and so the server identity has
+        # been set correctly
         dat = json.loads(http_get("http://localhost:8321/run-metadata"))
         assert not dat["data"]["git_supported"]
     finally:
