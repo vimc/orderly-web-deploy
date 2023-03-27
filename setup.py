@@ -13,7 +13,7 @@ requirements = [
     "Pillow"]
 
 setup(name="orderly_web",
-      version="0.2.1",
+      version="0.2.2",
       description="Deploy scripts for OrderlyWeb",
       long_description=long_description,
       classifiers=[
