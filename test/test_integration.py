@@ -19,7 +19,7 @@ import constellation.docker_util as docker_util
 from constellation.notifier import Notifier
 
 from orderly_web.config import fetch_config, build_config
-from orderly_web.docker_helpers import docker_client
+from orderly_web.docker_helpers import docker_client, read_env
 from orderly_web.errors import OrderlyWebConfigError
 import orderly_web
 
@@ -305,7 +305,7 @@ def test_without_github_app_for_montagu():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_with_prompt():
     if "VAULT_AUTH_GITHUB_TOKEN" in os.environ:
         del os.environ["VAULT_AUTH_GITHUB_TOKEN"]
@@ -324,9 +324,8 @@ def test_vault_github_login_with_prompt():
 
             cfg = fetch_config(path)
             container = cfg.get_container("orderly")
-            res = docker_util.string_from_container(container,
-                                                    "/root/.Renviron")
-            assert "ORDERLY_DB_PASS=s3cret" in res
+            env = read_env(container)
+            assert "ORDERLY_DB_PASS=s3cret" in env
 
             orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -334,7 +333,7 @@ def test_vault_github_login_with_prompt():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_from_env():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
     with vault_dev.server() as s:
@@ -350,9 +349,8 @@ def test_vault_github_login_from_env():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = docker_util.string_from_container(container,
-                                                "/root/.Renviron")
-        assert "ORDERLY_DB_PASS=s3cret" in res
+        env = read_env(container)
+        assert "ORDERLY_DB_PASS=s3cret" in env
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
@@ -361,7 +359,7 @@ def test_vault_github_login_from_env():
 # To run this test you will need a token for the vimc robot user -
 # this can be found in the montagu vault as
 # /secret/vimc-robot/vault-token
-# This environment variable is configured on travis
+# This environment variable is configured on github actions
 def test_vault_github_login_with_mount_path():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
     with vault_dev.server() as s:
@@ -380,9 +378,8 @@ def test_vault_github_login_with_mount_path():
 
         cfg = fetch_config(path)
         container = cfg.get_container("orderly")
-        res = docker_util.string_from_container(container,
-                                                "/root/.Renviron")
-        assert "ORDERLY_DB_PASS=s3cret" in res
+        env = read_env(container)
+        assert "ORDERLY_DB_PASS=s3cret" in env
 
         orderly_web.stop(path, kill=True, volumes=True,
                          network=True)
@@ -528,6 +525,41 @@ def test_wait_for_redis_exists():
         res = docker_util.string_from_container(container,
                                                 "/wait_for_redis")
         assert re.match(r'#!/usr/bin/env bash', res)
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_remote_identity_set():
+    path = "config/basic"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        assert docker_util.container_exists("orderly_web_orderly")
+
+        # Remote identity is set via env var ORDERLY_API_SERVER_IDENTITY
+        # This matches config from orderly_config.yml which sets
+        # default_branch_only: true. If that is true then orderly.server
+        # sets git_supported to FALSE so we check run-metadata to see that
+        # is reflected in orderly.server and so the server identity has
+        # been set correctly
+        dat = json.loads(http_get("http://localhost:8321/run-metadata"))
+        assert not dat["data"]["git_supported"]
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_orderly_server_not_exposed_to_host():
+    path = "config/montagu"
+    try:
+        res = orderly_web.start(path)
+        assert res
+        assert docker_util.container_exists("orderly_web_orderly")
+
+        try:
+            json.loads(http_get("http://localhost:8321/run-metadata"))
+        except (urllib.error.URLError, ConnectionResetError):
+            request_failed = True
+        assert request_failed
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 

@@ -58,6 +58,7 @@ def test_example_config():
     assert cfg.proxy_ssl_self_signed
     assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
 
+    assert cfg.orderly_expose
     assert cfg.orderly_initial_source == "clone"
     assert cfg.orderly_initial_url == \
            "https://github.com/reside-ic/orderly-example"
