@@ -69,7 +69,7 @@ class OrderlyWebConfigBase:
         self.containers = {
             "redis": "redis",
             "orderly": "orderly",
-            "orderly_worker": "orderly_worker",
+            "orderly-worker": "orderly-worker",
             "web": "web"
         }
 
