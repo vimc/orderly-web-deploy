@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 set -eu
 
-if [ "$#" -eq 4 ]; then
+if [ "$#" -eq 6 ]; then
     export HTTP_HOST=$1
     export HTTP_PORT=$2
     export HTTPS_PORT=$3
     export ORDERLY_WEB=$4
+    export PACKIT_API=$5
+    export PACKIT=$6
 else
-    echo "Usage: HOSTNAME PORT_HTTP PORT_HTTPS ORDERLY_WEB"
-    echo "e.g. docker run ... montagu.vaccineimpact.org 80 443 orderly"
+    echo "Usage: HOSTNAME PORT_HTTP PORT_HTTPS ORDERLY_WEB PACKIT_API PACKIT"
+    echo "e.g. docker run ... montagu.vaccineimpact.org 80 443 orderly packit_api packit"
     exit 1
 fi
 
 echo "We will listen on ports $HTTP_PORT (http) and $HTTPS_PORT (https)"
 echo "with hostname $HTTP_HOST, proxying orderly web from $ORDERLY_WEB"
 
-envsubst '$HTTP_HOST,$HTTP_PORT,$HTTPS_PORT,$ORDERLY_WEB' \
+envsubst '$HTTP_HOST,$HTTP_PORT,$HTTPS_PORT,$ORDERLY_WEB, $PACKIT_API, $PACKIT' \
          < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 # These paths must match the paths as used in the nginx.conf

@@ -3,9 +3,7 @@ from contextlib import redirect_stdout
 import pytest
 import shutil
 import tempfile
-import vault_dev
 import yaml
-import os
 
 from orderly_web.config import *
 
@@ -56,7 +54,7 @@ def test_example_config():
 
     assert cfg.proxy_enabled
     assert cfg.proxy_ssl_self_signed
-    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:master"
+    assert str(cfg.images["proxy"]) == "vimc/orderly-web-proxy:mrc-4255"
 
     assert cfg.orderly_expose
     assert cfg.orderly_initial_source == "clone"
@@ -263,11 +261,10 @@ def test_outpack_volume_required_if_enabled():
 
 
 def test_outpack_config():
-    options = {"outpack": {"migrate": {"repo": "mrcide",
-                                       "name": "outpack.orderly",
+    options = {"outpack": {"repo": "mrcide",
+                           "migrate": {"name": "outpack.orderly",
                                        "tag": "main"},
-                           "server": {"repo": "mrcide",
-                                      "name": "outpack_server",
+                           "server": {"name": "outpack_server",
                                       "tag": "main"}
                            },
                "volumes": {"outpack": "outpack_vol"}}
@@ -283,6 +280,22 @@ def test_outpack_config():
 def test_outpack_disabled_if_no_config():
     cfg = build_config("config/basic")
     assert cfg.outpack_enabled is False
+
+
+def test_packit_config():
+    cfg = build_config("config/packit")
+    assert cfg.packit_api_ref is not None
+    assert cfg.containers["packit_api"] == "packit_api"
+    assert cfg.packit_db_ref is not None
+    assert cfg.containers["packit_db"] == "packit_db"
+    assert cfg.packit_app_ref is not None
+    assert cfg.containers["packit"] == "packit"
+    assert cfg.packit_enabled is True
+
+
+def test_packit_disabled_if_no_config():
+    cfg = build_config("config/basic")
+    assert cfg.packit_enabled is False
 
 
 def read_file(path):

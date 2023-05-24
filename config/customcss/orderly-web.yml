@@ -110,4 +110,4 @@ proxy:
   image:
     repo: vimc
     name: orderly-web-proxy
-    tag: master
+    tag: mrc-4255

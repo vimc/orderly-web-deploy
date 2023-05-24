@@ -17,15 +17,26 @@ def orderly_constellation(cfg):
     web = web_container(cfg)
     containers = [redis, orderly, worker, web]
 
-    if cfg.proxy_enabled:
-        proxy = proxy_container(cfg, web)
-        containers.append(proxy)
-
     if cfg.outpack_enabled:
         outpack_migrate = outpack_migrate_container(cfg)
         containers.append(outpack_migrate)
         outpack_server = outpack_server_container(cfg)
         containers.append(outpack_server)
+
+    if cfg.packit_enabled:
+        packit_db = packit_db_container(cfg)
+        containers.append(packit_db)
+        packit_api = packit_api_container(cfg)
+        containers.append(packit_api)
+        packit = packit_container(cfg)
+        containers.append(packit)
+
+    if cfg.proxy_enabled:
+        if cfg.packit_enabled:
+            proxy = proxy_container(cfg, web, packit_api, packit)
+        else:
+            proxy = proxy_container(cfg, web)
+        containers.append(proxy)
 
     obj = constellation.Constellation("orderly-web", cfg.container_prefix,
                                       containers, cfg.network, cfg.volumes,
@@ -34,7 +45,7 @@ def orderly_constellation(cfg):
 
 
 def outpack_server_container(cfg):
-    name = cfg.containers["outpack_server"]
+    name = cfg.containers["outpack-server"]
     mounts = [constellation.ConstellationMount("outpack", "/outpack")]
     outpack_server = constellation.ConstellationContainer(
         name, cfg.outpack_ref, mounts=mounts)
@@ -42,13 +53,57 @@ def outpack_server_container(cfg):
 
 
 def outpack_migrate_container(cfg):
-    name = cfg.containers["outpack_migrate"]
+    name = cfg.containers["outpack-migrate"]
     mounts = [constellation.ConstellationMount("outpack", "/outpack"),
               constellation.ConstellationMount("orderly", "/orderly")]
     args = ["/orderly", "/outpack", "--minutes=5"]
     outpack_migrate = constellation.ConstellationContainer(
         name, cfg.outpack_migrate_ref, mounts=mounts, args=args)
     return outpack_migrate
+
+
+def packit_db_container(cfg):
+    name = cfg.containers["packit-db"]
+    packit_db = constellation.ConstellationContainer(
+        name, cfg.packit_db_ref, configure=packit_db_configure)
+    return packit_db
+
+
+def packit_db_configure(container, cfg):
+    docker_util.exec_safely(container, ["wait-for-db"])
+    docker_util.exec_safely(container,
+                            ["psql", "-U", "packituser", "-d", "packit", "-a", "-f", "/packit-schema/schema.sql"])
+
+
+def packit_api_container(cfg):
+    name = cfg.containers["packit-api"]
+    packit_api = constellation.ConstellationContainer(
+        name, cfg.packit_api_ref, configure=packit_api_configure)
+    return packit_api
+
+
+def packit_api_configure(container, cfg):
+    print("[web] Configuring Packit API container")
+    outpack_container = cfg.containers["outpack-server"]
+    packit_db_container = cfg.containers["packit-db"]
+    opts = {
+        "db.url": "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified".format(cfg.container_prefix,
+                                                                                      packit_db_container),
+        "db.user": "packituser",
+        "db.password": "changeme",
+        "outpack.server.url": "http://{}-{}:8000".format(cfg.container_prefix,
+                                                         outpack_container)
+    }
+    txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
+    docker_util.string_into_container(
+        txt, container, "/etc/packit/config.properties")
+
+
+def packit_container(cfg):
+    name = cfg.containers["packit"]
+    packit = constellation.ConstellationContainer(
+        name, cfg.packit_app_ref)
+    return packit
 
 
 def redis_container(cfg):
@@ -156,7 +211,7 @@ def orderly_start(container):
 
 
 def worker_container(cfg, redis_container):
-    worker_name = cfg.containers["orderly_worker"]
+    worker_name = cfg.containers["orderly-worker"]
     worker_args = ["--go-signal", "/go_signal"]
     worker_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
     worker_entrypoint = "/usr/local/bin/orderly_worker"
@@ -253,7 +308,7 @@ def web_container_config(container, cfg):
             "auth.github_team": cfg.web_auth_github_team or "",
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
-            "orderly.server": "http://{}_{}:8321".format(cfg.container_prefix,
+            "orderly.server": "http://{}-{}:8321".format(cfg.container_prefix,
                                                          orderly_container)
             }
     if cfg.logo_name is not None:
@@ -265,9 +320,9 @@ def web_container_config(container, cfg):
         opts["auth.github_key"] = cfg.web_auth_github_app["id"]
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
     if cfg.outpack_enabled:
-        outpack_container = cfg.containers["outpack_server"]
+        outpack_container = cfg.containers["outpack-server"]
         opts["outpack.server"] = \
-            "http://{}_{}:8000".format(cfg.container_prefix,
+            "http://{}-{}:8000".format(cfg.container_prefix,
                                        outpack_container)
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     docker_util.exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])
@@ -288,13 +343,26 @@ def web_start(container):
     docker_util.exec_safely(container, ["touch", "/etc/orderly/web/go_signal"])
 
 
-def proxy_container(cfg, web_container):
+def proxy_container(cfg, web, packit_api=None, packit=None):
     print("[proxy] Creating proxy container")
     proxy_name = cfg.containers["proxy"]
     web_addr = "{}:{}".format(
-        web_container.name_external(cfg.container_prefix), cfg.web_port)
+        web.name_external(cfg.container_prefix), cfg.web_port)
+    if packit_api is not None:
+        packit_api_addr = "{}:8080".format(
+            packit_api.name_external(cfg.container_prefix))
+    else:
+        # this is a bit hacky, but if Packit not available, just pass
+        # the OW address. this will just result in all proxy routes
+        # being mapped to OW and is easier than writing conditional logic
+        # in the nginx proxy scripts
+        packit_api_addr = web_addr
+    if packit is not None:
+        packit_addr = packit.name_external(cfg.container_prefix)
+    else:
+        packit_addr = web_addr
     proxy_args = [cfg.proxy_hostname, str(cfg.proxy_port_http),
-                  str(cfg.proxy_port_https), web_addr]
+                  str(cfg.proxy_port_https), web_addr, packit_api_addr, packit_addr]
     proxy_mounts = [constellation.ConstellationMount(
         "proxy_logs", "/var/log/nginx")]
     proxy_ports = [cfg.proxy_port_http, cfg.proxy_port_https]

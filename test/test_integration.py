@@ -132,7 +132,7 @@ def test_start_with_custom_styles():
         logo = docker_util.bytes_from_container(web, expected_destination)
         assert len(logo) > 0
         res = requests.get("http://localhost:8888")
-        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
+        assert """<img src="http://localhost:8888/img/logo/my-test-logo.png""" \
                in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
@@ -430,11 +430,10 @@ def test_can_start_with_prepared_volume():
 
 def test_can_start_with_outpack():
     path = "config/basic"
-    options = {"outpack": {"migrate": {"repo": "mrcide",
-                                       "name": "outpack.orderly",
+    options = {"outpack": {"repo": "mrcide",
+                           "migrate": {"name": "outpack.orderly",
                                        "tag": "main"},
-                           "server": {"repo": "mrcide",
-                                      "name": "outpack_server",
+                           "server": {"name": "outpack_server",
                                       "tag": "main"}
                            },
                "volumes": {"outpack": "outpack_vol"}}
@@ -449,6 +448,18 @@ def test_can_start_with_outpack():
             web, "/etc/orderly/web/config.properties").split("\n")
         expected = "outpack.server=http://orderly_web_outpack_server:8000"
         assert expected in web_config
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_can_start_with_packit():
+    path = "config/packit"
+    cfg = build_config(path)
+    try:
+        orderly_web.start(path)
+        assert docker_util.container_exists("orderly_web_packit_db")
+        assert docker_util.container_exists("orderly_web_packit_api")
+        assert docker_util.container_exists("orderly_web_packit")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
