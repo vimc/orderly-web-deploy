@@ -13,13 +13,13 @@ sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
 
 def test_example_config():
     cfg = build_config("config/basic")
-    assert cfg.network == "orderly_web_network"
+    assert cfg.network == "orderly-web-network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.volumes["redis"] == "orderly_web_redis_data"
-    assert cfg.container_prefix == "orderly_web"
+    assert cfg.container_prefix == "orderly-web"
     assert cfg.containers["redis"] == "redis"
     assert cfg.containers["orderly"] == "orderly"
-    assert cfg.containers["orderly_worker"] == "orderly_worker"
+    assert cfg.containers["orderly-worker"] == "orderly-worker"
     assert cfg.containers["web"] == "web"
 
     assert cfg.workers == 1
@@ -30,10 +30,10 @@ def test_example_config():
     assert cfg.images["orderly"].name == "orderly.server"
     assert cfg.images["orderly"].tag == "master"
     assert str(cfg.images["orderly"]) == "vimc/orderly.server:master"
-    assert cfg.images["orderly_worker"].repo == "vimc"
-    assert cfg.images["orderly_worker"].name == "orderly.server"
-    assert cfg.images["orderly_worker"].tag == "master"
-    assert str(cfg.images["orderly_worker"]) == \
+    assert cfg.images["orderly-worker"].repo == "vimc"
+    assert cfg.images["orderly-worker"].name == "orderly.server"
+    assert cfg.images["orderly-worker"].tag == "master"
+    assert str(cfg.images["orderly-worker"]) == \
            "vimc/orderly.server:master"
     assert cfg.web_dev_mode
     assert cfg.web_port == 8888
@@ -270,9 +270,9 @@ def test_outpack_config():
                "volumes": {"outpack": "outpack_vol"}}
     cfg = build_config("config/basic", options=options)
     assert cfg.outpack_migrate_ref is not None
-    assert cfg.containers["outpack_migrate"] == "outpack_migrate"
+    assert cfg.containers["outpack-migrate"] == "outpack-migrate"
     assert cfg.outpack_ref is not None
-    assert cfg.containers["outpack_server"] == "outpack_server"
+    assert cfg.containers["outpack-server"] == "outpack-server"
     assert cfg.volumes["outpack"] == "outpack_vol"
     assert cfg.outpack_enabled is True
 
@@ -285,9 +285,9 @@ def test_outpack_disabled_if_no_config():
 def test_packit_config():
     cfg = build_config("config/packit")
     assert cfg.packit_api_ref is not None
-    assert cfg.containers["packit_api"] == "packit_api"
+    assert cfg.containers["packit-api"] == "packit-api"
     assert cfg.packit_db_ref is not None
-    assert cfg.containers["packit_db"] == "packit_db"
+    assert cfg.containers["packit-db"] == "packit-db"
     assert cfg.packit_app_ref is not None
     assert cfg.containers["packit"] == "packit"
     assert cfg.packit_enabled is True

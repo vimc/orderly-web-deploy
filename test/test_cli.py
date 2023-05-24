@@ -14,9 +14,9 @@ def test_cli_basic_usage():
         orderly_web.cli.main(["status", path])
     out = f.getvalue()
 
-    assert "Network:\n    - orderly_web_network: created" in out
+    assert "Network:\n    - orderly-web-network: created" in out
     assert "Volumes:\n    - redis (orderly_web_redis_data): created" in out
-    assert "- web (orderly_web_web): running" in out
+    assert "- web (orderly-web-web): running" in out
 
     stop_args = ["stop", path, "--kill", "--volumes", "--network"]
     orderly_web.cli.main(stop_args)

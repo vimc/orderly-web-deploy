@@ -1,11 +1,11 @@
-## Prefix for container names; we'll use {container_prefix}_(orderly,web)
-container_prefix: orderly_web
+## Prefix for container names; we'll use {container_prefix}-{container_name)
+container_prefix: orderly-web
 
 ## The name of the docker network that containers will be attached to.
 ## If you want to proxy OrderlyWeb to the host, you will need to
 ## arrange a proxy on this network, or use dev_mode in the web section
 ## below.
-network: orderly_web_network
+network: orderly-web-network
 
 ## Names of the docker volumes to use:
 ##
