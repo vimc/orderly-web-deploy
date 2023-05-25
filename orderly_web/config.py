@@ -69,7 +69,7 @@ class OrderlyWebConfigBase:
         self.containers = {
             "redis": "redis",
             "orderly": "orderly",
-            "orderly_worker": "orderly_worker",
+            "orderly-worker": "orderly-worker",
             "web": "web"
         }
 
@@ -85,7 +85,7 @@ class OrderlyWebConfigBase:
             with docker_client() as cl:
                 name = self.containers[PATH_CONFIG["container"]]
                 container = cl.containers.get(
-                    "{}_{}".format(self.container_prefix, name))
+                    "{}-{}".format(self.container_prefix, name))
         except docker.errors.NotFound:
             return None
         path = PATH_CONFIG["path"]
@@ -163,14 +163,14 @@ class OrderlyWebConfig:
         self.containers = {
             "redis": "redis",
             "orderly": "orderly",
-            "orderly_worker": "orderly_worker",
+            "orderly-worker": "orderly-worker",
             "web": "web"
         }
 
         self.images = {
             "redis": self.redis_ref,
             "orderly": self.orderly_ref,
-            "orderly_worker": self.orderly_worker_ref,
+            "orderly-worker": self.orderly_worker_ref,
             "web": self.web_ref,
             "admin": self.admin_ref,
             "migrate": self.migrate_ref
@@ -201,10 +201,10 @@ class OrderlyWebConfig:
                 self.outpack_migrate_repo, self.outpack_migrate_name,
                 self.outpack_migrate_tag)
 
-            self.containers["outpack_server"] = "outpack_server"
-            self.images["outpack_server"] = self.outpack_ref
-            self.containers["outpack_migrate"] = "outpack_migrate"
-            self.images["outpack_migrate"] = self.outpack_migrate_ref
+            self.containers["outpack-server"] = "outpack-server"
+            self.images["outpack-server"] = self.outpack_ref
+            self.containers["outpack-migrate"] = "outpack-migrate"
+            self.images["outpack-migrate"] = self.outpack_migrate_ref
 
         self.non_constellation_images = {
             "admin": self.admin_ref,
@@ -346,7 +346,7 @@ class OrderlyWebConfig:
 
     def get_container(self, name):
         with docker_client() as cl:
-            return cl.containers.get("{}_{}".format(self.container_prefix,
+            return cl.containers.get("{}-{}".format(self.container_prefix,
                                                     self.containers[name]))
 
     def resolve_secrets(self):
