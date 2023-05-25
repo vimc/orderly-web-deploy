@@ -34,7 +34,7 @@ def orderly_constellation(cfg):
 
 
 def outpack_server_container(cfg):
-    name = cfg.containers["outpack_server"]
+    name = cfg.containers["outpack-server"]
     mounts = [constellation.ConstellationMount("outpack", "/outpack")]
     outpack_server = constellation.ConstellationContainer(
         name, cfg.outpack_ref, mounts=mounts)
@@ -42,7 +42,7 @@ def outpack_server_container(cfg):
 
 
 def outpack_migrate_container(cfg):
-    name = cfg.containers["outpack_migrate"]
+    name = cfg.containers["outpack-migrate"]
     mounts = [constellation.ConstellationMount("outpack", "/outpack"),
               constellation.ConstellationMount("orderly", "/orderly")]
     args = ["/orderly", "/outpack", "--minutes=5"]
@@ -156,7 +156,7 @@ def orderly_start(container):
 
 
 def worker_container(cfg, redis_container):
-    worker_name = cfg.containers["orderly_worker"]
+    worker_name = cfg.containers["orderly-worker"]
     worker_args = ["--go-signal", "/go_signal"]
     worker_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
     worker_entrypoint = "/usr/local/bin/orderly_worker"
@@ -253,7 +253,7 @@ def web_container_config(container, cfg):
             "auth.github_team": cfg.web_auth_github_team or "",
             "auth.fine_grained": str(cfg.web_auth_fine_grained).lower(),
             "auth.provider": "montagu" if cfg.web_auth_montagu else "github",
-            "orderly.server": "http://{}_{}:8321".format(cfg.container_prefix,
+            "orderly.server": "http://{}-{}:8321".format(cfg.container_prefix,
                                                          orderly_container)
             }
     if cfg.logo_name is not None:
@@ -267,7 +267,7 @@ def web_container_config(container, cfg):
     if cfg.outpack_enabled:
         outpack_container = cfg.containers["outpack_server"]
         opts["outpack.server"] = \
-            "http://{}_{}:8000".format(cfg.container_prefix,
+            "http://{}-{}:8000".format(cfg.container_prefix,
                                        outpack_container)
     txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
     docker_util.exec_safely(container, ["mkdir", "-p", "/etc/orderly/web"])

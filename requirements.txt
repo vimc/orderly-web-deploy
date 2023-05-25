@@ -1,4 +1,4 @@
-constellation==0.0.12
+constellation==1.0.0
 docker
 docopt
 hvac

@@ -38,15 +38,15 @@ def test_start_and_stop():
         assert docker_util.volume_exists(cfg.volumes["orderly"])
         assert docker_util.volume_exists(cfg.volumes["documents"])
         assert docker_util.volume_exists(cfg.volumes["redis"])
-        assert docker_util.container_exists("orderly_web_web")
-        assert docker_util.container_exists("orderly_web_orderly")
-        assert docker_util.container_exists("orderly_web_proxy")
-        assert docker_util.container_exists("orderly_web_redis")
+        assert docker_util.container_exists("orderly-web-web")
+        assert docker_util.container_exists("orderly-web-orderly")
+        assert docker_util.container_exists("orderly-web-proxy")
+        assert docker_util.container_exists("orderly-web-redis")
 
         names = []
         for container in containers:
             names.append(container.name)
-        assert any(re.match(r"orderly_web_orderly_worker_\w+", name)
+        assert any(re.match(r"orderly-web-orderly-worker-\w+", name)
                    for name in names)
 
         web = cfg.get_container("web")
@@ -56,7 +56,7 @@ def test_start_and_stop():
         assert "app.url=https://localhost" in web_config
         assert "auth.github_key=notarealid" in web_config
         assert "auth.github_secret=notarealsecret" in web_config
-        assert "orderly.server=http://orderly_web_orderly:8321" in web_config
+        assert "orderly.server=http://orderly-web-orderly:8321" in web_config
 
         # Trivial check that the proxy container works too:
         proxy = cfg.get_container("proxy")
@@ -82,10 +82,10 @@ def test_start_and_stop():
         assert not docker_util.volume_exists(cfg.volumes["orderly"])
         assert not docker_util.volume_exists(cfg.volumes["documents"])
         assert not docker_util.volume_exists(cfg.volumes["redis"])
-        assert not docker_util.container_exists("orderly_web_web")
-        assert not docker_util.container_exists("orderly_web_orderly")
-        assert not docker_util.container_exists("orderly_web_proxy")
-        assert not docker_util.container_exists("orderly_web_redis")
+        assert not docker_util.container_exists("orderly-web-web")
+        assert not docker_util.container_exists("orderly-web-orderly")
+        assert not docker_util.container_exists("orderly-web-proxy")
+        assert not docker_util.container_exists("orderly-web-redis")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -101,14 +101,14 @@ def test_start_with_custom_styles():
 
         assert docker_util.network_exists(cfg.network)
         assert docker_util.volume_exists(cfg.volumes["css"])
-        assert docker_util.container_exists("orderly_web_web")
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-web")
+        assert docker_util.container_exists("orderly-web-orderly")
         assert not docker_util.volume_exists("documents")
 
         # check that the style volume is really mounted
         cl = docker.client.from_env()
         api_client = cl.api
-        details = api_client.inspect_container("orderly_web_web")
+        details = api_client.inspect_container("orderly-web-web")
         assert len(details['Mounts']) == 2
         css_volume = [v for v in details['Mounts']
                       if v['Type'] == "volume" and
@@ -159,10 +159,10 @@ def test_stop_broken_orderly_web():
 
         assert stop_failed
 
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-orderly")
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True)
-        assert not docker_util.container_exists("orderly_web_orderly")
+        assert not docker_util.container_exists("orderly-web-orderly")
 
 
 def test_stop_broken_orderly_web_with_option():
@@ -177,13 +177,13 @@ def test_stop_broken_orderly_web_with_option():
 
         assert start_failed
 
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.network_exists("ow_broken_test")
 
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True,
                          options=options)
-    assert not docker_util.container_exists("orderly_web_orderly")
+    assert not docker_util.container_exists("orderly-web-orderly")
     assert not docker_util.network_exists("ow_broken_test")
 
 
@@ -198,12 +198,12 @@ def test_stop_broken_orderly_web_with_extra():
             start_failed = True
 
         assert start_failed
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.network_exists("ow_broken_extra_test")
     finally:
         orderly_web.stop(path, force=True, network=True, volumes=True,
                          extra=extra)
-        assert not docker_util.container_exists("orderly_web_orderly")
+        assert not docker_util.container_exists("orderly-web-orderly")
         assert not docker_util.network_exists("ow_broken_extra_test")
 
 
@@ -216,8 +216,8 @@ def test_start_with_montagu_config():
         cfg = fetch_config(path)
 
         assert docker_util.network_exists(cfg.network)
-        assert docker_util.container_exists("orderly_web_web")
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-web")
+        assert docker_util.container_exists("orderly-web-orderly")
 
         web = cfg.get_container("web")
         web_config = docker_util.string_from_container(
@@ -296,8 +296,8 @@ def test_without_github_app_for_montagu():
     assert res
     cfg = fetch_config(path)
     assert docker_util.network_exists(cfg.network)
-    assert docker_util.container_exists("orderly_web_web")
-    assert docker_util.container_exists("orderly_web_orderly")
+    assert docker_util.container_exists("orderly-web-web")
+    assert docker_util.container_exists("orderly-web-orderly")
 
     orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -441,13 +441,13 @@ def test_can_start_with_outpack():
     cfg = build_config(path, options=options)
     try:
         orderly_web.start(path, options=options)
-        assert docker_util.container_exists("orderly_web_outpack_migrate")
-        assert docker_util.container_exists("orderly_web_outpack_server")
+        assert docker_util.container_exists("orderly-web-outpack-migrate")
+        assert docker_util.container_exists("orderly-web-outpack-server")
         assert docker_util.volume_exists("outpack_vol")
         web = cfg.get_container("web")
         web_config = docker_util.string_from_container(
             web, "/etc/orderly/web/config.properties").split("\n")
-        expected = "outpack.server=http://orderly_web_outpack_server:8000"
+        expected = "outpack.server=http://orderly-web-outpack-server:8000"
         assert expected in web_config
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
@@ -487,10 +487,10 @@ def test_start_and_stop_multiple_workers():
     try:
         res = orderly_web.start(path, options=options)
         assert res
-        assert docker_util.container_exists("orderly_web_web")
-        assert docker_util.container_exists("orderly_web_orderly")
-        assert docker_util.container_exists("orderly_web_proxy")
-        assert docker_util.container_exists("orderly_web_redis")
+        assert docker_util.container_exists("orderly-web-web")
+        assert docker_util.container_exists("orderly-web-orderly")
+        assert docker_util.container_exists("orderly-web-proxy")
+        assert docker_util.container_exists("orderly-web-redis")
 
         cl = docker.client.from_env()
         containers = cl.containers.list()
@@ -499,7 +499,7 @@ def test_start_and_stop_multiple_workers():
         for container in containers:
             names.append(container.name)
         workers = list(filter(lambda name: re.match(
-            r"orderly_web_orderly_worker_\w+", name), names))
+            r"orderly-web-orderly-worker-\w+", name), names))
         assert len(workers) == 2
 
         # Bring the whole lot down:
@@ -515,10 +515,10 @@ def test_wait_for_redis_exists():
     try:
         res = orderly_web.start(path)
         assert res
-        assert docker_util.container_exists("orderly_web_web")
-        assert docker_util.container_exists("orderly_web_orderly")
-        assert docker_util.container_exists("orderly_web_proxy")
-        assert docker_util.container_exists("orderly_web_redis")
+        assert docker_util.container_exists("orderly-web-web")
+        assert docker_util.container_exists("orderly-web-orderly")
+        assert docker_util.container_exists("orderly-web-proxy")
+        assert docker_util.container_exists("orderly-web-redis")
 
         cfg = fetch_config(path)
         container = cfg.get_container("redis")
@@ -534,7 +534,7 @@ def test_remote_identity_set():
     try:
         res = orderly_web.start(path)
         assert res
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-orderly")
 
         # Remote identity is set via env var ORDERLY_API_SERVER_IDENTITY
         # This matches config from orderly_config.yml which sets
@@ -553,7 +553,7 @@ def test_orderly_server_not_exposed_to_host():
     try:
         res = orderly_web.start(path)
         assert res
-        assert docker_util.container_exists("orderly_web_orderly")
+        assert docker_util.container_exists("orderly-web-orderly")
 
         try:
             json.loads(http_get("http://localhost:8321/run-metadata"))

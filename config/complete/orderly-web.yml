@@ -32,7 +32,7 @@ vault:
     args:
       token: ~
 
-## Prefix for container names; we'll use {container_prefix}_(orderly,web)
+## Prefix for container names; we'll use {container_prefix}-(orderly,web)
 ##
 ## This is an important configuration option because it cannot be
 ## overridden by a patch file or by passing options in.
@@ -41,7 +41,7 @@ vault:
 ## OrderlyWeb, then change the prefix, then start it back up.
 ## Otherwise OrderlyWeb will not take down the required containers
 ## before starting back up.
-container_prefix: orderly_web
+container_prefix: orderly-web
 
 ## The name of the docker network that containers will be attached to.
 ## If you want to proxy OrderlyWeb to the host, you will need to
