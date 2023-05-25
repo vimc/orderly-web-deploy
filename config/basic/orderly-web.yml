@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ## Prefix for container names; we'll use {container_prefix}-{container_name)
+=======
+## Prefix for container names; we'll use {container_prefix}-(orderly,web)
+>>>>>>> master
 container_prefix: orderly-web
 
 ## The name of the docker network that containers will be attached to.

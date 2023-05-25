@@ -32,7 +32,7 @@ vault:
     args:
       token: ~
 
-## Prefix for container names; we'll use {container_prefix}-(container_name)
+## Prefix for container names; we'll use {container_prefix}-(orderly,web)
 ##
 ## This is an important configuration option because it cannot be
 ## overridden by a patch file or by passing options in.
