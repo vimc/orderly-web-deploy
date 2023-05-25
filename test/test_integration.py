@@ -133,7 +133,7 @@ def test_start_with_custom_styles():
         assert len(logo) > 0
         res = http_get("http://localhost:8888")
         assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
-               in res.text
+               in res
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
         assert res.status_code == 200
     finally:
