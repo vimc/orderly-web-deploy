@@ -265,7 +265,7 @@ def web_container_config(container, cfg):
         opts["auth.github_key"] = cfg.web_auth_github_app["id"]
         opts["auth.github_secret"] = cfg.web_auth_github_app["secret"]
     if cfg.outpack_enabled:
-        outpack_container = cfg.containers["outpack_server"]
+        outpack_container = cfg.containers["outpack-server"]
         opts["outpack.server"] = \
             "http://{}-{}:8000".format(cfg.container_prefix,
                                        outpack_container)
