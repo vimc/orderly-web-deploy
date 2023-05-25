@@ -5,7 +5,7 @@ container_prefix: orderly-web
 ## If you want to proxy OrderlyWeb to the host, you will need to
 ## arrange a proxy on this network, or use dev_mode in the web section
 ## below.
-network: orderly-web-network
+network: orderly_web_network
 
 ## Names of the docker volumes to use:
 ##

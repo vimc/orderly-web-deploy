@@ -13,7 +13,7 @@ sample_data = {"a": "value1", "b": {"x": "value2"}, "c": 1, "d": True,
 
 def test_example_config():
     cfg = build_config("config/basic")
-    assert cfg.network == "orderly-web-network"
+    assert cfg.network == "orderly_web_network"
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.volumes["redis"] == "orderly_web_redis_data"
     assert cfg.container_prefix == "orderly-web"

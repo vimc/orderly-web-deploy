@@ -1,6 +1,6 @@
 container_prefix: orderly-web
 
-network: orderly-web-network
+network: orderly_web_network
 
 volumes:
   orderly: orderly_web_volume
