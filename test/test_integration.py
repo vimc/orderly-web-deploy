@@ -131,7 +131,7 @@ def test_start_with_custom_styles():
         expected_destination = "/static/public/img/logo/my-test-logo.png"
         logo = docker_util.bytes_from_container(web, expected_destination)
         assert len(logo) > 0
-        res = requests.get("http://localhost:8888")
+        res = http_get("http://localhost:8888")
         assert """<img src="http://localhost:8888/img/logo/my-test-logo.png"""\
                in res.text
         res = requests.get("http://localhost:8888/img/logo/my-test-logo.png")
