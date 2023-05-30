@@ -72,7 +72,9 @@ def packit_db_container(cfg):
 def packit_db_configure(container, cfg):
     docker_util.exec_safely(container, ["wait-for-db"])
     docker_util.exec_safely(container,
-                            ["psql", "-U", "packituser", "-d", "packit", "-a", "-f", "/packit-schema/schema.sql"])
+                            ["psql", "-U", "packituser", "-d",
+                             "packit", "-a", "-f",
+                             "/packit-schema/schema.sql"])
 
 
 def packit_api_container(cfg):
@@ -86,9 +88,10 @@ def packit_api_configure(container, cfg):
     print("[web] Configuring Packit API container")
     outpack_container = cfg.containers["outpack-server"]
     packit_db_container = cfg.containers["packit-db"]
+    url = "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified"
     opts = {
-        "db.url": "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified".format(cfg.container_prefix,
-                                                                                      packit_db_container),
+        "db.url": url.format(cfg.container_prefix,
+                             packit_db_container),
         "db.user": "packituser",
         "db.password": "changeme",
         "outpack.server.url": "http://{}-{}:8000".format(cfg.container_prefix,
@@ -354,15 +357,16 @@ def proxy_container(cfg, web, packit_api=None, packit=None):
     else:
         # this is a bit hacky, but if Packit not available, just pass
         # the OW address. this will just result in all proxy routes
-        # being mapped to OW and is easier than writing conditional logic
-        # in the nginx proxy scripts
+        # being mapped to OW and is easier than writing conditional
+        # logic in the nginx proxy scripts
         packit_api_addr = web_addr
     if packit is not None:
         packit_addr = packit.name_external(cfg.container_prefix)
     else:
         packit_addr = web_addr
     proxy_args = [cfg.proxy_hostname, str(cfg.proxy_port_http),
-                  str(cfg.proxy_port_https), web_addr, packit_api_addr, packit_addr]
+                  str(cfg.proxy_port_https), web_addr, packit_api_addr,
+                  packit_addr]
     proxy_mounts = [constellation.ConstellationMount(
         "proxy_logs", "/var/log/nginx")]
     proxy_ports = [cfg.proxy_port_http, cfg.proxy_port_https]
