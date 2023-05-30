@@ -119,4 +119,4 @@ proxy:
   image:
     repo: vimc
     name: orderly-web-proxy
-    tag: mrc-211
+    tag: mrc-4255
