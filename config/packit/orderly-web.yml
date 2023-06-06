@@ -124,7 +124,7 @@ proxy:
   image:
     repo: vimc
     name: orderly-web-proxy
-    tag: mrc-4255
+    tag: master
 
 outpack:
   repo: mrcide
@@ -139,7 +139,7 @@ packit:
   repo: mrcide
   api:
     name: packit-api
-    tag: mrc-4255
+    tag: master
   app:
     name: packit
     tag: mrc-4261
