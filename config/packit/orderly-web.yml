@@ -1,20 +1,4 @@
-vault:
-  ## Address of the vault server.  This should be a string if it is
-  ## present.
-  addr: ~
-  auth:
-    ## Authentication type - must be either "token" or the name of a
-    ## supported authentication method.  These seem to be poorly
-    ## documented in the hvac, but include "github" for github
-    ## authentication.
-    ##
-    ## On a vault client object, see auth.implemented_class_names for
-    ## a list, which is currently
-    ##
-    ##     azure, github, gcp, kubernetes, ldap, mfa, okta
-    method: github
-
-## Prefix for container names; we'll use {container_prefix}-(orderly,web)
+## Prefix for container names; we'll use {container_prefix}-(container_name)
 container_prefix: orderly-web
 
 ## The name of the docker network that containers will be attached to.
@@ -27,12 +11,15 @@ network: orderly_web_network
 ##
 ## orderly: stores the orderly archive
 ## proxy_logs: stores logs from the reverse proxy (only used if proxy is given)
+## documents: stores static documentation available through the web app
 ##
 ## (More volumes are anticipated as the tool develops)
 volumes:
   orderly: orderly_web_volume
   proxy_logs: orderly_web_proxy_logs
+  documents: orderly_web_documents
   redis: orderly_web_redis_data
+  outpack: orderly_web_outpack
 
 ## Redis configuration
 redis:
@@ -40,6 +27,7 @@ redis:
     name: redis
     tag: "5.0"
   volume: orderly_web_redis_data
+
 
 ## Orderly configuration
 orderly:
@@ -52,15 +40,23 @@ orderly:
     name: orderly.server
     tag: master
     worker_name: orderly.server
-  ## Environment variables that will be made available to orderly.
-  ## Typically these will be in SHOUTY_SNAKE_CASE.  To pull values
-  ## from the vault, use the format VAULT:<path>:<key>
-  env:
-    ORDERLY_DB_HOST: db_host
-    ORDERLY_DB_USER: db_user
-    ORDERLY_DB_PASS: VAULT:secret/db/password:value
+  ## Initial data source for the orderly reports.  This section is
+  ## optional - if not present, it is up to you to initialise the
+  ## orderly volume (in the volumes section above) with appropriate
+  ## data (if data is not present, orderly will not start).  This
+  ## section only has an effect if the volume is empty.
   initial:
-    source: demo
+    ## Source must be one of "clone" or "demo"
+    source: clone
+    ## If source is "clone", then "url" must be given.  If using a
+    ## private repo, then use an ssh url and provide ssh keys in the
+    ## "ssh" section.
+    url: https://github.com/reside-ic/orderly-example
+  ## Number of workers to create to run orderly jobs
+  workers: 1
+  expose: true
+  env:
+    ORDERLY_API_SERVER_IDENTITY: production
 
 ## Api and Website configuration
 web:
@@ -101,12 +97,21 @@ web:
     ## Name of the team within this github organisation if using
     ## github auth (cuurrently must be "" - VIMC
     github_team: ""
+    ## If using github auth you will need to register a github oauth app
+    ## https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
+    ## The "Authorization callback URL" must be set to the public facing url
+    ## that you configured above
+    github_oauth:
+      id: "notarealid"
+      secret: "notarealsecret"
     ## Enable or disable fine grained permissions
     fine_grained: true
     ## Enable montagu authentication provider
-    montagu: true
-    montagu_url: http://montagu
-    montagu_api_url: http://montagu/api
+    montagu: false
+
+# Optional: to notify a Slack channel during deployment, provide a webhook url
+slack:
+  webhook_url: https://hooks.slack.com/services/T000/B000/XXXX
 
 ## If running a proxy directly, fill this section in.  Otherwise you
 ## are responsible for proxying the application out of the docker
@@ -120,3 +125,24 @@ proxy:
     repo: vimc
     name: orderly-web-proxy
     tag: master
+
+outpack:
+  repo: mrcide
+  server:
+    name: outpack_server
+    tag: main
+  migrate:
+    name: outpack.orderly
+    tag: main
+
+packit:
+  repo: mrcide
+  api:
+    name: packit-api
+    tag: master
+  app:
+    name: packit
+    tag: mrc-4261
+  db:
+    name: packit-db
+    tag: main

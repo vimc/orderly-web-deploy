@@ -430,11 +430,10 @@ def test_can_start_with_prepared_volume():
 
 def test_can_start_with_outpack():
     path = "config/basic"
-    options = {"outpack": {"migrate": {"repo": "mrcide",
-                                       "name": "outpack.orderly",
+    options = {"outpack": {"repo": "mrcide",
+                           "migrate": {"name": "outpack.orderly",
                                        "tag": "main"},
-                           "server": {"repo": "mrcide",
-                                      "name": "outpack_server",
+                           "server": {"name": "outpack_server",
                                       "tag": "main"}
                            },
                "volumes": {"outpack": "outpack_vol"}}
@@ -449,6 +448,18 @@ def test_can_start_with_outpack():
             web, "/etc/orderly/web/config.properties").split("\n")
         expected = "outpack.server=http://orderly-web-outpack-server:8000"
         assert expected in web_config
+    finally:
+        orderly_web.stop(path, kill=True, volumes=True, network=True)
+
+
+def test_can_start_with_packit():
+    path = "config/packit"
+    cfg = build_config(path)
+    try:
+        orderly_web.start(path)
+        assert docker_util.container_exists("orderly-web-packit-db")
+        assert docker_util.container_exists("orderly-web-packit-api")
+        assert docker_util.container_exists("orderly-web-packit")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
