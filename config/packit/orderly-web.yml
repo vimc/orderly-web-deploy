@@ -139,7 +139,7 @@ packit:
   repo: mrcide
   api:
     name: packit-api
-    tag: master
+    tag: main
   app:
     name: packit
     tag: mrc-4261

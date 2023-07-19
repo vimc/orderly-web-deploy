@@ -27,7 +27,7 @@ import orderly_web
 def test_start_and_stop():
     path = "config/basic"
     try:
-        res = orderly_web.start(path)
+        res = orderly_web.start(path, pull_images=True)
         assert res
 
         cl = docker.client.from_env()
