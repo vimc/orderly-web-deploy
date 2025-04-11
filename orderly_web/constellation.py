@@ -79,27 +79,35 @@ def packit_db_configure(container, cfg):
 
 def packit_api_container(cfg):
     name = cfg.containers["packit-api"]
-    packit_api = constellation.ConstellationContainer(
-        name, cfg.packit_api_ref, configure=packit_api_configure)
+    packit_db = cfg.containers["packit-db"]
+    outpack = cfg.containers["outpack"]
+    env = {
+            "PACKIT_DB_URL": f"jdbc:postgresql://{cfg.container_prefix}-{packit_db}:5432/packit?stringtype=unspecified",
+            "PACKIT_DB_USER": "packituser",
+            "PACKIT_DB_PASSWORD": "changeme",
+            "PACKIT_OUTPACK_SERVER_URL": f"http://{cfg.container_prefix}-{outpack}:8000",
+            "PACKIT_AUTH_ENABLED": "false",  # TODO: can we assume this?
+        }
+    packit_api = constellation.ConstellationContainer(name, cfg.packit_api_ref, environment=env)
     return packit_api
 
 
-def packit_api_configure(container, cfg):
-    print("[web] Configuring Packit API container")
-    outpack_container = cfg.containers["outpack-server"]
-    packit_db_container = cfg.containers["packit-db"]
-    url = "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified"
-    opts = {
-        "db.url": url.format(cfg.container_prefix,
-                             packit_db_container),
-        "db.user": "packituser",
-        "db.password": "changeme",
-        "outpack.server.url": "http://{}-{}:8000".format(cfg.container_prefix,
-                                                         outpack_container)
-    }
-    txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
-    docker_util.string_into_container(
-        txt, container, "/etc/packit/config.properties")
+#def packit_api_configure(container, cfg):
+#    print("[web] Configuring Packit API container")
+#    outpack_container = cfg.containers["outpack-server"]
+#    packit_db_container = cfg.containers["packit-db"]
+    #url = "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified"
+#    opts = {
+        #"db.url": url.format(cfg.container_prefix,
+        #                     packit_db_container),
+        #"db.user": "packituser",
+        #"db.password": "changeme",
+#        "outpack.server.url": "http://{}-{}:8000".format(cfg.container_prefix,
+#                                                         outpack_container)
+#    }
+#    txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
+#    docker_util.string_into_container(
+#        txt, container, "/etc/packit/config.properties")
 
 
 def packit_container(cfg):
