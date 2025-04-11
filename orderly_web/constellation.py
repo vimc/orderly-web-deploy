@@ -71,10 +71,10 @@ def packit_db_container(cfg):
 
 def packit_db_configure(container, cfg):
     docker_util.exec_safely(container, ["wait-for-db"])
-    docker_util.exec_safely(container,
-                            ["psql", "-U", "packituser", "-d",
-                             "packit", "-a", "-f",
-                             "/packit-schema/schema.sql"])
+    #docker_util.exec_safely(container,
+    #                        ["psql", "-U", "packituser", "-d",
+    #                         "packit", "-a", "-f",
+    #                         "/packit-schema/schema.sql"])
 
 
 def packit_api_container(cfg):
