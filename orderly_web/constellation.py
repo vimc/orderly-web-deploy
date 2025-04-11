@@ -80,7 +80,7 @@ def packit_db_configure(container, cfg):
 def packit_api_container(cfg):
     name = cfg.containers["packit-api"]
     packit_db = cfg.containers["packit-db"]
-    outpack = cfg.containers["outpack"]
+    outpack = cfg.containers["outpack-server"]
     env = {
             "PACKIT_DB_URL": f"jdbc:postgresql://{cfg.container_prefix}-{packit_db}:5432/packit?stringtype=unspecified",
             "PACKIT_DB_USER": "packituser",
