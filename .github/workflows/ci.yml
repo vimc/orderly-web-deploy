@@ -1,18 +1,15 @@
+name: Run Tests
 on:
-  #schedule:
-  #  - cron: '0 2 * * *' # run at 2 AM UTC
   push:
     branches:
-      - main
-      - master
-      - mrc-6404-remove-packit-db-schema-config
+      - "main"
+      - "master"
+      - "mrc-6404-remove-packit-db-schema-config"
   pull_request:
     branches:
-      - main
-      - master
-
-name: Tests
-
+      - "main"
+      - "master"
+      -
 jobs:
   test:
     runs-on: ubuntu-latest
