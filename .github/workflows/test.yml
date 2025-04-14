@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - mrc-6404-remove-packit-db-schema-config
   pull_request:
     branches:
       - main

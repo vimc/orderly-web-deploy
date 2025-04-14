@@ -142,7 +142,7 @@ packit:
     tag: main
   app:
     name: packit
-    tag: mrc-4261
+    tag: main
   db:
     name: packit-db
     tag: main
