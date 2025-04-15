@@ -78,14 +78,19 @@ def packit_api_container(cfg):
     name = cfg.containers["packit-api"]
     packit_db = cfg.containers["packit-db"]
     outpack = cfg.containers["outpack-server"]
+    db_url = (f"jdbc:postgresql://{cfg.container_prefix}-{packit_db}:5432/"
+              "packit?stringtype=unspecified")
+    outpack_url = f"http://{cfg.container_prefix}-{outpack}:8000"
     env = {
-            "PACKIT_DB_URL": f"jdbc:postgresql://{cfg.container_prefix}-{packit_db}:5432/packit?stringtype=unspecified",
+            "PACKIT_DB_URL": db_url,
             "PACKIT_DB_USER": "packituser",
             "PACKIT_DB_PASSWORD": "changeme",
-            "PACKIT_OUTPACK_SERVER_URL": f"http://{cfg.container_prefix}-{outpack}:8000",
-            "PACKIT_AUTH_ENABLED": "false",  # We assume no auth is required in Packit alongside OW!
+            "PACKIT_OUTPACK_SERVER_URL": outpack_url,
+            # We assume no auth is required in Packit alongside OW!
+            "PACKIT_AUTH_ENABLED": "false",
         }
-    packit_api = constellation.ConstellationContainer(name, cfg.packit_api_ref, environment=env)
+    packit_api = constellation.ConstellationContainer(
+        name, cfg.packit_api_ref, environment=env)
     return packit_api
 
 
@@ -138,7 +143,9 @@ def orderly_configure(container, cfg):
     orderly_initial_data(cfg, container)
     orderly_check_schema(container)
     orderly_start(container)
-    time.sleep(5) # This is gross but wait a little for orderly to backup db before starting outpack server
+    # This is gross but wait a little for orderly to backup db before
+    # starting outpack server
+    time.sleep(5)
 
 
 def orderly_initial_data(cfg, container):
