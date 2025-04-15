@@ -32,7 +32,7 @@ def test_start_and_stop():
 
         cl = docker.client.from_env()
         containers = cl.containers.list()
-        #assert len(containers) == 5
+        assert len(containers) == 5
         cfg = fetch_config(path)
         assert docker_util.network_exists(cfg.network)
         assert docker_util.volume_exists(cfg.volumes["orderly"])
@@ -509,7 +509,7 @@ def test_start_and_stop_multiple_workers():
 
         cl = docker.client.from_env()
         containers = cl.containers.list()
-
+        assert len(containers) == 6
         names = []
         for container in containers:
             names.append(container.name)

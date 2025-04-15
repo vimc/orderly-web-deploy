@@ -1,6 +1,7 @@
 import os
 import tempfile
 import docker
+import time
 
 from PIL import Image
 
@@ -137,6 +138,7 @@ def orderly_configure(container, cfg):
     orderly_initial_data(cfg, container)
     orderly_check_schema(container)
     orderly_start(container)
+    time.sleep(5) # This is gross but wait a little for orderly to backup db before starting outpack server
 
 
 def orderly_initial_data(cfg, container):
