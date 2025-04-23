@@ -311,7 +311,7 @@ def test_vault_github_login_with_prompt():
         del os.environ["VAULT_AUTH_GITHUB_TOKEN"]
     with mock.patch('builtins.input',
                     return_value=os.environ["VAULT_TEST_GITHUB_PAT"]):
-        with vault_dev.server() as s:
+        with vault_dev.Server() as s:
             cl = s.client()
             enable_github_login(cl)
             cl.write("secret/db/password", value="s3cret")
@@ -336,15 +336,18 @@ def test_vault_github_login_with_prompt():
 # This environment variable is configured on github actions
 def test_vault_github_login_from_env():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
-    with vault_dev.server() as s:
+    with vault_dev.Server() as s:
         cl = s.client()
         enable_github_login(cl)
         cl.write("secret/db/password", value="s3cret")
 
         path = "config/vault"
         vault_addr = "http://localhost:{}".format(s.port)
-        options = {"vault": {"addr": vault_addr}}
-
+        options = {
+            "vault": {
+                "addr": vault_addr
+            }
+        }
         orderly_web.start(path, options=options)
 
         cfg = fetch_config(path)
@@ -362,7 +365,7 @@ def test_vault_github_login_from_env():
 # This environment variable is configured on github actions
 def test_vault_github_login_with_mount_path():
     os.environ["VAULT_AUTH_GITHUB_TOKEN"] = os.environ["VAULT_TEST_GITHUB_PAT"]
-    with vault_dev.server() as s:
+    with vault_dev.Server() as s:
         cl = s.client()
         enable_github_login(cl, path="github-custom")
         cl.write("secret/db/password", value="s3cret")
@@ -498,6 +501,7 @@ def test_start_and_stop_multiple_workers():
     try:
         res = orderly_web.start(path, options=options)
         assert res
+
         assert docker_util.container_exists("orderly-web-web")
         assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.container_exists("orderly-web-proxy")

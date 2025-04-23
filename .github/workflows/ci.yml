@@ -1,17 +1,13 @@
+name: Run Tests
 on:
-  schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
   push:
     branches:
-      - main
-      - master
+      - "main"
+      - "master"
   pull_request:
     branches:
-      - main
-      - master
-
-name: Tests
-
+      - "main"
+      - "master"
 jobs:
   test:
     runs-on: ubuntu-latest

@@ -141,8 +141,8 @@ packit:
     name: packit-api
     tag: main
   app:
-    name: packit
-    tag: mrc-4261
+    name: montagu-packit
+    tag: mrc-5140-trusted-headers
   db:
     name: packit-db
     tag: main

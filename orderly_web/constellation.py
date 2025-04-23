@@ -1,6 +1,7 @@
 import os
 import tempfile
 import docker
+import time
 
 from PIL import Image
 
@@ -71,35 +72,26 @@ def packit_db_container(cfg):
 
 def packit_db_configure(container, cfg):
     docker_util.exec_safely(container, ["wait-for-db"])
-    docker_util.exec_safely(container,
-                            ["psql", "-U", "packituser", "-d",
-                             "packit", "-a", "-f",
-                             "/packit-schema/schema.sql"])
 
 
 def packit_api_container(cfg):
     name = cfg.containers["packit-api"]
+    packit_db = cfg.containers["packit-db"]
+    outpack = cfg.containers["outpack-server"]
+    db_url = (f"jdbc:postgresql://{cfg.container_prefix}-{packit_db}:5432/"
+              "packit?stringtype=unspecified")
+    outpack_url = f"http://{cfg.container_prefix}-{outpack}:8000"
+    env = {
+            "PACKIT_DB_URL": db_url,
+            "PACKIT_DB_USER": "packituser",
+            "PACKIT_DB_PASSWORD": "changeme",
+            "PACKIT_OUTPACK_SERVER_URL": outpack_url,
+            # We assume no auth is required in Packit alongside OW!
+            "PACKIT_AUTH_ENABLED": "false",
+        }
     packit_api = constellation.ConstellationContainer(
-        name, cfg.packit_api_ref, configure=packit_api_configure)
+        name, cfg.packit_api_ref, environment=env)
     return packit_api
-
-
-def packit_api_configure(container, cfg):
-    print("[web] Configuring Packit API container")
-    outpack_container = cfg.containers["outpack-server"]
-    packit_db_container = cfg.containers["packit-db"]
-    url = "jdbc:postgresql://{}-{}:5432/packit?stringtype=unspecified"
-    opts = {
-        "db.url": url.format(cfg.container_prefix,
-                             packit_db_container),
-        "db.user": "packituser",
-        "db.password": "changeme",
-        "outpack.server.url": "http://{}-{}:8000".format(cfg.container_prefix,
-                                                         outpack_container)
-    }
-    txt = "".join(["{}={}\n".format(k, v) for k, v in opts.items()])
-    docker_util.string_into_container(
-        txt, container, "/etc/packit/config.properties")
 
 
 def packit_container(cfg):
@@ -151,6 +143,9 @@ def orderly_configure(container, cfg):
     orderly_initial_data(cfg, container)
     orderly_check_schema(container)
     orderly_start(container)
+    # This is gross but wait a little for orderly to backup db before
+    # starting outpack server
+    time.sleep(5)
 
 
 def orderly_initial_data(cfg, container):
