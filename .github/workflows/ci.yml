@@ -59,4 +59,4 @@ jobs:
         with:
           # This can be useful, but the false positive rate is
           # annoyingly high.
-          fail_ci_if_error: false
+          fail_ci_if_error: true
