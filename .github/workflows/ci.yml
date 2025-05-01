@@ -1,15 +1,13 @@
-name: Test
-
+name: Run Tests
 on:
-  pull_request:
-    branches:
-      - master
   push:
     branches:
-      - master
-
-env:
-  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - "main"
+      - "master"
+  pull_request:
+    branches:
+      - "main"
+      - "master"
 
 jobs:
   run:
