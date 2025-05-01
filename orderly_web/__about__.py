@@ -1,2 +1,2 @@
-__version__ = "1.1.0"
-__name__ = "pyorderly"
+__version__ = "1.4.0"
+__name__ = "orderly_web"
