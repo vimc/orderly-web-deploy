@@ -32,6 +32,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.config.py }}
+      - name: Pull containers
+        run: |
+          docker pull redis:5.0
+          docker pull vimc/orderly.server:master
+          docker pull vimc/orderly-web:master
+          docker pull vimc/orderly-web-proxy:master
+          docker pull vimc/orderly-web-css-generator:master
+          docker pull vimc/orderly-web-user-cli:master
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
