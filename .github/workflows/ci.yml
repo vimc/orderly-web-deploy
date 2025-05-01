@@ -40,6 +40,7 @@ jobs:
           docker pull vimc/orderly-web-proxy:master
           docker pull vimc/orderly-web-css-generator:master
           docker pull vimc/orderly-web-user-cli:master
+          docker pull mrcide/outpack.orderly:main
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
