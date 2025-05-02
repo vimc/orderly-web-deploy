@@ -1,8 +1,0 @@
-constellation==1.0.0
-docker
-docopt
-hvac
-pytest
-pyyaml
-vault_dev
-Pillow

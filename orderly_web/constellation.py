@@ -47,7 +47,7 @@ def orderly_constellation(cfg):
 
 def outpack_server_container(cfg):
     name = cfg.containers["outpack-server"]
-    mounts = [constellation.ConstellationMount("outpack", "/outpack")]
+    mounts = [constellation.ConstellationVolumeMount("outpack", "/outpack")]
     outpack_server = constellation.ConstellationContainer(
         name, cfg.outpack_ref, mounts=mounts)
     return outpack_server
@@ -55,8 +55,8 @@ def outpack_server_container(cfg):
 
 def outpack_migrate_container(cfg):
     name = cfg.containers["outpack-migrate"]
-    mounts = [constellation.ConstellationMount("outpack", "/outpack"),
-              constellation.ConstellationMount("orderly", "/orderly")]
+    mounts = [constellation.ConstellationVolumeMount("outpack", "/outpack"),
+              constellation.ConstellationVolumeMount("orderly", "/orderly")]
     args = ["/orderly", "/outpack", "--minutes=5"]
     outpack_migrate = constellation.ConstellationContainer(
         name, cfg.outpack_migrate_ref, mounts=mounts, args=args)
@@ -103,7 +103,7 @@ def packit_container(cfg):
 
 def redis_container(cfg):
     redis_name = cfg.containers["redis"]
-    redis_mounts = [constellation.ConstellationMount("redis", "/data")]
+    redis_mounts = [constellation.ConstellationVolumeMount("redis", "/data")]
     redis_args = ["--appendonly", "yes"]
     redis = constellation.ConstellationContainer(
         redis_name, cfg.redis_ref, mounts=redis_mounts, args=redis_args,
@@ -127,7 +127,7 @@ def redis_configure(container, cfg):
 def orderly_container(cfg, redis_container):
     orderly_name = cfg.containers["orderly"]
     orderly_args = ["--port", "8321", "--go-signal", "/go_signal", "/orderly"]
-    orderly_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
+    orderly_mounts = [constellation.ConstellationVolumeMount("orderly", "/orderly")]
     ports = [8321] if cfg.orderly_expose else None
     environment = orderly_env(cfg, redis_container)
     orderly = constellation.ConstellationContainer(
@@ -211,7 +211,7 @@ def orderly_start(container):
 def worker_container(cfg, redis_container):
     worker_name = cfg.containers["orderly-worker"]
     worker_args = ["--go-signal", "/go_signal"]
-    worker_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
+    worker_mounts = [constellation.ConstellationVolumeMount("orderly", "/orderly")]
     worker_entrypoint = "/usr/local/bin/orderly_worker"
     environment = orderly_env(cfg, redis_container)
     worker = constellation.ConstellationService(
@@ -234,12 +234,12 @@ def worker_start(container):
 
 def web_container(cfg):
     web_name = cfg.containers["web"]
-    web_mounts = [constellation.ConstellationMount("orderly", "/orderly")]
+    web_mounts = [constellation.ConstellationVolumeMount("orderly", "/orderly")]
     if cfg.sass_variables is not None:
-        web_mounts.append(constellation.ConstellationMount(
+        web_mounts.append(constellation.ConstellationVolumeMount(
             "css", "/static/public/css"))
     if "documents" in cfg.volumes:
-        web_mounts.append(constellation.ConstellationMount(
+        web_mounts.append(constellation.ConstellationVolumeMount(
             "documents", "/documents"))
     if cfg.web_dev_mode:
         web_ports = [(cfg.web_port, ("127.0.0.1", cfg.web_port))]
@@ -362,7 +362,7 @@ def proxy_container(cfg, web, packit_api=None, packit=None):
     proxy_args = [cfg.proxy_hostname, str(cfg.proxy_port_http),
                   str(cfg.proxy_port_https), web_addr, packit_api_addr,
                   packit_addr]
-    proxy_mounts = [constellation.ConstellationMount(
+    proxy_mounts = [constellation.ConstellationVolumeMount(
         "proxy_logs", "/var/log/nginx")]
     proxy_ports = [cfg.proxy_port_http, cfg.proxy_port_https]
     proxy = constellation.ConstellationContainer(
