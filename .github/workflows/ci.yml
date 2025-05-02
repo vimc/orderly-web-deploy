@@ -54,9 +54,3 @@ jobs:
           VAULT_TEST_GITHUB_PAT: ${{ secrets.VAULT_TEST_GITHUB_PAT }}
         run: |
           hatch run cov-ci
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          # This can be useful, but the false positive rate is
-          # annoyingly high.
-          fail_ci_if_error: true
