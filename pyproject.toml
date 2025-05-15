@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "orderly-web"
+dynamic = ["version"]
+description = "Deploy scripts for OrderlyWeb"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Rich FitzJohn", email = "r.fitzjohn@imperial.ac.uk" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "constellation==1.4.0",
+    "docker",
+    "docopt",
+    "hvac",
+    "Pillow",
+    "pytest",
+    "pyyaml",
+    "vault_dev",
+]
+
+[project.scripts]
+orderly-web = "orderly_web.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/vimc/orderly-web-deploy"
+
+[tool.hatch.version]
+path = "orderly_web/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/orderly_web",
+]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "coverage[toml]>=6.5",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:test}"
+test-cov = "pytest --cov --cov-report= --cov-config=pyproject.toml {args:test}"
+cov-report = "coverage report --show-missing"
+cov = [
+  "test-cov",
+  "cov-report",
+]
+cov-report-xml = "coverage xml"
+cov-ci = [
+  "test-cov",
+  "cov-report-xml",
+]
