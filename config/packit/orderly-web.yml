@@ -142,7 +142,7 @@ packit:
     tag: main
   app:
     name: montagu-packit
-    tag: mrc-5140-trusted-headers
+    tag: main
   db:
     name: packit-db
     tag: main
