@@ -163,7 +163,9 @@ class OrderlyWebConfig:
             self.web_repo, self.migrate_name, self.web_tag)
 
         self.containers = {
-            "redis": "redis",
+            # This silly name (redis_ow) is to avoid potential
+            # collisions when running side-by-side with packit
+            "redis": "redis-ow",
             "orderly": "orderly",
             "orderly-worker": "orderly-worker",
             "web": "web"
