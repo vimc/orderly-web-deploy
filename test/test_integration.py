@@ -41,7 +41,7 @@ def test_start_and_stop():
         assert docker_util.container_exists("orderly-web-web")
         assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.container_exists("orderly-web-proxy")
-        assert docker_util.container_exists("orderly-web-redis")
+        assert docker_util.container_exists("orderly-web-redis-ow")
 
         names = []
         for container in containers:
@@ -85,7 +85,7 @@ def test_start_and_stop():
         assert not docker_util.container_exists("orderly-web-web")
         assert not docker_util.container_exists("orderly-web-orderly")
         assert not docker_util.container_exists("orderly-web-proxy")
-        assert not docker_util.container_exists("orderly-web-redis")
+        assert not docker_util.container_exists("orderly-web-redis-ow")
     finally:
         orderly_web.stop(path, kill=True, volumes=True, network=True)
 
@@ -505,7 +505,7 @@ def test_start_and_stop_multiple_workers():
         assert docker_util.container_exists("orderly-web-web")
         assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.container_exists("orderly-web-proxy")
-        assert docker_util.container_exists("orderly-web-redis")
+        assert docker_util.container_exists("orderly-web-redis-ow")
 
         cl = docker.client.from_env()
         containers = cl.containers.list()
@@ -533,7 +533,7 @@ def test_wait_for_redis_exists():
         assert docker_util.container_exists("orderly-web-web")
         assert docker_util.container_exists("orderly-web-orderly")
         assert docker_util.container_exists("orderly-web-proxy")
-        assert docker_util.container_exists("orderly-web-redis")
+        assert docker_util.container_exists("orderly-web-redis-ow")
 
         cfg = fetch_config(path)
         container = cfg.get_container("redis")
