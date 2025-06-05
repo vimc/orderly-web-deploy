@@ -86,9 +86,11 @@ def packit_api_container(cfg):
             "PACKIT_DB_USER": "packituser",
             "PACKIT_DB_PASSWORD": "changeme",
             "PACKIT_OUTPACK_SERVER_URL": outpack_url,
-            # We assume no auth is required in Packit alongside OW!
-            "PACKIT_AUTH_ENABLED": "false",
+            # We assume preauth for a Montagu deploy
+            "PACKIT_AUTH_ENABLED": "true",
+            "PACKIT_AUTH_METHOD": "preauth",
         }
+
     packit_api = constellation.ConstellationContainer(
         name, cfg.packit_api_ref, environment=env)
     return packit_api
