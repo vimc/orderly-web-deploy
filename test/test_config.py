@@ -17,7 +17,7 @@ def test_example_config():
     assert cfg.volumes["orderly"] == "orderly_web_volume"
     assert cfg.volumes["redis"] == "orderly_web_redis_data"
     assert cfg.container_prefix == "orderly-web"
-    assert cfg.containers["redis"] == "redis"
+    assert cfg.containers["redis"] == "redis-ow"
     assert cfg.containers["orderly"] == "orderly"
     assert cfg.containers["orderly-worker"] == "orderly-worker"
     assert cfg.containers["web"] == "web"
